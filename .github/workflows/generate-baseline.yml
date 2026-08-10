@@ -1,0 +1,47 @@
+# Regenereert baseline/conditional-access/baseline-v1.0.json uit CATemplate/GLOBAL__*.json
+# bij elke push naar main die die map wijzigt, en opent daar een PR voor — nooit een
+# stilzwijgende commit op main, zelfde reden als writeBackBaseline in het gekoppelde
+# platform (TEST Policies Platform): een gegenereerd bestand dat niemand review't is
+# precies het soort ongeziene wijziging die baseline-drift veroorzaakt.
+#
+# Run het script lokaal (`node scripts/generate-baseline.js`) om te zien wat een wijziging
+# aan een policy-template oplevert vóór je 'm pusht.
+
+name: Genereer baseline uit CATemplate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "CATemplate/**"
+      - "scripts/generate-baseline.js"
+      - ".github/workflows/generate-baseline.yml"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Genereer baseline/conditional-access/baseline-v1.0.json
+        run: node scripts/generate-baseline.js
+      - name: Open PR met de gegenereerde baseline (als er iets veranderde)
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: regenereer baseline/conditional-access/baseline-v1.0.json uit CATemplate/"
+          title: "Baseline geregenereerd uit CATemplate/"
+          body: >
+            Automatisch gegenereerd door `.github/workflows/generate-baseline.yml` na een
+            wijziging in `CATemplate/`. Controleer de diff — met name nieuwe/verwijderde
+            checkId's en gewijzigde `params` — vóór je merget. Dit bestand is de bron voor
+            de `conditional-access`-categorie in de baseline-koppeling van TEST Policies
+            Platform (Instellingen → Baseline-koppelingen).
+          branch: auto/regenerate-baseline
+          delete-branch: true
+          add-paths: baseline/conditional-access/baseline-v1.0.json
