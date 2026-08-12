@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-08-10",
+  "reviewedAt": "2026-08-12",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -1148,6 +1148,25 @@
         {
           "label": "Conditional Access policies overview",
           "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ]
+    },
+    {
+      "checkId": "CA-BASE-029-NonAdminPasskeyCoverage",
+      "severity": "medium",
+      "tags": [
+        "conditional-access",
+        "mfa",
+        "passkey"
+      ],
+      "type": "non-admin-passkey-coverage",
+      "what": "Hebben alle actieve, niet-admin gebruikers een passkey (of andere phishing-resistente methode) geregistreerd?",
+      "why": "Microsoft schakelt vanaf 1 september 2026 automatisch een passkey-registratiecampagne in voor gebruikers op SMS/Voice, en handhaaft vanaf 1 februari 2027: zonder geregistreerde passkey kunnen zij dan niet meer inloggen als SMS/Voice hun enige methode is.",
+      "source": "Microsoft Entra — SMS/Voice-retirement en passkey-default-rollout (learn.microsoft.com/entra/identity/authentication/concept-sms-voice-retirement)",
+      "learnMoreLinks": [
+        {
+          "label": "Passkeys by default and retirement of Microsoft-provided SMS and voice authentication",
+          "url": "https://learn.microsoft.com/en-us/entra/identity/authentication/concept-sms-voice-retirement"
         }
       ]
     }
