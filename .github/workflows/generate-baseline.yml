@@ -31,6 +31,12 @@ jobs:
           node-version: 24
       - name: Genereer baseline/conditional-access/baseline-v1.0.json
         run: node scripts/generate-baseline.js
+      # Ná het genereren, want twee van de zes tests kijken naar het resultaat. Faalt deze
+      # stap, dan wordt er géén PR geopend: een baseline met een hernummerd checkId is
+      # schadelijker dan geen bijgewerkte baseline — dat id is de sleutel voor drift over
+      # runs heen en voor de klantuitzonderingen in het gekoppelde platform.
+      - name: Bewaak de gepinde checkId-nummers
+        run: node --test scripts/generate-baseline.test.js
       - name: Open PR met de gegenereerde baseline (als er iets veranderde)
         uses: peter-evans/create-pull-request@v7
         with:
