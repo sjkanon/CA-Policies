@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-08-13",
+  "reviewedAt": "2026-08-15",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -386,10 +386,8 @@
             {
               "kind": "country",
               "countriesAndRegions": [
-                "SE",
-                "NO",
-                "DK",
-                "FI"
+                "BE",
+                "NL"
               ],
               "includeUnknownCountriesAndRegions": true
             }
