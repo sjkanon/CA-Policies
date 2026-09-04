@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-08-13",
+  "reviewedAt": "2026-09-04",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -271,6 +271,12 @@
         "clientAppTypes": [
           "all"
         ],
+        "authenticationFlows": {
+          "transferMethods": [
+            "deviceCodeFlow",
+            "authenticationTransfer"
+          ]
+        },
         "applications": {
           "includeApplications": [
             "All"
@@ -386,10 +392,8 @@
             {
               "kind": "country",
               "countriesAndRegions": [
-                "SE",
-                "NO",
-                "DK",
-                "FI"
+                "BE",
+                "NL"
               ],
               "includeUnknownCountriesAndRegions": true
             }
@@ -833,20 +837,6 @@
             "Conditional Access Service Accounts"
           ]
         },
-        "locations": {
-          "includeLocations": [
-            {
-              "kind": "sentinel",
-              "value": "All"
-            }
-          ],
-          "excludeLocations": [
-            {
-              "kind": "sentinel",
-              "value": "AllTrusted"
-            }
-          ]
-        },
         "grantControls": {
           "operator": "OR",
           "authenticationStrengthId": "00000000-0000-0000-0000-000000000002"
@@ -892,7 +882,24 @@
             "8ac3fc64-6eca-42ea-9e69-59f4c7b60eb2",
             "7be44c8a-adaf-4e2a-84d6-ab2649e08a13",
             "e8611ab8-c189-46e8-94e1-60213ab1f814",
-            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+            "194ae4cb-b126-40b2-bd5b-6091b380977d",
+            "f28a1f50-f6e7-4571-818b-6a12f2af6b6c",
+            "29232cdf-9323-42fd-ade2-1d097af3e4de",
+            "3a2c62db-5318-420d-8d74-23affee5d9d5",
+            "69091246-20e8-4a56-aa4d-066075b2a7a8",
+            "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "b0f54661-2d74-4c50-afa3-1ec803f12efe",
+            "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+            "d2562ede-74db-457e-a7b6-544e236ebb61",
+            "db506228-d27e-4b7d-95e5-295956d6615f",
+            "6b942400-691f-4bf0-9d12-d8a254a2baf5",
+            "11451d60-acb2-45eb-a7d6-43d0f0125c13",
+            "b6a27b2b-f905-4b2e-81b5-0d90e0ef1fdb",
+            "1707125e-0aa2-4d4d-8655-a7c786c76a25",
+            "e93e3737-fa85-474a-aee4-7d3fb86510f3"
           ]
         },
         "groups": {
@@ -931,6 +938,10 @@
         "applications": {
           "includeApplications": [
             "All"
+          ],
+          "excludeApplications": [
+            "0000000a-0000-0000-c000-000000000000",
+            "d4ebce55-015a-49b5-a083-c84d1797ae8c"
           ]
         },
         "roles": {
@@ -1042,7 +1053,24 @@
             "8ac3fc64-6eca-42ea-9e69-59f4c7b60eb2",
             "7be44c8a-adaf-4e2a-84d6-ab2649e08a13",
             "e8611ab8-c189-46e8-94e1-60213ab1f814",
-            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+            "194ae4cb-b126-40b2-bd5b-6091b380977d",
+            "f28a1f50-f6e7-4571-818b-6a12f2af6b6c",
+            "29232cdf-9323-42fd-ade2-1d097af3e4de",
+            "3a2c62db-5318-420d-8d74-23affee5d9d5",
+            "69091246-20e8-4a56-aa4d-066075b2a7a8",
+            "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "b0f54661-2d74-4c50-afa3-1ec803f12efe",
+            "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+            "d2562ede-74db-457e-a7b6-544e236ebb61",
+            "db506228-d27e-4b7d-95e5-295956d6615f",
+            "6b942400-691f-4bf0-9d12-d8a254a2baf5",
+            "11451d60-acb2-45eb-a7d6-43d0f0125c13",
+            "b6a27b2b-f905-4b2e-81b5-0d90e0ef1fdb",
+            "1707125e-0aa2-4d4d-8655-a7c786c76a25",
+            "e93e3737-fa85-474a-aee4-7d3fb86510f3"
           ]
         },
         "groups": {
@@ -1095,16 +1123,6 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access"
-          ]
-        },
-        "guestsOrExternalUsers": {
-          "excludeTypes": [
-            "internalGuest",
-            "b2bCollaborationGuest",
-            "b2bCollaborationMember",
-            "b2bDirectConnectUser",
-            "otherExternalUser",
-            "serviceProvider"
           ]
         },
         "sessionControls": {
@@ -1273,7 +1291,8 @@
             "All"
           ],
           "excludeApplications": [
-            "Office365"
+            "Office365",
+            "2793995e-0a7d-40d7-bd35-6968ba142197"
           ]
         },
         "groups": {
@@ -1337,7 +1356,24 @@
             "8ac3fc64-6eca-42ea-9e69-59f4c7b60eb2",
             "7be44c8a-adaf-4e2a-84d6-ab2649e08a13",
             "e8611ab8-c189-46e8-94e1-60213ab1f814",
-            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+            "194ae4cb-b126-40b2-bd5b-6091b380977d",
+            "f28a1f50-f6e7-4571-818b-6a12f2af6b6c",
+            "29232cdf-9323-42fd-ade2-1d097af3e4de",
+            "3a2c62db-5318-420d-8d74-23affee5d9d5",
+            "69091246-20e8-4a56-aa4d-066075b2a7a8",
+            "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "b0f54661-2d74-4c50-afa3-1ec803f12efe",
+            "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+            "d2562ede-74db-457e-a7b6-544e236ebb61",
+            "db506228-d27e-4b7d-95e5-295956d6615f",
+            "6b942400-691f-4bf0-9d12-d8a254a2baf5",
+            "11451d60-acb2-45eb-a7d6-43d0f0125c13",
+            "b6a27b2b-f905-4b2e-81b5-0d90e0ef1fdb",
+            "1707125e-0aa2-4d4d-8655-a7c786c76a25",
+            "e93e3737-fa85-474a-aee4-7d3fb86510f3"
           ]
         },
         "groups": {
@@ -1476,6 +1512,10 @@
         "applications": {
           "includeApplications": [
             "All"
+          ],
+          "excludeApplications": [
+            "0000000a-0000-0000-c000-000000000000",
+            "d4ebce55-015a-49b5-a083-c84d1797ae8c"
           ]
         },
         "groups": {
@@ -1658,7 +1698,24 @@
             "8ac3fc64-6eca-42ea-9e69-59f4c7b60eb2",
             "7be44c8a-adaf-4e2a-84d6-ab2649e08a13",
             "e8611ab8-c189-46e8-94e1-60213ab1f814",
-            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+            "194ae4cb-b126-40b2-bd5b-6091b380977d",
+            "f28a1f50-f6e7-4571-818b-6a12f2af6b6c",
+            "29232cdf-9323-42fd-ade2-1d097af3e4de",
+            "3a2c62db-5318-420d-8d74-23affee5d9d5",
+            "69091246-20e8-4a56-aa4d-066075b2a7a8",
+            "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "b0f54661-2d74-4c50-afa3-1ec803f12efe",
+            "f2ef992c-3afb-46b9-b7cf-a126ee74c451",
+            "d2562ede-74db-457e-a7b6-544e236ebb61",
+            "db506228-d27e-4b7d-95e5-295956d6615f",
+            "6b942400-691f-4bf0-9d12-d8a254a2baf5",
+            "11451d60-acb2-45eb-a7d6-43d0f0125c13",
+            "b6a27b2b-f905-4b2e-81b5-0d90e0ef1fdb",
+            "1707125e-0aa2-4d4d-8655-a7c786c76a25",
+            "e93e3737-fa85-474a-aee4-7d3fb86510f3"
           ]
         },
         "groups": {
@@ -1813,6 +1870,328 @@
         }
       ],
       "optional": true
+    },
+    {
+      "checkId": "CA-BASE-044-SessionLimitsAllUsers",
+      "severity": "medium",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "session"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3070 - SESSION - Session Limits All Users\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "source": "CA-Policies/CATemplate/GLOBAL__3070__SESSION__Session_Limits_All_Users.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "groups": {
+          "excludeGroups": [
+            "Excluded from Conditional Access",
+            "Conditional Access Service Accounts"
+          ]
+        },
+        "sessionControls": {
+          "signInFrequency": {
+            "value": 12,
+            "type": "hours",
+            "authenticationType": "primaryAndSecondaryAuthentication",
+            "frequencyInterval": "timeBased",
+            "isEnabled": true
+          }
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ]
+    },
+    {
+      "checkId": "CA-BASE-045-RiskyAgentIdentities",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "block"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1150 - BLOCK - Risky Agent Identities\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.",
+      "source": "CA-Policies/CATemplate/GLOBAL__1150__BLOCK__Risky_Agent_Identities.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "clientApplications": {
+          "includeAgentIdServicePrincipals": [
+            "All"
+          ]
+        },
+        "agentIdRiskLevels": [
+          "high"
+        ],
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "builtInControls": [
+            "block"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "checkId": "CA-BASE-046-AgentIdentitiesToAgentResources",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "block"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1160 - BLOCK - Agent Identities To Agent Resources\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.",
+      "source": "CA-Policies/CATemplate/GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "clientApplications": {
+          "includeAgentIdServicePrincipals": [
+            "All"
+          ]
+        },
+        "applications": {
+          "includeApplications": [
+            "AllAgentIdResources"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "builtInControls": [
+            "block"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "checkId": "CA-BASE-047-AgentUsersCompliantDevice",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "grant"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2160 - GRANT - Agent Users Compliant Device\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart.",
+      "source": "CA-Policies/CATemplate/GLOBAL__2160__GRANT__Agent_Users_Compliant_Device.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "agents": {
+          "includeAgentUsers": [
+            "All"
+          ]
+        },
+        "agentContext": {
+          "includeAgentContexts": [
+            "agentUserSessionsInitiatedFromEndpoints"
+          ]
+        },
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "builtInControls": [
+            "compliantDevice"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "checkId": "CA-BASE-048-RiskyAgentUsers",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "block"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1170 - BLOCK - Risky Agent Users\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.",
+      "source": "CA-Policies/CATemplate/GLOBAL__1170__BLOCK__Risky_Agent_Users.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "agentIdRiskLevels": [
+          "medium",
+          "high"
+        ],
+        "agents": {
+          "includeAgentUsers": [
+            "All"
+          ]
+        },
+        "applications": {
+          "includeApplications": [
+            "All"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "builtInControls": [
+            "block"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "checkId": "CA-BASE-049-AgentUsersOutsideCompliantNetwork",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "block"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1180 - BLOCK - Agent Users Outside Compliant Network\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
+      "source": "CA-Policies/CATemplate/GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "agents": {
+          "includeAgentUsers": [
+            "All"
+          ]
+        },
+        "applications": {
+          "includeApplications": [
+            "AllAgentIdResources"
+          ]
+        },
+        "locations": {
+          "includeLocations": [
+            {
+              "kind": "sentinel",
+              "value": "All"
+            }
+          ],
+          "excludeLocations": [
+            {
+              "kind": "sentinel",
+              "value": "All Compliant Network locations"
+            }
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "builtInControls": [
+            "block"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
+    },
+    {
+      "checkId": "CA-BASE-050-MFAForIntuneEnrollment",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "grant"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2170 - GRANT - MFA for Intune Enrollment\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "source": "CA-Policies/CATemplate/GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "applications": {
+          "includeApplications": [
+            "d4ebce55-015a-49b5-a083-c84d1797ae8c"
+          ]
+        },
+        "groups": {
+          "excludeGroups": [
+            "Excluded from Conditional Access"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "authenticationStrengthId": "00000000-0000-0000-0000-000000000002"
+        },
+        "sessionControls": {
+          "signInFrequency": {
+            "value": null,
+            "type": null,
+            "authenticationType": "primaryAndSecondaryAuthentication",
+            "frequencyInterval": "everyTime",
+            "isEnabled": true
+          }
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ]
     }
   ]
 }

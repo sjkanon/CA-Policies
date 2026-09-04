@@ -1,0 +1,129 @@
+{
+  "version": "ca-prerequisites-v1.0",
+  "reviewedAt": "2026-09-04",
+  "_comment": [
+    "De groepen en named locations waar CATemplate/GLOBAL__*.json naar verwijzen. Zonder deze",
+    "bestaat de verwijzing bij de klant niet, en dat faalt de verkeerde kant op: een",
+    "uitzonderingsgroep die niet bestaat sluit niemand uit, dus de policy wordt strenger dan",
+    "bedoeld in plaats van dat de uitrol stukloopt. Zie ANALYSE.md, 'Wat er stuk is aan de set",
+    "zelf', punt 1.",
+    "",
+    "Dit bestand is handgeschreven en is de bron: scripts/prerequisites.js faalt op elke",
+    "verwijzing in een template die hier geen tegenhanger heeft, en generate-baseline.js roept",
+    "die validatie aan vóór het genereren. Welke templates een groep gebruiken staat er",
+    "bewust NIET in — dat leidt de validator live uit CATemplate/ af, zodat er geen tweede",
+    "lijst is die kan verouderen."
+  ],
+  "builtInLocationIds": {
+    "_comment": "Gereserveerde Entra-waarden, geen named location om aan te maken.",
+    "All": "alle locaties",
+    "AllTrusted": "alle locaties die als trusted zijn gemarkeerd"
+  },
+  "groups": [
+    {
+      "displayName": "Excluded from Conditional Access",
+      "mailNickname": "excluded-from-conditional-access",
+      "membershipType": "assigned",
+      "purpose": "De break-glass-uitsluiting. Staat in de excludeGroups van 34 van de 40 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'.",
+      "danger": "critical",
+      "dangerReason": "Deze groep leeg laten is het scenario waar CA-BASE-008-BreakGlassExclusion voor waarschuwt: tientallen policies actief en geen enkel account dat er buiten valt. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
+      "requiresMembers": true
+    },
+    {
+      "displayName": "Excluded from Legacy Authentication Block",
+      "mailNickname": "excluded-from-legacy-auth-block",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 1010 (legacy auth) en 1030 (niet-ondersteunde platforms), voor apparatuur die aantoonbaar geen moderne auth kan — multifunctionals, scan-to-mail, oude line-of-business-clients.",
+      "danger": "low",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "Excluded from Device Code Auth Flow Block",
+      "mailNickname": "excluded-from-device-code-block",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 1020. Device code flow is legitiem voor Azure CLI op headless machines en voor het inrichten van gedeelde apparaten (Teams Rooms, kiosk).",
+      "danger": "low",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "Excluded from Country Block List",
+      "mailNickname": "excluded-from-country-block-list",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 1040. Voor gebruikers die aantoonbaar buiten de toegestane landen werken — expats, langdurig verblijf, vakantiewerk met toestemming.",
+      "danger": "low",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "Conditional Access Service Accounts",
+      "mailNickname": "conditional-access-service-accounts",
+      "membershipType": "assigned",
+      "purpose": "De serviceaccounts die geen interactieve MFA kunnen doen. Wordt in 1060 als includeGroups gebruikt (vastzetten op vertrouwde IP's) en in negen andere templates als excludeGroups.",
+      "danger": "high",
+      "dangerReason": "Deze groep werkt twee kanten op: leden zijn uitgezonderd van MFA (9 templates) én vastgezet op de IP-ranges van 'Service Accounts Trusted IPs' (1060). Iemand hier per ongeluk in zetten haalt de MFA-eis bij hem weg. Houd de inhoud klein en gedocumenteerd.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "Licensed Users",
+      "mailNickname": "licensed-users",
+      "membershipType": "dynamic",
+      "membershipRule": "(user.assignedPlans -any (assignedPlan.servicePlanId -ne null -and assignedPlan.capabilityStatus -eq \"Enabled\"))",
+      "membershipRuleProcessingState": "On",
+      "purpose": "De tegenhanger van 1110 (BLOCK Unlicensed Users): die policy blokkeert alles behalve deze groep, de serviceaccounts en de break-glass-groep.",
+      "danger": "critical",
+      "dangerReason": "1110 staat op 'enabled' en includeUsers 'All'. Deze groep als lege statische groep aanmaken blokkeert daarmee élke gebruiker in de tenant. Hij MOET dynamisch zijn en de regel moet zijn verwerkt (membershipRuleProcessingState 'On') vóór 1110 wordt uitgerold — vandaar dat de PowerShell-variant wacht tot de eerste evaluatie leden heeft opgeleverd.",
+      "requiresMembers": true,
+      "requiresEntraIdP1": true
+    }
+  ],
+  "namedLocations": [
+    {
+      "displayName": "Allowed Countries",
+      "definition": {
+        "@odata.type": "#microsoft.graph.countryNamedLocation",
+        "displayName": "Allowed Countries",
+        "countriesAndRegions": ["BE", "NL"],
+        "includeUnknownCountriesAndRegions": true,
+        "countryLookupMethod": "clientIpAddress"
+      },
+      "purpose": "De landen waarbuiten 1040 blokkeert.",
+      "tenantSpecific": "de landenlijst is een klantkeuze — een klant met een vestiging of thuiswerkers buiten BE/NL heeft een andere lijst. Overleg vóór uitrol.",
+      "danger": "medium"
+    },
+    {
+      "displayName": "High-Risk Countries",
+      "definition": {
+        "@odata.type": "#microsoft.graph.countryNamedLocation",
+        "displayName": "High-Risk Countries",
+        "countriesAndRegions": ["KP", "RU", "IR"],
+        "includeUnknownCountriesAndRegions": true,
+        "countryLookupMethod": "clientIpAddress"
+      },
+      "purpose": "De landen die 1050 blokkeert. 1050 staat op 'enabled' en is daarmee onderdeel van stage 1.",
+      "danger": "low"
+    },
+    {
+      "displayName": "All Compliant Network locations",
+      "definition": {
+        "@odata.type": "#microsoft.graph.compliantNetworkNamedLocation",
+        "displayName": "All Compliant Network locations"
+      },
+      "purpose": "De locatie waarbuiten 1180 agent-gebruikers blokkeert.",
+      "notCreatable": "Entra levert deze named location zelf zodra Global Secure Access in de tenant is ingericht — je maakt hem niet aan. Zonder GSA bestaat hij niet en verwijst 1180 naar een locatie die er niet is; dan is de excludeLocations leeg en blokkeert de policy álle agent-gebruikers.",
+      "requiresGlobalSecureAccess": true,
+      "danger": "high"
+    },
+    {
+      "displayName": "Service Accounts Trusted IPs",
+      "definition": {
+        "@odata.type": "#microsoft.graph.ipNamedLocation",
+        "displayName": "Service Accounts Trusted IPs",
+        "isTrusted": true,
+        "ipRanges": []
+      },
+      "purpose": "De IP-ranges waarbuiten 1060 de serviceaccounts blokkeert.",
+      "tenantSpecific": "VERPLICHT per klant invullen. Het template in CATemplate/ draagt hier 94.110.96.252/32 — één specifieke tenant, per ongeluk meegeëxporteerd. Die waarde staat hier bewust niet: een andere klant zou er zijn serviceaccounts mee vastzetten op een IP dat van iemand anders is.",
+      "requiresIpRanges": true,
+      "danger": "high"
+    }
+  ]
+}

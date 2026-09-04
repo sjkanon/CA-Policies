@@ -1,0 +1,564 @@
+{
+  "version": "cipp-baseline-v1.0",
+  "generatedAt": "2026-09-04",
+  "generatedBy": "scripts/export-cipp-baseline.js",
+  "baselineName": "GLOBAL CA Baseline v1.0",
+  "_comment": [
+    "ONS formaat, niet dat van CIPP — zie de kop van export-cipp-baseline.js. Elke regel in",
+    "'standards' is één keer de standard 'Conditional Access Template' toevoegen in het",
+    "Add Baseline-scherm, met dat template en die state.",
+    "",
+    "Vóór stage 1 op Remediate gaat: scripts/New-CaPrerequisites.ps1 -RequireSafeToDeploy moet",
+    "groen afsluiten in de doeltenant. De groepen 'Excluded from Conditional Access' en",
+    "'Licensed Users' moeten leden hebben; zonder de eerste is er geen break-glass, zonder de",
+    "tweede blokkeert 1110 elke gebruiker."
+  ],
+  "prerequisites": {
+    "script": "scripts/New-CaPrerequisites.ps1",
+    "definition": "prerequisites/ca-prerequisites.json",
+    "groups": [
+      {
+        "displayName": "Excluded from Conditional Access",
+        "danger": "critical",
+        "requiresMembers": true
+      },
+      {
+        "displayName": "Excluded from Legacy Authentication Block",
+        "danger": "low",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "Excluded from Device Code Auth Flow Block",
+        "danger": "low",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "Excluded from Country Block List",
+        "danger": "low",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "Conditional Access Service Accounts",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "Licensed Users",
+        "danger": "critical",
+        "requiresMembers": true
+      }
+    ],
+    "namedLocations": [
+      {
+        "displayName": "Allowed Countries",
+        "danger": "medium",
+        "tenantSpecific": true,
+        "notCreatable": false
+      },
+      {
+        "displayName": "High-Risk Countries",
+        "danger": "low",
+        "tenantSpecific": false,
+        "notCreatable": false
+      },
+      {
+        "displayName": "All Compliant Network locations",
+        "danger": "high",
+        "tenantSpecific": false,
+        "notCreatable": true
+      },
+      {
+        "displayName": "Service Accounts Trusted IPs",
+        "danger": "high",
+        "tenantSpecific": true,
+        "notCreatable": false
+      }
+    ]
+  },
+  "blockedStandards": [
+    {
+      "templateFile": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
+      "checkId": "CA-BASE-014",
+      "blockedUntil": [
+        "\"Service Accounts Trusted IPs\" vereist de IP-ranges van deze klant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)"
+      ]
+    },
+    {
+      "templateFile": "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
+      "checkId": "CA-BASE-049",
+      "blockedUntil": [
+        "\"All Compliant Network locations\" is niet aan te maken: Entra levert deze named location zelf zodra Global Secure Access in de tenant is ingericht — je maakt hem niet aan. Zonder GSA bestaat hij niet en verwijst 1180 naar een locatie die er niet is; dan is de excludeLocations leeg en blokkeert de policy álle agent-gebruikers."
+      ]
+    }
+  ],
+  "sanitized": [
+    {
+      "file": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
+      "verwijderd": [
+        {
+          "displayName": "Service Accounts Trusted IPs",
+          "ipRanges": [
+            "94.110.96.252/32"
+          ]
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Kern",
+      "criterium": "state 'enabled' in het template en niet optioneel",
+      "deployState": "enabled",
+      "toelichting": "Wat de set als vanzelfsprekend beschouwt. Dit is de enige stage die met --remediate-stage1 op Remediate mag, en pas nadat New-CaPrerequisites.ps1 groen afsluit.",
+      "standards": [
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "58e8f95e-12d1-4def-9f8c-4159fa826cc9",
+          "templateFile": "GLOBAL__1010__BLOCK__Legacy_Authentication",
+          "displayName": "GLOBAL - 1010 - BLOCK - Legacy Authentication",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-009"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "7c4de0ec-9dcf-4d80-a513-b1b3822b1ecb",
+          "templateFile": "GLOBAL__1050__BLOCK__HighRisk_Countries",
+          "displayName": "GLOBAL - 1050 - BLOCK - High-Risk Countries",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-013"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "3368b030-a84a-4f82-8efc-8e5de9d4fcf1",
+          "templateFile": "GLOBAL__1090__BLOCK__HighRisk_SignIns",
+          "displayName": "GLOBAL - 1090 - BLOCK - High-Risk Sign-Ins",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-017"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "3f1c8a20-6b74-4a1e-9c53-1d8f0a2b4e61",
+          "templateFile": "GLOBAL__1110__BLOCK__Unlicensed_Users",
+          "displayName": "GLOBAL - 1110 - BLOCK - Unlicensed Users",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-030"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "7d2e91b8-4c05-4f6a-b3e7-2a91c58d0f43",
+          "templateFile": "GLOBAL__1120__BLOCK__Guest_Access_Outside_Approved_Apps",
+          "displayName": "GLOBAL - 1120 - BLOCK - Guest Access Outside Approved Apps",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-031"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "ccf1e270-fedc-44fe-a192-4e7a6fecd501",
+          "templateFile": "GLOBAL__2010__GRANT__MediumRisk_Signins",
+          "displayName": "GLOBAL - 2010 - GRANT - Medium-Risk Sign-ins",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-019"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "2ee477a8-bbde-491d-b7da-41acd3357214",
+          "templateFile": "GLOBAL__2020__GRANT__MediumRisk_Users",
+          "displayName": "GLOBAL - 2020 - GRANT - Medium-Risk Users",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-020"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "55d06371-14a9-4bd6-861b-8d282b1cf8ce",
+          "templateFile": "GLOBAL__2050__GRANT__MFA_for_All_Users",
+          "displayName": "GLOBAL - 2050 - GRANT - MFA for All Users",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-021"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "c85a1d90-7e63-4f28-b0d4-93f6a2c17e5b",
+          "templateFile": "GLOBAL__2080__GRANT__MFA_For_Device_Registration",
+          "displayName": "GLOBAL - 2080 - GRANT - MFA for Device Registration",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-034"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "9a4c72e1-3b08-4d56-8f92-1e07b5a3c68d",
+          "templateFile": "GLOBAL__2090__GRANT__Browser_Access_On_Unmanaged_Devices",
+          "displayName": "GLOBAL - 2090 - GRANT - Browser Access On Unmanaged Devices",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-035"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "2b5e08c4-6d17-4a93-85f0-c9a13e7b402f",
+          "templateFile": "GLOBAL__2100__GRANT__MFA_For_Admin_Portals",
+          "displayName": "GLOBAL - 2100 - GRANT - MFA for Admin Portals",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-036"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "84f3c197-5b20-46de-a8c1-703e9b5f2a68",
+          "templateFile": "GLOBAL__2110__GRANT__Token_Protection",
+          "displayName": "GLOBAL - 2110 - GRANT - Token Protection",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-037"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "f2470ba8-6d13-4c9e-85b7-3a0e19cd82f5",
+          "templateFile": "GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment",
+          "displayName": "GLOBAL - 2170 - GRANT - MFA for Intune Enrollment",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-050"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "2e47ab19-0c43-4929-9bb0-eb514934da15",
+          "templateFile": "GLOBAL__3010__SESSION__Admin_Persistence",
+          "displayName": "GLOBAL - 3010 - SESSION - Admin Persistence",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-025"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "5b2ae664-37e4-454b-814a-325e13e8f329",
+          "templateFile": "GLOBAL__3030__SESSION__Register_Security_Info_Requirements",
+          "displayName": "GLOBAL - 3030 - SESSION - Register Security Info Requirements",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-027"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "d1f80b26-495e-4c73-a0b8-6f37e91c25a4",
+          "templateFile": "GLOBAL__3050__SESSION__Continuous_Access_Evaluation",
+          "displayName": "GLOBAL - 3050 - SESSION - Continuous Access Evaluation",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-042"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "7c1e4f08-2b6d-4a51-9f3c-08d5b7a4e612",
+          "templateFile": "GLOBAL__3070__SESSION__Session_Limits_All_Users",
+          "displayName": "GLOBAL - 3070 - SESSION - Session Limits All Users",
+          "templateState": "enabled",
+          "deployState": "enabled",
+          "action": "Report",
+          "checkId": "CA-BASE-044"
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "name": "Aanscherping",
+      "criterium": "state 'disabled' of report-only in het template, en niet optioneel",
+      "deployState": "enabledForReportingButNotEnforced",
+      "toelichting": "Deze staan niet voor niets uit (ANALYSE.md: twaalf templates die per definitie geel opleveren). Ze worden report-only uitgerold — de stap naar 'enabled' is een beslissing per klant, na het lezen van de report-only-resultaten, en geen graduatie die vanzelf gebeurt.",
+      "standards": [
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "03c20c3f-8aa6-4dc2-a98f-9911a322aec0",
+          "templateFile": "GLOBAL__1020__BLOCK__Device_Code_Auth_Flow",
+          "displayName": "GLOBAL - 1020 - BLOCK - Device Code Auth Flow",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-010"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "726e37fa-456c-4c97-8fa0-c93ad574f958",
+          "templateFile": "GLOBAL__1030__BLOCK__Unsupported_Device_Platforms",
+          "displayName": "GLOBAL - 1030 - BLOCK - Unsupported Device Platforms",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-011"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "adea0bb6-c502-4fe6-9d9c-b4b355ca8d9d",
+          "templateFile": "GLOBAL__1040__BLOCK__Countries_not_Allowed",
+          "displayName": "GLOBAL - 1040 - BLOCK - Countries not Allowed",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-012"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "09ee07db-ecc9-44dc-ae3b-84d4e963f078",
+          "templateFile": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
+          "displayName": "GLOBAL - 1060 - BLOCK - Service Accounts (Trusted Locations Excluded)",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-014",
+          "blockedUntil": [
+            "\"Service Accounts Trusted IPs\" vereist de IP-ranges van deze klant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)"
+          ]
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "abd6d282-0fbf-4fc0-802b-58c8d4ee3948",
+          "templateFile": "GLOBAL__1070__BLOCK__Explicitly_Blocked_Cloud_Apps",
+          "displayName": "GLOBAL - 1070 - BLOCK - Explicitly Blocked Cloud Apps",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-015"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "37065607-c255-4766-a085-75f7b9e2f53b",
+          "templateFile": "GLOBAL__1080__BLOCK__Guest_Access_to_Sensitive_Apps",
+          "displayName": "GLOBAL - 1080 - BLOCK - Guest Access to Sensitive Apps",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-016"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "b372c5f9-5a1c-4d66-96ec-ed80c0f13603",
+          "templateFile": "GLOBAL__1100__BLOCK__HighRisk_Users",
+          "displayName": "GLOBAL - 1100 - BLOCK - High-Risk Users",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-018"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "7a19d853-861b-4fb5-9099-53debb76719d",
+          "templateFile": "GLOBAL__2055__GRANT__Phishing_Resistant_MFA_for_Admins",
+          "displayName": "GLOBAL - 2055 - GRANT - Phishing Resistant MFA for Admins",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-022"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "9bf2ff3d-c1c8-4e8f-b3b2-6ffbeea31fab",
+          "templateFile": "GLOBAL__2060__GRANT__Mobile_Apps_and_Desktop_Clients",
+          "displayName": "GLOBAL - 2060 - GRANT - Mobile Apps and Desktop Clients",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-023"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "1c1eb60f-4365-44f8-864f-f5f1e0d15c8c",
+          "templateFile": "GLOBAL__2070__GRANT__Mobile_Device_Access_Requirements",
+          "displayName": "GLOBAL - 2070 - GRANT - Mobile Device Access Requirements",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-024"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "c4342bb4-aa9e-4b45-8223-7de0e01f92f4",
+          "templateFile": "GLOBAL__3020__SESSION__BYOD_Persistence",
+          "displayName": "GLOBAL - 3020 - SESSION - BYOD Persistence",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-026"
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "fdab1e7a-755a-407c-a421-3dfb347b1d5f",
+          "templateFile": "GLOBAL__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices",
+          "displayName": "GLOBAL - 3040 - SESSION - Block File Downloads On Unmanaged Devices",
+          "templateState": "disabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-028"
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "name": "Klantkeuze en licentie",
+      "criterium": "staat in OPTIONAL_TEMPLATES van generate-baseline.js",
+      "deployState": "enabledForReportingButNotEnforced",
+      "toelichting": "Licentiegebonden of een expliciet klantbesluit. Hoort niet automatisch te graduaten: 2130 eist een beheerd apparaat van élke beheerder, bij een MSP dus ook van elke engineer. Actie blijft Report tot iemand er ja op zegt.",
+      "standards": [
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "e4b06f57-8a19-4d23-91c6-5b7e0a2f8c34",
+          "templateFile": "GLOBAL__1130__BLOCK__Admins_From_Untrusted_Locations",
+          "displayName": "GLOBAL - 1130 - BLOCK - Admins From Untrusted Locations",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-032",
+          "optional": true,
+          "optionalReason": "beheerders vastzetten op vertrouwde locaties sluit ze buiten zodra ze thuis of onderweg werken. Alleen inschakelen na expliciete afstemming met de klant."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "b7401e8c-93a5-4f26-8d10-c6e2f5079b34",
+          "templateFile": "GLOBAL__1140__BLOCK__Managed_Identities_At_Risk",
+          "displayName": "GLOBAL - 1140 - BLOCK - Managed Identities At Risk",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-033",
+          "optional": true,
+          "optionalReason": "risicodetectie op workload-identiteiten vereist Microsoft Entra Workload ID Premium."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "a4d6b920-83c7-4e15-8ad0-1f27c9b6e534",
+          "templateFile": "GLOBAL__1150__BLOCK__Risky_Agent_Identities",
+          "displayName": "GLOBAL - 1150 - BLOCK - Risky Agent Identities",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-045",
+          "optional": true,
+          "optionalReason": "vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "c72f18ab-45d9-4b03-9e6a-8d41b0c7f295",
+          "templateFile": "GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources",
+          "displayName": "GLOBAL - 1160 - BLOCK - Agent Identities To Agent Resources",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-046",
+          "optional": true,
+          "optionalReason": "vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "b8134e7f-2a05-49dc-86b1-c4e70d9a5f38",
+          "templateFile": "GLOBAL__1170__BLOCK__Risky_Agent_Users",
+          "displayName": "GLOBAL - 1170 - BLOCK - Risky Agent Users",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-048",
+          "optional": true,
+          "optionalReason": "vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "d391f6c0-7b28-4e54-93af-25c8b1e0a746",
+          "templateFile": "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
+          "displayName": "GLOBAL - 1180 - BLOCK - Agent Users Outside Compliant Network",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-049",
+          "optional": true,
+          "optionalReason": "vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
+          "blockedUntil": [
+            "\"All Compliant Network locations\" is niet aan te maken: Entra levert deze named location zelf zodra Global Secure Access in de tenant is ingericht — je maakt hem niet aan. Zonder GSA bestaat hij niet en verwijst 1180 naar een locatie die er niet is; dan is de excludeLocations leeg en blokkeert de policy álle agent-gebruikers."
+          ]
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "af62d013-7e49-4b85-92c7-140b8e5a37fd",
+          "templateFile": "GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users",
+          "displayName": "GLOBAL - 2120 - GRANT - Phishing Resistant MFA for All Users",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-038",
+          "optional": true,
+          "optionalReason": "vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "56e0a8f3-24b7-41cd-90e6-b8f172a4c093",
+          "templateFile": "GLOBAL__2130__GRANT__Admins_Compliant_Device",
+          "displayName": "GLOBAL - 2130 - GRANT - Admins Compliant Device",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-039",
+          "optional": true,
+          "optionalReason": "eist dat élke beheerder een beheerd apparaat heeft — bij een MSP dus ook elke engineer die in de klanttenant komt. Klantbeslissing."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "0c9b47e5-8102-4fa6-b73d-25e6c8109af4",
+          "templateFile": "GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access",
+          "displayName": "GLOBAL - 2150 - GRANT - Cloud PC Mobile Access",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-041",
+          "optional": true,
+          "optionalReason": "alleen relevant bij een klant met Windows 365 / Cloud PC."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "e05a3c6d-91f4-42b8-bc27-6a0d5e83b491",
+          "templateFile": "GLOBAL__2160__GRANT__Agent_Users_Compliant_Device",
+          "displayName": "GLOBAL - 2160 - GRANT - Agent Users Compliant Device",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-047",
+          "optional": true,
+          "optionalReason": "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "6a37c904-b25f-48e1-93d0-7fa4e28b510c",
+          "templateFile": "GLOBAL__3060__SESSION__Defender_for_Cloud_Apps",
+          "displayName": "GLOBAL - 3060 - SESSION - Defender for Cloud Apps",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-043",
+          "optional": true,
+          "optionalReason": "sessiecontrole via Defender for Cloud Apps vereist een MDCA-licentie."
+        }
+      ]
+    }
+  ]
+}

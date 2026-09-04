@@ -21,6 +21,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { validate: validatePrerequisites } = require("./prerequisites");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -132,6 +133,15 @@ const CHECK_ID_BY_TEMPLATE = {
   GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access: "041",
   GLOBAL__3050__SESSION__Continuous_Access_Evaluation: "042",
   GLOBAL__3060__SESSION__Defender_for_Cloud_Apps: "043",
+  // Ronde j0eyv 2026.6.1 (4 september 2026): sessieduur voor iedereen, de agent-persona en
+  // MFA op de Intune-enrollment-app. Zie ANALYSE.md.
+  GLOBAL__3070__SESSION__Session_Limits_All_Users: "044",
+  GLOBAL__1150__BLOCK__Risky_Agent_Identities: "045",
+  GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources: "046",
+  GLOBAL__2160__GRANT__Agent_Users_Compliant_Device: "047",
+  GLOBAL__1170__BLOCK__Risky_Agent_Users: "048",
+  GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network: "049",
+  GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment: "050",
 };
 
 /**
@@ -168,6 +178,16 @@ const OPTIONAL_TEMPLATES = {
     "alleen relevant bij een klant met Windows 365 / Cloud PC.",
   GLOBAL__3060__SESSION__Defender_for_Cloud_Apps:
     "sessiecontrole via Defender for Cloud Apps vereist een MDCA-licentie.",
+  GLOBAL__1150__BLOCK__Risky_Agent_Identities:
+    "vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.",
+  GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources:
+    "vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.",
+  GLOBAL__2160__GRANT__Agent_Users_Compliant_Device:
+    "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart.",
+  GLOBAL__1170__BLOCK__Risky_Agent_Users:
+    "vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.",
+  GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network:
+    "vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
 };
 
 /** Het eerstvolgende nummer dat nog niet vergeven is — puur voor de foutmelding. */
@@ -256,7 +276,50 @@ function extractParams(policy) {
     if (c.clientApplications.excludeServicePrincipals && c.clientApplications.excludeServicePrincipals.length > 0) {
       clientApps.excludeServicePrincipals = c.clientApplications.excludeServicePrincipals;
     }
+    if (c.clientApplications.includeAgentIdServicePrincipals && c.clientApplications.includeAgentIdServicePrincipals.length > 0) {
+      clientApps.includeAgentIdServicePrincipals = c.clientApplications.includeAgentIdServicePrincipals;
+    }
+    if (c.clientApplications.excludeAgentIdServicePrincipals && c.clientApplications.excludeAgentIdServicePrincipals.length > 0) {
+      clientApps.excludeAgentIdServicePrincipals = c.clientApplications.excludeAgentIdServicePrincipals;
+    }
     if (Object.keys(clientApps).length > 0) params.clientApplications = clientApps;
+  }
+
+  // Agent-identiteiten (Microsoft Entra Agent ID). Zelfde reden als hierboven bij de
+  // workload-identiteiten: zonder deze drie velden houdt een policy die risicovolle agents
+  // blokkeert alleen "applications: All" + "block" over, en dat is niet te onderscheiden van
+  // elke andere blokkeerregel. Graph levert agentIdRiskLevels als één komma-gescheiden
+  // string ("medium,high"); hier gesplitst, zodat de engine een verzameling vergelijkt en
+  // niet de schrijfwijze.
+  if (c.agentIdRiskLevels) {
+    const levels = Array.isArray(c.agentIdRiskLevels)
+      ? c.agentIdRiskLevels
+      : String(c.agentIdRiskLevels)
+          .split(",")
+          .map((l) => l.trim())
+          .filter(Boolean);
+    if (levels.length > 0) params.agentIdRiskLevels = levels;
+  }
+  if (c.agents) {
+    const agents = {};
+    if (c.agents.includeAgentUsers && c.agents.includeAgentUsers.length > 0) agents.includeAgentUsers = c.agents.includeAgentUsers;
+    if (c.agents.excludeAgentUsers && c.agents.excludeAgentUsers.length > 0) agents.excludeAgentUsers = c.agents.excludeAgentUsers;
+    if (Object.keys(agents).length > 0) params.agents = agents;
+  }
+  if (c.agentContext && c.agentContext.includeAgentContexts && c.agentContext.includeAgentContexts.length > 0) {
+    params.agentContext = { includeAgentContexts: c.agentContext.includeAgentContexts };
+  }
+
+  // Authentication transfer / device code flow. Hetzelfde probleem, al langer: zonder dit
+  // veld is 1020 (device code auth flow) in de vergelijking een gewone "blokkeer alles voor
+  // iedereen"-policy, en dekt hij CIS 5.2.2.17 alleen op papier.
+  if (c.authenticationFlows && c.authenticationFlows.transferMethods) {
+    params.authenticationFlows = {
+      transferMethods: String(c.authenticationFlows.transferMethods)
+        .split(",")
+        .map((m) => m.trim())
+        .filter(Boolean),
+    };
   }
 
   if (c.platforms) {
@@ -381,6 +444,18 @@ function convertTemplateFile(filePath) {
 function main() {
   if (!fs.existsSync(TEMPLATE_DIR)) {
     console.error(`CATemplate/ niet gevonden op ${TEMPLATE_DIR}`);
+    process.exit(1);
+  }
+
+  // Randvoorwaarden eerst. Een template dat verwijst naar een groep of named location die
+  // nergens gedefinieerd is levert bij de klant geen foutmelding op maar een strengere
+  // policy: een uitzonderingsgroep die niet bestaat sluit niemand uit. Zie ANALYSE.md, punt
+  // 1 van "Wat er stuk is aan de set zelf", en scripts/prerequisites.js.
+  const { errors: prereqFouten, warnings: prereqWaarschuwingen } = validatePrerequisites();
+  for (const w of prereqWaarschuwingen) console.warn(`waarschuwing: ${w}`);
+  if (prereqFouten.length > 0) {
+    for (const e of prereqFouten) console.error(`FOUT: ${e}`);
+    console.error("\nGenereren afgebroken: vul prerequisites/ca-prerequisites.json aan.");
     process.exit(1);
   }
 

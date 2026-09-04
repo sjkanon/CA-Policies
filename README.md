@@ -12,7 +12,10 @@ platform-engine vergelijkt de structurele policy-opzet (condities, grant-/sessio
 tegen wat er in een klanttenant staat.
 
 **Wat wél meetelt in de vergelijking:** `clientAppTypes`, `platforms`, `applications`,
-`userRiskLevels`/`signInRiskLevels`, `grantControls`, `sessionControls`, ingebouwde
+`userRiskLevels`/`signInRiskLevels`, `servicePrincipalRiskLevels` en `clientApplications`
+(workload-identiteiten), `agentIdRiskLevels`, `agents` en `agentContext`
+(Entra Agent ID), `authenticationFlows` (device code flow / authentication transfer),
+`grantControls`, `sessionControls`, ingebouwde
 directory-rollen (`includeRoles`/`excludeRoles` — overal dezelfde GUID's), groepen
 (`includeGroups`/`excludeGroups` — op naam, de platform-engine resolvet de live
 group-GUID's naar displayName vóór het vergelijken), gasten en externe gebruikers
@@ -49,7 +52,71 @@ Dus:
 3. Vraagt de policy een licentie of is hij een klantkeuze? Zet 'm dan in
    `OPTIONAL_TEMPLATES` met de reden; hij krijgt dan `optional: true` en levert bij een
    klant zonder die licentie geen `fail` op voor iets wat hij niet kán hebben.
-4. `node scripts/generate-baseline.js && node --test scripts/generate-baseline.test.js`.
+4. Verwijst het template naar een groep of named location? Zorg dat die in
+   `prerequisites/ca-prerequisites.json` staat — de generator weigert anders te draaien.
+5. `node scripts/generate-baseline.js && node scripts/export-cipp-baseline.js && node --test scripts/generate-baseline.test.js scripts/prerequisites.test.js`.
 
 De generator faalt hard op een template zonder pin en noemt het eerstvolgende vrije nummer;
 de test bewaakt hetzelfde in CI, ná het genereren.
+
+## Uitrollen via CIPP
+
+Dezelfde 40 templates voeden twee dingen die het tegenovergestelde doen:
+
+| | Genereert | Doet |
+|---|---|---|
+| `scripts/generate-baseline.js` | `baseline/conditional-access/baseline-v1.0.json` | **toetst** een klanttenant |
+| `scripts/export-cipp-baseline.js` | `cipp/ca-templates-import.json` + `cipp/baseline-stages.json` | **rolt uit** via CIPP |
+
+Een CIPP-baseline bestaat niet uit policies maar uit *standards*: elk template is één keer
+de standard **Conditional Access Template** in een stage, met een template-GUID, een state
+en een actie (Report / Alert / Remediate). `cipp/baseline-stages.json` is die lijst, in ons
+eigen formaat — het schema dat CIPP's Baselines-scherm zelf opslaat is versiegebonden en
+staat daarom bewust niet vastgelegd in dit script.
+
+De stage-indeling volgt de metadata die de repo al had:
+
+| Stage | Wat erin | Uitgerold als |
+|---|---|---|
+| 1 — Kern | `state: enabled`, niet optioneel (17) | `enabled` |
+| 2 — Aanscherping | `disabled` of report-only in het template (12) | report-only |
+| 3 — Klantkeuze en licentie | `OPTIONAL_TEMPLATES` (11) | report-only, blijft op Report |
+
+### Eerst de randvoorwaarden, dan pas Remediate
+
+De templates verwijzen naar zes groepen en vier named locations die geen enkele tenant
+vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: **een uitzonderingsgroep
+die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld en niets slaat
+alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
+
+- `Excluded from Conditional Access` staat in 34 van de 40 templates. De zes zonder richten
+  zich op workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raakt hij niets.
+  Leeg = geen break-glass.
+- `Licensed Users` — 1110 staat op `enabled` en blokkeert `All` behalve deze groep. Statisch
+  of leeg aangemaakt blokkeert dat élke gebruiker in de tenant. Hij moet dynamisch zijn.
+
+Daarom:
+
+```powershell
+./scripts/New-CaPrerequisites.ps1 -TenantId <klant> -WhatIf          # eerst kijken
+./scripts/New-CaPrerequisites.ps1 -TenantId <klant> `
+    -ServiceAccountIpRange '<cidr van deze klant>' `
+    -BreakGlassUserId '<object-id>' -RequireSafeToDeploy             # dan aanmaken
+```
+
+Het script is idempotent en sluit met een fout af zolang de kritieke groepen leeg zijn.
+Pas als het groen afsluit mag stage 1 afdwingen:
+
+```bash
+node scripts/export-cipp-baseline.js --remediate-stage1
+```
+
+Zonder die vlag staat élke standard op `Report`, en dat is ook wat CI genereert. Twee
+templates blijven daar hoe dan ook op staan, omdat hun randvoorwaarde niet uit deze repo kan
+komen: `1060` (vereist de IP-ranges van die specifieke klant) en `1180` (vereist de
+compliant-network-locatie die Entra pas levert bij Global Secure Access).
+
+`prerequisites/ca-prerequisites.json` is de bron voor beide scripts.
+`scripts/prerequisites.js` faalt op elke verwijzing zonder definitie, en op een named
+location waarvan de inhoud in het template afwijkt van de definitie — de platform-engine
+vergelijkt die op volledige inhoud, dus die twee moeten gelijk blijven.

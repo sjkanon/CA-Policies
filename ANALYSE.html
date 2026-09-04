@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>CA-Baseline Gapanalyse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#EDF0F3; --surface:#FFFFFF; --sunken:#E3E8ED; --raised:#F7F9FB;
+  --ink:#0D1519; --body:#26333C; --muted:#5A6B77; --faint:#8695A1;
+  --line:#CFD8E0; --hair:#E2E8ED;
+  --acc:#2F4B7C; --acc-soft:#DEE6F1;
+  --block:#9E2A2B; --block-bg:#F4E3E3;
+  --warn:#8A5B08; --warn-bg:#F6EBD8;
+  --ok:#2C6650; --ok-bg:#DEEBE5;
+  --inert:#5A6B77; --inert-bg:#E4E9ED;
+  --f-ui:"IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
+  --f-tx:"IBM Plex Serif",Georgia,serif;
+  --f-mo:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1216; --surface:#161D23; --sunken:#111920; --raised:#1C252D;
+    --ink:#E8EEF2; --body:#C2CDD6; --muted:#8B9BA7; --faint:#6A7A87;
+    --line:#2A3742; --hair:#202B34;
+    --acc:#7FA3D8; --acc-soft:#1A2739;
+    --block:#E39396; --block-bg:#2E1A1B;
+    --warn:#D9A559; --warn-bg:#2C2314;
+    --ok:#79BFA0; --ok-bg:#15291F;
+    --inert:#8B9BA7; --inert-bg:#1D262D;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1216; --surface:#161D23; --sunken:#111920; --raised:#1C252D;
+  --ink:#E8EEF2; --body:#C2CDD6; --muted:#8B9BA7; --faint:#6A7A87;
+  --line:#2A3742; --hair:#202B34;
+  --acc:#7FA3D8; --acc-soft:#1A2739;
+  --block:#E39396; --block-bg:#2E1A1B;
+  --warn:#D9A559; --warn-bg:#2C2314;
+  --ok:#79BFA0; --ok-bg:#15291F;
+  --inert:#8B9BA7; --inert-bg:#1D262D;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; padding:0 22px 88px;
+  background:var(--paper); color:var(--body);
+  font-family:var(--f-tx); font-size:16.5px; line-height:1.66;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:1080px;margin:0 auto}
+.narrow{max-width:700px}
+h1,h2,h3,h4{font-family:var(--f-ui);color:var(--ink);margin:0;line-height:1.2;text-wrap:balance}
+p{margin:0}
+a{color:var(--acc);text-decoration-thickness:1px;text-underline-offset:2px}
+code{font-family:var(--f-mo);font-size:.84em}
+b,strong{font-weight:600;color:var(--ink)}
+
+/* ---- masthead: schematic label block ---- */
+.mast{padding:52px 0 0}
+.stamp{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--ink);
+  font-family:var(--f-mo);font-size:11px;margin-bottom:26px;background:var(--surface)}
+.stamp div{padding:7px 13px;border-right:1px solid var(--ink);white-space:nowrap}
+.stamp div:last-child{border-right:0}
+.stamp span{color:var(--muted)}
+.mast h1{font-size:clamp(34px,5.4vw,54px);font-weight:600;letter-spacing:-.028em;max-width:17ch}
+.mast .lede{font-family:var(--f-tx);font-size:18.5px;color:var(--muted);margin-top:20px;max-width:60ch}
+.mast .hr{height:3px;background:var(--ink);margin:34px 0 44px}
+
+/* ---- counters ---- */
+.counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:52px}
+.ct{background:var(--surface);padding:18px 18px 16px}
+.ct .n{font-family:var(--f-ui);font-size:34px;font-weight:600;color:var(--ink);
+  line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.ct .n em{font-style:normal;font-size:17px;font-weight:400;color:var(--faint)}
+.ct .l{font-family:var(--f-ui);font-size:12.5px;color:var(--muted);margin-top:9px;line-height:1.4}
+.ct.bad .n{color:var(--block)}
+
+/* ---- sections ---- */
+section{margin-bottom:60px;scroll-margin-top:20px}
+.tag{font-family:var(--f-mo);font-size:11px;color:var(--acc);letter-spacing:.05em}
+section>h2{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:8px 0 0;max-width:24ch}
+.dek{color:var(--muted);font-size:16px;margin-top:11px;max-width:66ch}
+.bar{height:1px;background:var(--line);margin:20px 0 28px}
+.flow{display:flex;flex-direction:column;gap:17px;max-width:700px}
+.flow p+p{margin-top:0}
+
+/* ---- tables ---- */
+.scroll{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--f-ui);font-size:13.5px}
+th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:11px 13px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid var(--hair);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.id{font-family:var(--f-mo);font-size:12.5px;color:var(--ink);font-weight:500}
+.grp{font-family:var(--f-mo);font-size:10.5px;letter-spacing:.04em;color:var(--faint)}
+
+/* ---- state pills ---- */
+.pill{display:inline-block;font-family:var(--f-ui);font-size:10.5px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;white-space:nowrap;border-radius:2px}
+.pill.on{background:var(--ok-bg);color:var(--ok)}
+.pill.off{background:var(--block-bg);color:var(--block)}
+.pill.ro{background:var(--warn-bg);color:var(--warn)}
+.pill.opt{background:var(--acc-soft);color:var(--acc)}
+.pill.no{background:var(--inert-bg);color:var(--inert)}
+.flag{color:var(--block);font-weight:600;font-family:var(--f-ui);font-size:12px}
+
+/* ---- findings ---- */
+.find{border:1px solid var(--line);background:var(--surface);margin-bottom:18px}
+.find>header{display:flex;gap:14px;align-items:baseline;padding:16px 20px 0}
+.find .no{font-family:var(--f-mo);font-size:12px;font-weight:500;color:var(--block);flex:0 0 auto}
+.find h3{font-size:18.5px;font-weight:600;letter-spacing:-.012em}
+.find .bd{padding:11px 20px 18px 20px;display:flex;flex-direction:column;gap:12px}
+.find .bd>*{max-width:68ch}
+.pre{font-family:var(--f-mo);font-size:12px;line-height:1.7;background:var(--sunken);
+  padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--body);max-width:100%!important;
+  border-left:2px solid var(--line)}
+.act{background:var(--raised);border-top:1px solid var(--hair);padding:13px 20px;
+  font-family:var(--f-ui);font-size:14.5px;color:var(--ink);max-width:100%}
+.act::before{content:"Wat moet veranderen";display:block;font-size:10px;font-weight:600;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+
+/* ---- change list ---- */
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:2px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;background:var(--surface);
+  border:1px solid var(--line);padding:15px 18px;align-items:start}
+.step .k{font-family:var(--f-mo);font-size:19px;font-weight:500;color:var(--acc);
+  font-variant-numeric:tabular-nums;line-height:1.25}
+.step h4{font-size:16.5px;font-weight:600;margin-bottom:5px}
+.step p{font-family:var(--f-ui);font-size:14.5px;color:var(--muted);line-height:1.5}
+.step.maint{border-left:3px solid var(--block)}
+.step.add{border-left:3px solid var(--acc)}
+.step.proc{border-left:3px solid var(--faint)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--f-ui);font-size:12.5px;
+  color:var(--muted);margin-top:16px}
+.legend i{display:inline-block;width:3px;height:12px;margin-right:7px;vertical-align:-1px}
+
+ul{margin:0;padding-left:19px}
+li{margin-bottom:8px}
+li::marker{color:var(--acc)}
+.note{font-family:var(--f-ui);font-size:14px;color:var(--muted);max-width:70ch;line-height:1.55}
+
+footer{border-top:1px solid var(--line);padding-top:22px;
+  font-family:var(--f-ui);font-size:13px;color:var(--muted);max-width:74ch}
+
+@media (max-width:620px){
+  body{font-size:15.5px;padding:0 14px 56px}
+  .mast{padding-top:30px}
+  .step{grid-template-columns:1fr;gap:6px}
+  .find>header{flex-direction:column;gap:6px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="mast">
+  <div class="stamp">
+    <div><span>repo</span> sjkanon/CA-Policies</div>
+    <div><span>datum</span> 2026-09-03</div>
+    <div><span>templates</span> 33</div>
+    <div><span>regels</span> 43</div>
+  </div>
+  <h1>Wat mist de CA-baseline</h1>
+  <p class="lede">De 33 templates getoetst aan MCSB, CIS Microsoft&nbsp;365 Foundations en
+  Microsofts eigen CA-templates — en aan wat er gebeurt als je ze op een echte tenant legt.
+  De maatregelen blijken vrijwel compleet. De set eromheen niet.</p>
+  <div class="hr"></div>
+</header>
+
+<div class="counts">
+  <div class="ct"><div class="n">7<em>/7</em></div><div class="l">MCSB IM-7-toepassingen gedekt</div></div>
+  <div class="ct"><div class="n">3<em>/5</em></div><div class="l">nieuwe CIS-controls uit v7.0.0 gedekt</div></div>
+  <div class="ct"><div class="n">5<em>/6</em></div><div class="l">Microsoft-templatecategorieën gedekt</div></div>
+  <div class="ct bad"><div class="n">12<em>/33</em></div><div class="l">templates die nooit een <code>pass</code> kunnen opleveren</div></div>
+  <div class="ct bad"><div class="n">10</div><div class="l">groepen en locaties waarnaar wordt verwezen zonder definitie</div></div>
+</div>
+
+<section>
+  <div class="tag">01 — herkomst</div>
+  <h2>De vergelijking met frameworks is uitgeput</h2>
+  <p class="dek">Er lag al een analyse. Die is uitgevoerd, en daarmee op — wat nu overblijft
+  moet uit een andere hoek komen.</p>
+  <div class="bar"></div>
+  <div class="flow">
+    <p><code>docs/ca-baseline-gap.md</code> in <b>sjkanon/Platform</b>, van 13 augustus 2026,
+    legde de set naast drie frameworks: Daniel Chronlund (21 policies), Kenneth van Surksum
+    (49) en Joey Verlinden (36). Het legde ook de herkomst vast, en dat blijft het
+    belangrijkste stuk context: <b>onze nummering ís Chronlunds baseline.</b> De reeks
+    <code>1010</code>–<code>3040</code>, de indeling BLOCK/GRANT/SESSION en de naamvorm
+    <code>GLOBAL - nnnn - ACTIE - Omschrijving</code> komen één op één uit zijn ontwerp.</p>
+
+    <p>Dat rapport beschrijft 20 templates; er zijn er 33. Dat is geen achterstand maar het
+    tegendeel — <b>veertien van de vijftien kandidaten die het aandroeg zijn gebouwd:</b>
+    <span class="id">1110 · 1120 · 1130 · 1140 · 2080 · 2090 · 2100 · 2110 · 2120 · 2130 ·
+    2150 · 3050 · 3060</span> plus Terms of Use als eigen rule-type. Alleen
+    agent-identiteiten niet.</p>
+
+    <p>Deze ronde toetst daarom aan de normatieve bronnen in plaats van aan
+    community-frameworks, en stelt daarnaast een vraag die met geen policyvergelijking te
+    beantwoorden is: wat mankeert er aan de set <i>als geheel</i>?</p>
+  </div>
+</section>
+
+<section>
+  <div class="tag">02 — statusbord</div>
+  <h2>Elk template, met zijn staat en zijn licentie</h2>
+  <p class="dek">De README zegt het zelf: een structureel matchende maar disabled of
+  report-only policy levert <code>warning</code> op, geen <code>pass</code>. Elf templates
+  staan uit, één op report-only. Nergens staat welke, of waarom.</p>
+  <div class="bar"></div>
+  <div class="scroll">
+    <table>
+      <thead><tr>
+        <th>Template</th><th>Groep</th><th>State</th><th>Licentie</th><th><code>optional</code></th><th></th>
+      </tr></thead>
+      <tbody>
+      <tr><td class="id">1010 Legacy Authentication</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1020 Device Code Auth Flow</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td class="flag">dekt CIS 5.2.2.17 (L1)</td></tr>
+      <tr><td class="id">1030 Unsupported Device Platforms</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1040 Countries not Allowed</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td class="flag">dekt CIS 5.2.2.15 (L1)</td></tr>
+      <tr><td class="id">1050 High-Risk Countries</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1060 Service Accounts</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1070 Explicitly Blocked Cloud Apps</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1080 Guest Access to Sensitive Apps</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1090 High-Risk Sign-Ins</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>Entra ID P2</td><td><span class="pill no">nee</span></td><td class="flag">licentie niet gemarkeerd</td></tr>
+      <tr><td class="id">1100 High-Risk Users</td><td class="grp">BLOCK</td><td><span class="pill off">disabled</span></td><td>Entra ID P2</td><td><span class="pill no">nee</span></td><td class="flag">licentie niet gemarkeerd</td></tr>
+      <tr><td class="id">1110 Unlicensed Users</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1120 Guest Access Outside Approved Apps</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">1130 Admins From Untrusted Locations</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      <tr><td class="id">1140 Managed Identities At Risk</td><td class="grp">BLOCK</td><td><span class="pill on">enabled</span></td><td>Workload ID Premium</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      <tr><td class="id">2010 Medium-Risk Sign-ins</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>Entra ID P2</td><td><span class="pill no">nee</span></td><td class="flag">licentie niet gemarkeerd</td></tr>
+      <tr><td class="id">2020 Medium-Risk Users</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>Entra ID P2</td><td><span class="pill no">nee</span></td><td class="flag">licentie niet gemarkeerd</td></tr>
+      <tr><td class="id">2050 MFA for All Users</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2055 Phishing Resistant MFA for Admins</td><td class="grp">GRANT</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td class="flag">eerste stap staat uit, einddoel aan</td></tr>
+      <tr><td class="id">2060 Mobile Apps and Desktop Clients</td><td class="grp">GRANT</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2070 Mobile Device Access Requirements</td><td class="grp">GRANT</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2080 MFA For Device Registration</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2090 Browser Access On Unmanaged Devices</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2100 MFA For Admin Portals</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">2110 Token Protection</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>Entra ID P2</td><td><span class="pill no">nee</span></td><td class="flag">licentie niet gemarkeerd</td></tr>
+      <tr><td class="id">2120 Phishing Resistant MFA for All Users</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      <tr><td class="id">2130 Admins Compliant Device</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      <tr><td class="id">2150 Cloud PC Mobile Access</td><td class="grp">GRANT</td><td><span class="pill on">enabled</span></td><td>Windows 365</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      <tr><td class="id">3010 Admin Persistence</td><td class="grp">SESSION</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">3020 BYOD Persistence</td><td class="grp">SESSION</td><td><span class="pill ro">report-only</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">3030 Register Security Info</td><td class="grp">SESSION</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">3040 Block File Downloads Unmanaged</td><td class="grp">SESSION</td><td><span class="pill off">disabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">3050 Continuous Access Evaluation</td><td class="grp">SESSION</td><td><span class="pill on">enabled</span></td><td>—</td><td><span class="pill no">nee</span></td><td></td></tr>
+      <tr><td class="id">3060 Defender for Cloud Apps</td><td class="grp">SESSION</td><td><span class="pill on">enabled</span></td><td>MDCA</td><td><span class="pill opt">ja</span></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="tag">03 — structureel</div>
+  <h2>Vier dingen die geen policyvergelijking vindt</h2>
+  <p class="dek">Alle vier zichtbaar geworden door de set op een echte klanttenant te leggen,
+  en alle vier dringender dan welk nieuw template ook.</p>
+  <div class="bar"></div>
+
+  <article class="find">
+    <header><span class="no">01</span><h3>De randvoorwaarden worden niet meegeleverd</h3></header>
+    <div class="bd">
+      <p>De templates verwijzen naar zes groepen en vier named locations die de repo nergens
+      definieert en nergens als voorwaarde noemt.</p>
+      <div class="pre">Excluded from Conditional Access             Allowed Countries
+Conditional Access Service Accounts         High-Risk Countries
+Licensed Users                              Service Accounts Trusted IPs
+Excluded from Legacy Authentication Block   AllTrusted
+Excluded from Device Code Auth Flow Block
+Excluded from Country Block List</div>
+      <p>Bij de getoetste tenant bestond <b>geen van de zes groepen</b>, en de named locations
+      heetten er anders. Het probleem is niet dat uitrol dan faalt. Het probleem is dat hij
+      <i>slaagt</i>: een uitzonderingsgroep die niet bestaat sluit niemand uit, dus de policy
+      wordt strenger dan bedoeld.</p>
+      <p><code>Excluded from Conditional Access</code> is de break-glass-uitsluiting. 33
+      policies uitrollen waarvan die groep niet bestaat is de klassieke manier om een tenant
+      volledig buiten te sluiten — precies waar <code>CA-BASE-008-BreakGlassExclusion</code>
+      voor waarschuwt, maar dan veroorzaakt door onze eigen templates.</p>
+    </div>
+    <div class="act">De repo levert de groepen en named locations als aanmaakscript mee, en
+    <code>generate-baseline.js</code> faalt op een template dat verwijst naar iets wat niet in
+    die lijst staat — zoals <code>check-scope.js</code> in IntuneBackup bewaakt dat elk bestand
+    op zijn plek staat.</div>
+  </article>
+
+  <article class="find">
+    <header><span class="no">02</span><h3>Twaalf templates kunnen nooit een <code>pass</code> opleveren</h3></header>
+    <div class="bd">
+      <p>Een derde van de set levert per definitie geel op, en welke dat zijn staat nergens.
+      Twee gevallen spreken zichzelf bovendien tegen.</p>
+      <p><b><code>2055</code> staat uit, <code>2120</code> staat aan.</b> 2055 is
+      phishing-resistant MFA voor beheerders, 2120 voor álle gebruikers.
+      <code>OPTIONAL_TEMPLATES</code> noemt 2120 zelf <i>"het einddoel waar de admin-variant
+      (2055) de eerste stap van is… een uitrolproject en geen instelling"</i>. De set levert
+      dus de eerste stap uit en het einddoel aan. Omgedraaid.</p>
+      <p><b><code>1090</code> staat aan, <code>1100</code> staat uit.</b> Beide
+      risicopolicies, beide Entra ID P2. Geen reden gedocumenteerd waarom aanmeldrisico wel
+      en gebruikersrisico niet.</p>
+    </div>
+    <div class="act">Eén verplicht veld per template dat zegt waarom het niet
+    <code>enabled</code> is — zoals <code>faseWaarom</code> in IntuneBackup — en een generator
+    die faalt zonder die reden. Daarna 2055 aanzetten en de 1090/1100-keuze rechttrekken.</div>
+  </article>
+
+  <article class="find">
+    <header><span class="no">03</span><h3>De licentiemarkering is half</h3></header>
+    <div class="bd">
+      <p><code>OPTIONAL_TEMPLATES</code> bestaat precies om te voorkomen dat een klant een
+      <code>fail</code> krijgt voor iets wat hij niet kán hebben. Zes templates staan erin.
+      Vijf die Entra ID P2 vereisen staan er niet in: <span class="id">1090 · 1100 · 2010 ·
+      2020 · 2110</span>.</p>
+      <p>De inconsistentie is aantoonbaar en niet bedoeld: de oudere checks
+      <code>CA-BASE-004</code> en <code>005</code> dragen wél
+      <code>params: { requiresEntraIdP2: true }</code>. De templates die ze vervingen namen
+      die markering niet mee.</p>
+      <p>Bij een klant zonder P2 zijn dat nu vijf permanente rode vinkjes voor iets wat niet
+      te configureren is zonder licentie-upgrade — en een check die altijd rood staat leert
+      iedereen om rood te negeren.</p>
+    </div>
+    <div class="act">Die vijf in <code>OPTIONAL_TEMPLATES</code> zetten, met de licentie als
+    reden.</div>
+  </article>
+
+  <article class="find">
+    <header><span class="no">04</span><h3>De gapanalyse staat in de verkeerde repo</h3></header>
+    <div class="bd">
+      <p><code>docs/ca-baseline-gap.md</code> in Platform beschrijft de baseline van déze
+      repo. De README hier zegt bij <i>Een policy toevoegen</i> niets over het bijwerken
+      ervan, dus het rapport liep onopgemerkt drie weken achter — 20 templates beschreven,
+      33 aanwezig.</p>
+    </div>
+    <div class="act"><code>npm run ca-baseline-gap</code> koppelen aan wijzigingen in
+    <code>CATemplate/</code>, zoals <code>generate-baseline.yml</code> de baseline al
+    regenereert. Het script blijft in Platform — het leest daar de frameworkbronnen — maar de
+    trigger hoort hier.</div>
+  </article>
+</section>
+
+<section>
+  <div class="tag">04 — maatregelen</div>
+  <h2>Wat er inhoudelijk ontbreekt</h2>
+  <p class="dek">Twee toevoegingen, en één beslissing die opnieuw op tafel moet.</p>
+  <div class="bar"></div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Maatregel</th><th>Bron</th><th>Licentie</th><th>Oordeel</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Periodieke herauthenticatie voor alle gebruikers</b></td>
+          <td>CIS 5.2.2.13 (L1)<br><span style="color:var(--faint)">Microsoft — No persistent browser session</span></td>
+          <td>—</td>
+          <td>Sessieduur staat alleen voor beheerders (<code>3010</code>) en BYOD
+          (<code>3020</code>). Een gewone gebruiker op een beheerd apparaat houdt zijn sessie
+          onbeperkt — precies het token dat bij AiTM wordt gestolen, en waar
+          <code>2110</code> alleen op Windows met Exchange en SharePoint iets tegen doet.
+          <b>Toevoegen</b> als SESSION-template; <code>persistentBrowser</code> ongemoeid
+          laten, die hoort bij onbeheerde apparaten.</td>
+        </tr>
+        <tr>
+          <td><b>Named locations als onderdeel van de repo</b></td>
+          <td>CIS 5.2.2.14 (L2)</td>
+          <td>—</td>
+          <td>Geen policy maar een randvoorwaarde — zie bevinding 01, en het is het
+          gevaarlijkste punt van alles hier.</td>
+        </tr>
+        <tr>
+          <td><b>Insider risk</b></td>
+          <td>Microsoft, Zero Trust —<br><i>Block access for users with insider risk</i></td>
+          <td>Microsoft Purview</td>
+          <td><code>insiderRiskLevels</code> komt in geen enkel template voor. Onze
+          risicopolicies kijken naar aanmeldsignalen; insider risk kijkt naar gedrag in de
+          data — exfiltratie vlak voor vertrek, ongebruikelijke downloads. Een andere vraag,
+          geen dubbeling. <b>Toevoegen als <code>optional</code>.</b></td>
+        </tr>
+        <tr>
+          <td><b>Agent-identiteiten</b></td>
+          <td>Microsoft, categorie AI Agents (3 policies)<br><span style="color:var(--faint)">Verlinden CA501–CA505</span></td>
+          <td>Entra Agent ID</td>
+          <td>In augustus op <i>nog niet</i> gezet omdat de voorziening niet breed beschikbaar
+          was. Microsoft levert er nu zelf templates voor, en de conditie <code>agents</code>
+          staat in élke policy — in alle 33 van ons, op <code>null</code>. Dat verandert de
+          afweging maar niet het antwoord: <b>heroverwegen zodra Entra Agent ID algemeen
+          beschikbaar is, en dan als <code>optional</code>.</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note" style="margin-top:18px"><b>Wat wél gedekt bleek.</b> MCSB IM-7 somt zeven
+  CA-toepassingen op en alle zeven zijn aanwezig. CIS 5.2.2.15 (geografische uitsluiting) →
+  <code>1040</code> en <code>1050</code>. CIS 5.2.2.16 (token protection) →
+  <code>2110</code>. CIS 5.2.2.17 (authentication transfer) → <code>1020</code>, dat
+  <code>transferMethods = "deviceCodeFlow,authenticationTransfer"</code> zet — maar dat
+  template staat uit.</p>
+</section>
+
+<section>
+  <div class="tag">05 — bewust niet</div>
+  <h2>Waarom er geen persona's zijn</h2>
+  <div class="bar"></div>
+  <div class="flow">
+    <p>Elk template heet <code>GLOBAL__</code>, terwijl van Surksum en Verlinden per persona
+    indelen — Admins, Internals, Externals, Guests, ServiceAccounts, Agents. Dat is geen
+    omissie en hoeft niet opnieuw gewogen te worden.</p>
+    <p>De set is Chronlunds ontwerp, en dat is bewust global: één set regels voor iedereen,
+    met rol- en groepsfilters <i>binnen</i> de policy waar dat nodig is. Dat doen we ook —
+    <code>1130</code>, <code>2055</code>, <code>2130</code> en <code>3010</code> richten alle
+    vier op dezelfde elf directory-rollen via <code>includeRoles</code>. Het onderscheid
+    bestaat wel degelijk; het staat alleen in de conditie in plaats van in de naam.</p>
+    <p>Persona's toevoegen zou betekenen: dezelfde maatregel in twee policies knippen zodra
+    hij voor twee groepen anders uitpakt. Dat is precies wat de augustus-analyse expliciet
+    afwijst — <i>"één regel per maatregel, niet per policy"</i> — omdat het bij elke klant
+    twee checks oplevert voor één vraag.</p>
+    <p class="note"><b>Wel te doen:</b> het prefix suggereert een tweede dimensie die er niet
+    is en ook niet komt. Bewaar het — de nummering hangt eraan — maar leg in de README uit dat
+    het geen belofte is.</p>
+  </div>
+
+  <h3 style="font-size:18px;margin:34px 0 0">Verder bewust niet</h3>
+  <div class="bar" style="margin:14px 0 20px"></div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Maatregel</th><th>Waarom niet</th></tr></thead>
+      <tbody>
+        <tr><td><b>MFA voor serviceaccounts</b><br><span class="grp">Verlinden CA300</span></td>
+            <td>Spreekt onszelf tegen: <code>1060</code> beperkt serviceaccounts tot vertrouwde IP's en <code>2050</code> sluit ze juist uit van de MFA-eis. Een niet-interactief account kan geen MFA doen.</td></tr>
+        <tr><td><b>Linux toestaan vanaf compliant apparaat</b><br><span class="grp">van Surksum CAD011</span></td>
+            <td>Spreekt <code>1030</code> tegen, dat alles buiten Android/iOS/Windows/macOS blokkeert. Wie Linux wil ondersteunen past 1030 aan — één wijziging, geen tweede policy.</td></tr>
+        <tr><td><b>Microsofts templates via Graph</b><br><span class="grp">/identity/conditionalAccess/templates</span></td>
+            <td>De meest onderhoudsarme toetssteen, en nog steeds niet uitgezocht of de ITCE-Portal-SP er met zijn huidige permissies bij kan. Deze ronde is de documentatielijst gebruikt in plaats van de API. Blijft openstaan.</td></tr>
+        <tr><td><b>AlexFilipin/ConditionalAccess</b></td>
+            <td>Vierde persona-gebaseerde set. Niet meegenomen — de drie die Platform al draait leverden bij de laatste ronde nul maatregelen op die niet al uit CIS of Microsoft kwamen.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="tag">06 — uitvoering</div>
+  <h2>Wat er moet veranderen</h2>
+  <p class="dek">Op volgorde. De eerste drie raken de set die er al staat en veranderen geen
+  enkele maatregel — die zijn dringender dan elk nieuw template.</p>
+  <div class="bar"></div>
+
+  <div class="steps">
+    <div class="step maint"><div class="k">1</div><div>
+      <h4>Randvoorwaarden meeleveren</h4>
+      <p>Groepen en named locations als aanmaakscript, plus een controle in
+      <code>generate-baseline.js</code> die faalt op een verwijzing zonder definitie. Zonder
+      dit is elke uitrol een lock-outrisico.</p></div></div>
+
+    <div class="step maint"><div class="k">2</div><div>
+      <h4><code>OPTIONAL_TEMPLATES</code> aanvullen</h4>
+      <p>1090, 1100, 2010, 2020 en 2110 toevoegen, reden Entra ID P2.</p></div></div>
+
+    <div class="step maint"><div class="k">3</div><div>
+      <h4>Een reden verplichten bij elke niet-<code>enabled</code> state</h4>
+      <p>De twaalf gevallen langslopen. Begin met 2055 aanzetten en de
+      1090/1100-tegenstrijdigheid oplossen.</p></div></div>
+
+    <div class="step add"><div class="k">4</div><div>
+      <h4>Nieuw template: periodieke herauthenticatie</h4>
+      <p>CIS 5.2.2.13, voor alle gebruikers. Eerstvolgende vrije checkId volgens
+      <code>eerstvolgendVrijNummer()</code>.</p></div></div>
+
+    <div class="step add"><div class="k">5</div><div>
+      <h4>Nieuw template (<code>optional</code>): insider risk</h4>
+      <p>Licentie Microsoft Purview.</p></div></div>
+
+    <div class="step proc"><div class="k">6</div><div>
+      <h4><code>npm run ca-baseline-gap</code> koppelen aan <code>CATemplate/</code></h4>
+      <p>Zodat het rapport in Platform niet opnieuw drie weken achterloopt.</p></div></div>
+
+    <div class="step proc"><div class="k">7</div><div>
+      <h4>Agent-identiteiten opnieuw beoordelen</h4>
+      <p>Zodra Entra Agent ID algemeen beschikbaar is — dan als <code>optional</code>.</p></div></div>
+
+    <div class="step proc"><div class="k">8</div><div>
+      <h4>Microsofts templates via Graph uitzoeken</h4>
+      <p>Als vervanging voor de handmatige documentatievergelijking.</p></div></div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--block)"></i>onderhoud aan wat er is</span>
+    <span><i style="background:var(--acc)"></i>nieuw template</span>
+    <span><i style="background:var(--faint)"></i>proces</span>
+  </div>
+</section>
+
+<footer>
+  <p>Getoetst aan de <a href="https://learn.microsoft.com/en-us/security/benchmark/azure/mcsb-identity-management">Microsoft cloud security benchmark — Identity Management</a>
+  (IM-1 t/m IM-9), de <a href="https://www.cisecurity.org/benchmark/microsoft_365">CIS Microsoft 365 Foundations Benchmark</a>
+  sectie 5.2.2 inclusief de vijf controls die v7.0.0 toevoegde, en
+  <a href="https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-policy-common">Microsofts eigen CA-templates</a>.
+  De frameworks van Chronlund, van Surksum en Verlinden zijn niet opnieuw gedraaid — dat doet
+  <code>npm run ca-baseline-gap</code> in sjkanon/Platform.</p>
+  <p style="margin-top:11px">Zelfde inhoud als <code>ANALYSE.md</code> ernaast.</p>
+</footer>
+
+</div>
+</body>
+</html>
