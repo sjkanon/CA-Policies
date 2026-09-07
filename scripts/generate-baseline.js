@@ -142,6 +142,10 @@ const CHECK_ID_BY_TEMPLATE = {
   GLOBAL__1170__BLOCK__Risky_Agent_Users: "048",
   GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network: "049",
   GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment: "050",
+  // Naar aanleiding van de r/msp-draad "Block new PassKey registrations" (september 2026):
+  // de registratiepagina zelf achter een TAP zetten, zodat een gekaapte sessie er geen extra
+  // passkey bij kan zetten. Zie ANALYSE.md.
+  GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only: "051",
 };
 
 /**
@@ -186,6 +190,8 @@ const OPTIONAL_TEMPLATES = {
     "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart.",
   GLOBAL__1170__BLOCK__Risky_Agent_Users:
     "vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.",
+  GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only:
+    "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant met de hand wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per klant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.",
   GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network:
     "vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
 };
@@ -387,8 +393,18 @@ function extractParams(policy) {
     const gc = {};
     if (policy.grantControls.operator) gc.operator = policy.grantControls.operator;
     if (policy.grantControls.builtInControls && policy.grantControls.builtInControls.length > 0) gc.builtInControls = policy.grantControls.builtInControls;
-    if (policy.grantControls.authenticationStrength && policy.grantControls.authenticationStrength.id) {
-      gc.authenticationStrengthId = policy.grantControls.authenticationStrength.id;
+    // Een ingebouwde authentication strength heeft in elke tenant hetzelfde id
+    // (00000000-0000-0000-0000-00000000000X) en is dus vergelijkbaar. Een custom strength
+    // krijgt zijn id van Entra bij het aanmaken — per tenant een andere, en daarmee dezelfde
+    // valstrik als termsOfUse (zie het docblok bij CA-BASE-040): de check zou dan altijd
+    // falen, om een reden die niets met die klant te maken heeft. Voor die gevallen
+    // vergelijken we waar de policy feitelijk om vraagt — de toegestane combinaties,
+    // gesorteerd zodat de volgorde in de export niet meetelt.
+    const strength = policy.grantControls.authenticationStrength;
+    if (strength && strength.policyType === "custom") {
+      gc.authenticationStrengthAllowedCombinations = [...(strength.allowedCombinations || [])].sort();
+    } else if (strength && strength.id) {
+      gc.authenticationStrengthId = strength.id;
     }
     if (Object.keys(gc).length > 0) params.grantControls = gc;
   }

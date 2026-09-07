@@ -398,3 +398,62 @@ tenant waar Entra Agent ID aan staat. Daar komt één ding bij:
   `agentIdRiskLevels`, `includeAgentIdServicePrincipals`, `AllAgentIdResources`). Zo niet, dan
   rollen de vijf agent-templates wel uit maar zonder hun onderscheidende conditie — en dat is
   gevaarlijker dan ze niet uitrollen, want `1160` wordt dan een blokkade op alles.
+
+# Ronde 3 — registratie van MFA-methodes achter een TAP (7 september 2026)
+
+## De aanleiding
+
+De r/msp-draad *"Block new PassKey registrations"* beschrijft een gat dat deze set niet
+dichtte: wie een sessie overneemt — AiTM-phishing, een rogue browser-extensie, of gewoon
+overtuigingskracht — registreert er zélf een passkey bij en heeft daarna een eigen,
+phishing-resistente sleutel tot de tenant. Een wachtwoordreset raakt die niet, en de
+sign-in-log laat een schone, sterke aanmelding zien.
+
+De draad noemt drie richtingen; alleen de eerste is een Conditional Access-maatregel:
+
+1. de registratiepagina achter een authentication strength zetten die alleen een TAP
+   accepteert — registreren kan dan niet meer vanuit een bestaande sessie;
+2. attestation afdwingen en AAGUID's beperken, zodat synced passkeys uit password managers
+   niet meer registreren — dat staat in het **authentication methods policy**, niet in CA,
+   en valt dus buiten deze repo;
+3. browser-extensies beheren via Intune — idem, andere repo.
+
+Wat de set al had is `3030`: die target dezelfde user action (`urn:user:registersecurityinfo`)
+maar zet er alleen een sign-in frequency van 90 dagen op, zónder `grantControls`. De
+registratie zelf stond daarmee open voor precies de sessie die een aanvaller al heeft.
+
+## Wat is toegevoegd
+
+| Template | checkId | Waarom |
+|---|---|---|
+| `2180 GRANT` Register Security Info TAP Only | 051 | `grantControls` op de user action die `3030` alleen in duur begrenst: alleen een eenmalige Temporary Access Pass voldoet. Een gekaapte sessie kan er geen methode bij zetten; de helpdesk geeft een TAP uit of het gebeurt niet. |
+
+**Waarom apart en niet ín 3030.** Het zijn twee maatregelen met een verschillende
+levenscyclus: `3030` is een sessiebegrenzing die overal aan kan, `2180` is een grant die pas
+kan zodra de klant een custom authentication strength én een TAP-proces heeft. Samengevoegd
+zou `CA-BASE-027` bovendien iets anders gaan betekenen dan waarop klanten vandaag een `pass`
+scoren — en dat is precies de stille herdefinitie die het pin-mechanisme moet voorkomen.
+
+`2180` staat in `OPTIONAL_TEMPLATES` (stage 3, report-only): hij vraagt een randvoorwaarde
+per tenant, en hij verlegt het aanvalsoppervlak naar de servicedesk. Zonder identiteits-
+verificatie bij de TAP-aanvraag is de winst kleiner dan hij lijkt.
+
+## Wat er aan de generator moest
+
+Een **custom** authentication strength krijgt zijn id van Entra bij het aanmaken: in elke
+tenant een andere. Op dat id vergelijken is dezelfde valstrik als bij `termsOfUse` (zie het
+docblok bij `CA-BASE-040`) — de check faalt dan altijd, om een reden die niets met die klant
+te maken heeft. `extractParams` schrijft daarom voor custom strengths
+`authenticationStrengthAllowedCombinations` (gesorteerd) in plaats van
+`authenticationStrengthId`; ingebouwde strengths houden hun id, want dat is overal hetzelfde.
+
+## Wat hierna nog openstaat
+
+- **De custom strength is een randvoorwaarde die de validator niet ziet.**
+  `prerequisites/ca-prerequisites.json` kent alleen groepen en named locations, dus
+  `scripts/prerequisites.js` valt hier stil. Het id in het template is een placeholder
+  (`00000000-0000-0000-0000-000000000000`); bij uitrol moet het id van de aangemaakte
+  strength in die tenant erin. Zolang dat handwerk is, hoort `2180` niet in stage 1.
+- **Controleren of CIPP's CA-deploy een custom authentication strength meestuurt of alleen
+  koppelt.** Zo niet, dan rolt `2180` uit zonder grant control — dat is geen strengere maar
+  een lege policy.

@@ -42,6 +42,7 @@ scripts/export-cipp-baseline.js`.
 | `OPTIONAL_TEMPLATES` | een licentiegebonden template dat je hier vergeet belandt stil in stage 1 of 2 — hier faalt niets op |
 | De baseline ín CIPP | `cipp/baseline-stages.json` is een bestand; de baseline in CIPP is een aparte kopie die iemand bijwerkt |
 | De klanttenants | een template dat een nieuwe groep of locatie introduceert vraagt `New-CaPrerequisites.ps1`, per tenant |
+| Een custom authentication strength | `prerequisites/ca-prerequisites.json` kent alleen groepen en named locations, dus de validator ziet hem niet. Entra bepaalt zijn id bij aanmaken: het id in het template is een placeholder, per tenant te vervangen. Vandaag alleen `2180` |
 
 ## Een policy toevoegen
 
@@ -71,7 +72,7 @@ de test bewaakt hetzelfde in CI, ná het genereren.
 
 ## Uitrollen via CIPP
 
-Dezelfde 40 templates voeden twee dingen die het tegenovergestelde doen:
+Dezelfde 41 templates voeden twee dingen die het tegenovergestelde doen:
 
 | | Genereert | Doet |
 |---|---|---|
@@ -90,7 +91,7 @@ De stage-indeling volgt de metadata die de repo al had:
 |---|---|---|
 | 1 — Kern | `state: enabled`, niet optioneel (17) | `enabled` |
 | 2 — Aanscherping | `disabled` of report-only in het template (12) | report-only |
-| 3 — Klantkeuze en licentie | `OPTIONAL_TEMPLATES` (11) | report-only, blijft op Report |
+| 3 — Klantkeuze en licentie | `OPTIONAL_TEMPLATES` (12) | report-only, blijft op Report |
 
 ### Eerst de randvoorwaarden, dan pas Remediate
 
@@ -99,7 +100,7 @@ vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: **een uitzonder
 die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld en niets slaat
 alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
 
-- `Excluded from Conditional Access` staat in 34 van de 40 templates. De zes zonder richten
+- `Excluded from Conditional Access` staat in 35 van de 41 templates. De zes zonder richten
   zich op workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raakt hij niets.
   Leeg = geen break-glass.
 - `Licensed Users` — 1110 staat op `enabled` en blokkeert `All` behalve deze groep. Statisch

@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-09-04",
+  "reviewedAt": "2026-09-07",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -2192,6 +2192,47 @@
           "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
         }
       ]
+    },
+    {
+      "checkId": "CA-BASE-051-RegisterSecurityInfoTAPOnly",
+      "severity": "high",
+      "tags": [
+        "conditional-access",
+        "ca-policy-match",
+        "grant"
+      ],
+      "type": "ca-policy-match",
+      "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2180 - GRANT - Register Security Info TAP Only\"?",
+      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant met de hand wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per klant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.",
+      "source": "CA-Policies/CATemplate/GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only.json (afgesproken baseline)",
+      "params": {
+        "clientAppTypes": [
+          "all"
+        ],
+        "applications": {
+          "includeUserActions": [
+            "urn:user:registersecurityinfo"
+          ]
+        },
+        "groups": {
+          "excludeGroups": [
+            "Excluded from Conditional Access"
+          ]
+        },
+        "grantControls": {
+          "operator": "OR",
+          "authenticationStrengthAllowedCombinations": [
+            "temporaryAccessPassOneTime"
+          ]
+        }
+      },
+      "learnMoreLinks": [
+        {
+          "label": "Conditional Access policies overview",
+          "url": "https://learn.microsoft.com/entra/identity/conditional-access/overview"
+        }
+      ],
+      "optional": true
     }
   ]
 }

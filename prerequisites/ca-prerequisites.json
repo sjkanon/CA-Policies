@@ -24,7 +24,7 @@
       "displayName": "Excluded from Conditional Access",
       "mailNickname": "excluded-from-conditional-access",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting. Staat in de excludeGroups van 34 van de 40 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'.",
+      "purpose": "De break-glass-uitsluiting. Staat in de excludeGroups van 35 van de 41 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'.",
       "danger": "critical",
       "dangerReason": "Deze groep leeg laten is het scenario waar CA-BASE-008-BreakGlassExclusion voor waarschuwt: tientallen policies actief en geen enkel account dat er buiten valt. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
       "requiresMembers": true

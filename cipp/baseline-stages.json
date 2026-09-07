@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-09-04",
+  "generatedAt": "2026-09-07",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "GLOBAL CA Baseline v1.0",
   "_comment": [
@@ -545,6 +545,18 @@
           "checkId": "CA-BASE-047",
           "optional": true,
           "optionalReason": "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "c8e21a47-9d3b-4f60-bb15-7ae0d2c9351f",
+          "templateFile": "GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only",
+          "displayName": "GLOBAL - 2180 - GRANT - Register Security Info TAP Only",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "checkId": "CA-BASE-051",
+          "optional": true,
+          "optionalReason": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant met de hand wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per klant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste."
         },
         {
           "standard": "ConditionalAccessTemplate",
