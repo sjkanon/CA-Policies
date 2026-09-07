@@ -29,9 +29,19 @@ geen match-criterium maar bepaalt wel het resultaat: een structureel matchende m
 disabled/report-only policy levert `warning` op, geen `pass`.
 
 **Bij een wijziging in `CATemplate/`:** `.github/workflows/generate-baseline.yml`
-regenereert `baseline/conditional-access/baseline-v1.0.json` automatisch en opent daar een
-PR voor — controleer de diff vóór je merget. Handmatig opnieuw genereren:
-`node scripts/generate-baseline.js`.
+regenereert `baseline/conditional-access/baseline-v1.0.json` en `cipp/*.json`, en opent daar
+een PR voor — controleer de diff vóór je merget. Dezelfde workflow draait op de PR zelf
+(zónder een PR te openen): een ontbrekende pin of randvoorwaarde loopt daar stuk, terwijl
+je nog weet wat je bedoelde. Handmatig: `node scripts/generate-baseline.js && node
+scripts/export-cipp-baseline.js`.
+
+**Wat níet vanzelf meebeweegt**, ook niet na een groene PR:
+
+| | |
+|---|---|
+| `OPTIONAL_TEMPLATES` | een licentiegebonden template dat je hier vergeet belandt stil in stage 1 of 2 — hier faalt niets op |
+| De baseline ín CIPP | `cipp/baseline-stages.json` is een bestand; de baseline in CIPP is een aparte kopie die iemand bijwerkt |
+| De klanttenants | een template dat een nieuwe groep of locatie introduceert vraagt `New-CaPrerequisites.ps1`, per tenant |
 
 ## Een policy toevoegen
 
@@ -54,7 +64,7 @@ Dus:
    klant zonder die licentie geen `fail` op voor iets wat hij niet kán hebben.
 4. Verwijst het template naar een groep of named location? Zorg dat die in
    `prerequisites/ca-prerequisites.json` staat — de generator weigert anders te draaien.
-5. `node scripts/generate-baseline.js && node scripts/export-cipp-baseline.js && node --test scripts/generate-baseline.test.js scripts/prerequisites.test.js`.
+5. `node scripts/generate-baseline.js && node scripts/export-cipp-baseline.js && node --test scripts/*.test.js`.
 
 De generator faalt hard op een template zonder pin en noemt het eerstvolgende vrije nummer;
 de test bewaakt hetzelfde in CI, ná het genereren.
@@ -111,7 +121,18 @@ Pas als het groen afsluit mag stage 1 afdwingen:
 node scripts/export-cipp-baseline.js --remediate-stage1
 ```
 
-Zonder die vlag staat élke standard op `Report`, en dat is ook wat CI genereert. Twee
+Zonder die vlag staat élke standard op `Report`, en dat is ook wat CI genereert.
+
+Die vlag weigert zolang er templates **nieuw in stage 1** staan ten opzichte van de vorige
+export. Stage 1 leidt zichzelf af uit `state: enabled`, dus een template dat je vandaag
+toevoegt valt daar vanzelf in; zonder die rem zou "ik heb een bestand toegevoegd" samenvallen
+met "dit wordt bij elke klant afgedwongen". Het script noemt welke, en `--accept-new`
+bevestigt ze. Hoort er iets niet in stage 1: zet het template op `disabled` (stage 2) of in
+`OPTIONAL_TEMPLATES` (stage 3).
+
+Wat die rem *niet* weet: wat er in CIPP en in de klanttenants daadwerkelijk staat — dat is
+daar de waarheid, niet hier. Hij vergelijkt met de vorige export in deze repo, en vangt de
+toevoeging dus af bij de auteur, niet bij de uitrol. Twee
 templates blijven daar hoe dan ook op staan, omdat hun randvoorwaarde niet uit deze repo kan
 komen: `1060` (vereist de IP-ranges van die specifieke klant) en `1180` (vereist de
 compliant-network-locatie die Entra pas levert bij Global Secure Access).
