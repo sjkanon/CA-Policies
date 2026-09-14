@@ -269,7 +269,7 @@ eraan, maar leg in de README uit dat het geen belofte is.
 | **Persona-splitsing** | Zie hierboven. Eén regel per maatregel; het onderscheid zit in `includeRoles`. |
 | **MFA voor serviceaccounts** (Verlinden `CA300`) | Spreekt onszelf tegen: `1060` beperkt serviceaccounts tot vertrouwde IP's en `2050` sluit ze juist uit van de MFA-eis. Een niet-interactief account kan geen MFA doen. |
 | **Linux toestaan vanaf compliant apparaat** (van Surksum `CAD011`) | Spreekt `1030` tegen, dat alles buiten Android/iOS/Windows/macOS blokkeert. Wie Linux wil ondersteunen past `1030` aan — één wijziging, geen tweede policy. |
-| **Microsofts templates rechtstreeks via Graph** (`/identity/conditionalAccess/templates`) | De meest onderhoudsarme toetssteen, en nog steeds niet uitgezocht of de ITCE-Portal-SP er met zijn huidige permissies bij kan. Deze ronde is de templatelijst uit de documentatie gebruikt in plaats van uit de API. Blijft openstaan. |
+| **Microsofts templates rechtstreeks via Graph** (`/identity/conditionalAccess/templates`) | De meest onderhoudsarme toetssteen, en nog steeds niet uitgezocht of de service principal van het beheerportaal er met zijn huidige permissies bij kan. Deze ronde is de templatelijst uit de documentatie gebruikt in plaats van uit de API. Blijft openstaan. |
 | **[AlexFilipin/ConditionalAccess](https://github.com/AlexFilipin/ConditionalAccess)** | Vierde persona-gebaseerde set. Niet meegenomen — de drie die Platform al draait leverden bij de laatste ronde nul nieuwe maatregelen op die niet al uit CIS of Microsoft kwamen. Opnieuw bekijken zodra die drie niets meer opleveren. |
 
 ## Wat er moet veranderen — de lijst
@@ -457,3 +457,51 @@ te maken heeft. `extractParams` schrijft daarom voor custom strengths
 - **Controleren of CIPP's CA-deploy een custom authentication strength meestuurt of alleen
   koppelt.** Zo niet, dan rolt `2180` uit zonder grant control — dat is geen strengere maar
   een lege policy.
+
+# Ronde 4 — j0eyv na 2026.6.1, en de set generiek (14 september 2026)
+
+## De aanleiding
+
+[`j0eyv/ConditionalAccessBaseline`](https://github.com/j0eyv/ConditionalAccessBaseline) is na de
+tag 2026.6.1 (die ronde 2 volgde) nog bijgewerkt, zonder nieuwe tag. Inhoudelijk telt één ding:
+CA005 en CA006 zijn omgebouwd van *Require app protection policy* naar
+**app enforced restrictions** als sessiecontrole. De rest is een README, afbeeldingen en een
+typfout in de namen van CA403/CA404.
+
+| Zijn policy (na 13 juli 2026) | Wat hij doet | In deze set |
+|---|---|---|
+| CA005 — iOS/Android, browser én apps, Office 365, onbeheerd | `compliantApplication` als grant **plus** app enforced restrictions; uitgesloten: compliant én bedrijfseigen apparaten | `2070` (compliant app op iOS/Android). `2090` eist in de browser al een compliant apparaat, dus browser toevoegen aan `2070` voegt niets toe. |
+| CA006 — elk platform, browser, **SharePoint én Exchange Online**, onbeheerd | alleen app enforced restrictions | `3040` — maar die gold alleen voor SharePoint Online |
+
+## Wat is aangepast
+
+**`3040` dekt nu ook Exchange Online** (`00000002-0000-0ff1-ce00-000000000000`). Ronde 2 schreef
+"CA005/CA006 los: gedekt door `2070`, `2090` en `3040` samen"; dat klopte voor SharePoint en
+OneDrive, maar een bijlage downloaden via Outlook op het web op een onbeheerd apparaat ging er
+langs. Twee kanttekeningen:
+
+- Voor Exchange doet de sessiecontrole alleen iets als de OWA-mailboxpolicy meewerkt:
+  `Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -ConditionalAccessPolicy ReadOnly` (of
+  `ReadOnlyPlusAttachmentsBlocked`). Zonder die stap is de policy voor Exchange stil. Die instelling
+  staat niet in deze repo; hij hoort in de randvoorwaarden per klant.
+- Dit verandert de vergelijking van een bestaande check: een klant met een `3040`-achtige policy
+  op alleen SharePoint gaat van structureel `pass` naar `fail`. Omdat `3040` in het template op
+  `disabled` staat, is de uitslag daar vandaag `warning` — maar het blijft een uitslagverandering
+  en geen nieuwe check.
+
+Het apparaatfilter van j0eyv (compliant **én** `deviceOwnership -eq "Company"`) is niet
+overgenomen. Dat zou een ingeschreven, compliant privéapparaat ook onder de beperking brengen;
+dat is een klantkeuze over BYOD, geen baselinemaatregel.
+
+**`1060` draagt geen IP-range meer.** Het template bevatte één publiek IP uit de tenant waaruit
+het ooit geëxporteerd is. De generator haalde het er bij de CIPP-export al uit en
+`New-CaPrerequisites.ps1` gebruikte het niet, maar het stond wel in `CATemplate/`,
+`baseline-v1.0.json` en `cipp/baseline-stages.json`. Nu is de named location in het template leeg,
+gelijk aan `prerequisites/ca-prerequisites.json`; de waarde komt per klant binnen via
+`-ServiceAccountIpRange`. Het IP staat nog wel in de git-geschiedenis.
+
+**`1040` draagt geen standaardlanden meer.** Het template en `prerequisites/` noemden BE en NL —
+de landen van één klant. Nu is `Allowed Countries` leeg en gemarkeerd als `requiresCountries`:
+de CIPP-export zet `1040` vast op Report tot de klant zijn landen heeft, en
+`New-CaPrerequisites.ps1` maakt de locatie alleen aan met `-AllowedCountry`. Een lege
+landenlijst uitrollen zou élke aanmelding buiten "geen enkel land" blokkeren.

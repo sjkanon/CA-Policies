@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-09-07",
+  "generatedAt": "2026-09-14",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "GLOBAL CA Baseline v1.0",
   "_comment": [
@@ -51,7 +51,7 @@
     "namedLocations": [
       {
         "displayName": "Allowed Countries",
-        "danger": "medium",
+        "danger": "high",
         "tenantSpecific": true,
         "notCreatable": false
       },
@@ -77,6 +77,13 @@
   },
   "blockedStandards": [
     {
+      "templateFile": "GLOBAL__1040__BLOCK__Countries_not_Allowed",
+      "checkId": "CA-BASE-012",
+      "blockedUntil": [
+        "\"Allowed Countries\" vereist de landenlijst van deze klant (-AllowedCountry in New-CaPrerequisites.ps1)"
+      ]
+    },
+    {
       "templateFile": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
       "checkId": "CA-BASE-014",
       "blockedUntil": [
@@ -91,19 +98,7 @@
       ]
     }
   ],
-  "sanitized": [
-    {
-      "file": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
-      "verwijderd": [
-        {
-          "displayName": "Service Accounts Trusted IPs",
-          "ipRanges": [
-            "94.110.96.252/32"
-          ]
-        }
-      ]
-    }
-  ],
+  "sanitized": [],
   "stages": [
     {
       "stage": 1,
@@ -319,7 +314,10 @@
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
-          "checkId": "CA-BASE-012"
+          "checkId": "CA-BASE-012",
+          "blockedUntil": [
+            "\"Allowed Countries\" vereist de landenlijst van deze klant (-AllowedCountry in New-CaPrerequisites.ps1)"
+          ]
         },
         {
           "standard": "ConditionalAccessTemplate",

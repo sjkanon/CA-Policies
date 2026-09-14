@@ -81,13 +81,14 @@
       "definition": {
         "@odata.type": "#microsoft.graph.countryNamedLocation",
         "displayName": "Allowed Countries",
-        "countriesAndRegions": ["BE", "NL"],
+        "countriesAndRegions": [],
         "includeUnknownCountriesAndRegions": true,
         "countryLookupMethod": "clientIpAddress"
       },
       "purpose": "De landen waarbuiten 1040 blokkeert.",
-      "tenantSpecific": "de landenlijst is een klantkeuze — een klant met een vestiging of thuiswerkers buiten BE/NL heeft een andere lijst. Overleg vóór uitrol.",
-      "danger": "medium"
+      "tenantSpecific": "VERPLICHT per klant invullen. De landenlijst is een klantkeuze — vestigingen, thuiswerkers en reizigers bepalen hem — en het template draagt daarom geen standaardlanden. Een lege lijst in 1040 zou élke aanmelding blokkeren, dus New-CaPrerequisites.ps1 maakt deze locatie alleen aan met -AllowedCountry.",
+      "requiresCountries": true,
+      "danger": "high"
     },
     {
       "displayName": "High-Risk Countries",
@@ -121,7 +122,7 @@
         "ipRanges": []
       },
       "purpose": "De IP-ranges waarbuiten 1060 de serviceaccounts blokkeert.",
-      "tenantSpecific": "VERPLICHT per klant invullen. Het template in CATemplate/ draagt hier 94.110.96.252/32 — één specifieke tenant, per ongeluk meegeëxporteerd. Die waarde staat hier bewust niet: een andere klant zou er zijn serviceaccounts mee vastzetten op een IP dat van iemand anders is.",
+      "tenantSpecific": "VERPLICHT per klant invullen. Het template in CATemplate/ draagt hier bewust geen IP-range: een waarde uit één tenant zou bij een andere klant de serviceaccounts vastzetten op een IP dat van iemand anders is.",
       "requiresIpRanges": true,
       "danger": "high"
     }

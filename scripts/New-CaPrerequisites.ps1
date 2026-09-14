@@ -27,13 +27,12 @@
 .PARAMETER ServiceAccountIpRange
     De publieke IP-range(s) van waaraf de serviceaccounts van DEZE klant mogen aanmelden,
     als CIDR. Verplicht zodra je 1060 wilt uitrollen. Het template in CATemplate/ draagt hier
-    94.110.96.252/32 - een specifieke tenant, per ongeluk meegeexporteerd, en dit script
-    gebruikt die waarde bewust niet.
+    bewust geen IP-range: die hoort bij één klant en komt dus alleen via deze parameter binnen.
 
 .PARAMETER AllowedCountry
-    Overschrijft de landenlijst van 'Allowed Countries' (standaard BE, NL uit
-    prerequisites/ca-prerequisites.json). Een klant met een vestiging elders heeft een
-    andere lijst; dat is een klantkeuze, geen baseline.
+    De landen waarbinnen aanmelden mag, als ISO 3166-1 alpha-2 (bijv. 'NL','BE'). Verplicht
+    zodra je 1040 wilt uitrollen: de repo draagt bewust geen standaardlanden, want de lijst
+    hangt af van vestigingen, thuiswerkers en reizigers van deze klant.
 
 .PARAMETER BreakGlassUserId
     Object-id('s) van de noodaccounts die in 'Excluded from Conditional Access' moeten. Laat
@@ -188,8 +187,16 @@ foreach ($locatie in $prereq.namedLocations) {
 
     $body = $locatie.definition | ConvertTo-Json -Depth 10 | ConvertFrom-Json -AsHashtable
 
-    if ($locatie.displayName -eq 'Allowed Countries' -and $AllowedCountry) {
-        $body.countriesAndRegions = $AllowedCountry
+    # Ook de landenlijst raadt dit script niet: een lege lijst in 1040 blokkeert elke
+    # aanmelding, en een standaardlijst past bij geen enkele klant precies.
+    if ($locatie.requiresCountries) {
+        if (-not $AllowedCountry) {
+            Write-Warning "'$($locatie.displayName)' overgeslagen: geen -AllowedCountry opgegeven. $($locatie.tenantSpecific)"
+            $blokkerend.Add("'$($locatie.displayName)' ontbreekt (geen landen opgegeven) - rol 1040 niet uit")
+            $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'overgeslagen (geen landen)'; Gevaar = $locatie.danger })
+            continue
+        }
+        $body.countriesAndRegions = @($AllowedCountry)
     }
 
     # De IP-locatie is het enige dat dit script weigert te raden. Een lege trusted-IP-locatie

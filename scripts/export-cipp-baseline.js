@@ -110,6 +110,7 @@ function blokkerendeRandvoorwaarden(policy, prereq) {
       if (!locatie) continue;
       if (locatie.notCreatable) blokkades.push(`"${naam}" is niet aan te maken: ${locatie.notCreatable}`);
       else if (locatie.requiresIpRanges) blokkades.push(`"${naam}" vereist de IP-ranges van deze klant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)`);
+      else if (locatie.requiresCountries) blokkades.push(`"${naam}" vereist de landenlijst van deze klant (-AllowedCountry in New-CaPrerequisites.ps1)`);
     }
   }
   return blokkades;

@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-09-07",
+  "reviewedAt": "2026-09-14",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -164,7 +164,7 @@
       "type": "break-glass-exclusion",
       "what": "Zijn break-glass accounts uitgesloten van alle Conditional Access-policies?",
       "why": "Een break-glass account dat zelf binnen scope van een CA-policy valt kan bij een storing of MFA-probleem ook zelf buitengesloten raken, met een volledige tenant-lock-out als risico.",
-      "source": "ITCE CA-baseline sectie 6.1 / community-referentie j0eyv/ConditionalAccessBaseline",
+      "source": "CA-baseline, break-glass-uitsluiting / community-referentie j0eyv/ConditionalAccessBaseline",
       "remediationScript": "Import-Module Microsoft.Graph.Identity.SignIns\n\n# Vervang door de daadwerkelijke break-glass-UPN('s)/groeps-id.\n$breakGlassGroupId = '<object-id-van-break-glass-security-group>'\n\n# Voeg de break-glass-groep toe aan de exclude-lijst van ELKE actieve policy — dit\n# script toont het patroon per policy, in de praktijk over alle policies heen herhalen.\n$policies = Get-MgIdentityConditionalAccessPolicy -All | Where-Object State -eq 'enabled'\nforeach ($policy in $policies) {\n    $excludeGroups = @($policy.Conditions.Users.ExcludeGroups) + $breakGlassGroupId | Select-Object -Unique\n    Update-MgIdentityConditionalAccessPolicy -ConditionalAccessPolicyId $policy.Id -Conditions @{\n        Users = @{ ExcludeGroups = $excludeGroups }\n    }\n}",
       "learnMoreLinks": [
         {
@@ -223,7 +223,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1010 - BLOCK - Legacy Authentication\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1010__BLOCK__Legacy_Authentication.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -265,7 +265,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1020 - BLOCK - Device Code Auth Flow\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1020__BLOCK__Device_Code_Auth_Flow.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -312,7 +312,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1030 - BLOCK - Unsupported Device Platforms\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1030__BLOCK__Unsupported_Device_Platforms.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -364,7 +364,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1040 - BLOCK - Countries not Allowed\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1040__BLOCK__Countries_not_Allowed.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -391,10 +391,7 @@
           "excludeLocations": [
             {
               "kind": "country",
-              "countriesAndRegions": [
-                "BE",
-                "NL"
-              ],
+              "countriesAndRegions": [],
               "includeUnknownCountriesAndRegions": true
             }
           ]
@@ -423,7 +420,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1050 - BLOCK - High-Risk Countries\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1050__BLOCK__HighRisk_Countries.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -476,7 +473,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1060 - BLOCK - Service Accounts (Trusted Locations Excluded)\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -505,9 +502,7 @@
           "excludeLocations": [
             {
               "kind": "ip",
-              "ipRanges": [
-                "94.110.96.252/32"
-              ],
+              "ipRanges": [],
               "isTrusted": true
             }
           ]
@@ -536,7 +531,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1070 - BLOCK - Explicitly Blocked Cloud Apps\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1070__BLOCK__Explicitly_Blocked_Cloud_Apps.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -576,7 +571,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1080 - BLOCK - Guest Access to Sensitive Apps\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1080__BLOCK__Guest_Access_to_Sensitive_Apps.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -626,7 +621,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1090 - BLOCK - High-Risk Sign-Ins\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1090__BLOCK__HighRisk_SignIns.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -669,7 +664,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1100 - BLOCK - High-Risk Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1100__BLOCK__HighRisk_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -712,7 +707,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2010 - GRANT - Medium-Risk Sign-ins\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2010__GRANT__MediumRisk_Signins.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -762,7 +757,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2020 - GRANT - Medium-Risk Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2020__GRANT__MediumRisk_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -812,7 +807,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2050 - GRANT - MFA for All Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2050__GRANT__MFA_for_All_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -859,7 +854,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2055 - GRANT - Phishing Resistant MFA for Admins\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2055__GRANT__Phishing_Resistant_MFA_for_Admins.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -929,7 +924,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2060 - GRANT - Mobile Apps and Desktop Clients\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2060__GRANT__Mobile_Apps_and_Desktop_Clients.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -979,7 +974,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2070 - GRANT - Mobile Device Access Requirements\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2070__GRANT__Mobile_Device_Access_Requirements.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1030,7 +1025,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3010 - SESSION - Admin Persistence\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3010__SESSION__Admin_Persistence.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1109,7 +1104,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3020 - SESSION - BYOD Persistence\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3020__SESSION__BYOD_Persistence.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1156,7 +1151,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3030 - SESSION - Register Security Info Requirements\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3030__SESSION__Register_Security_Info_Requirements.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1199,7 +1194,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3040 - SESSION - Block File Downloads On Unmanaged Devices\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1207,7 +1202,8 @@
         ],
         "applications": {
           "includeApplications": [
-            "00000003-0000-0ff1-ce00-000000000000"
+            "00000003-0000-0ff1-ce00-000000000000",
+            "00000002-0000-0ff1-ce00-000000000000"
           ]
         },
         "groups": {
@@ -1238,7 +1234,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1110 - BLOCK - Unlicensed Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1110__BLOCK__Unlicensed_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1280,7 +1276,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1120 - BLOCK - Guest Access Outside Approved Apps\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__1120__BLOCK__Guest_Access_Outside_Approved_Apps.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1333,7 +1329,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1130 - BLOCK - Admins From Untrusted Locations\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: beheerders vastzetten op vertrouwde locaties sluit ze buiten zodra ze thuis of onderweg werken. Alleen inschakelen na expliciete afstemming met de klant.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: beheerders vastzetten op vertrouwde locaties sluit ze buiten zodra ze thuis of onderweg werken. Alleen inschakelen na expliciete afstemming met de klant.",
       "source": "CA-Policies/CATemplate/GLOBAL__1130__BLOCK__Admins_From_Untrusted_Locations.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1420,7 +1416,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1140 - BLOCK - Managed Identities At Risk\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: risicodetectie op workload-identiteiten vereist Microsoft Entra Workload ID Premium.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: risicodetectie op workload-identiteiten vereist Microsoft Entra Workload ID Premium.",
       "source": "CA-Policies/CATemplate/GLOBAL__1140__BLOCK__Managed_Identities_At_Risk.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1465,7 +1461,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2080 - GRANT - MFA for Device Registration\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2080__GRANT__MFA_For_Device_Registration.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1503,7 +1499,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2090 - GRANT - Browser Access On Unmanaged Devices\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2090__GRANT__Browser_Access_On_Unmanaged_Devices.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1549,7 +1545,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2100 - GRANT - MFA for Admin Portals\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2100__GRANT__MFA_For_Admin_Portals.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1588,7 +1584,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2110 - GRANT - Token Protection\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2110__GRANT__Token_Protection.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1635,7 +1631,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2120 - GRANT - Phishing Resistant MFA for All Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1675,7 +1671,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2130 - GRANT - Admins Compliant Device\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: eist dat élke beheerder een beheerd apparaat heeft — bij een MSP dus ook elke engineer die in de klanttenant komt. Klantbeslissing.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: eist dat élke beheerder een beheerd apparaat heeft — bij een MSP dus ook elke engineer die in de klanttenant komt. Klantbeslissing.",
       "source": "CA-Policies/CATemplate/GLOBAL__2130__GRANT__Admins_Compliant_Device.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1749,7 +1745,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2150 - GRANT - Cloud PC Mobile Access\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: alleen relevant bij een klant met Windows 365 / Cloud PC.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: alleen relevant bij een klant met Windows 365 / Cloud PC.",
       "source": "CA-Policies/CATemplate/GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1800,7 +1796,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3050 - SESSION - Continuous Access Evaluation\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3050__SESSION__Continuous_Access_Evaluation.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1839,7 +1835,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3060 - SESSION - Defender for Cloud Apps\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: sessiecontrole via Defender for Cloud Apps vereist een MDCA-licentie.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: sessiecontrole via Defender for Cloud Apps vereist een MDCA-licentie.",
       "source": "CA-Policies/CATemplate/GLOBAL__3060__SESSION__Defender_for_Cloud_Apps.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1881,7 +1877,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 3070 - SESSION - Session Limits All Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__3070__SESSION__Session_Limits_All_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1925,7 +1921,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1150 - BLOCK - Risky Agent Identities\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.",
       "source": "CA-Policies/CATemplate/GLOBAL__1150__BLOCK__Risky_Agent_Identities.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -1969,7 +1965,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1160 - BLOCK - Agent Identities To Agent Resources\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.",
       "source": "CA-Policies/CATemplate/GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -2010,7 +2006,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2160 - GRANT - Agent Users Compliant Device\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is bij de meeste klanten nog niet in kaart.",
       "source": "CA-Policies/CATemplate/GLOBAL__2160__GRANT__Agent_Users_Compliant_Device.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -2056,7 +2052,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1170 - BLOCK - Risky Agent Users\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.",
       "source": "CA-Policies/CATemplate/GLOBAL__1170__BLOCK__Risky_Agent_Users.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -2101,7 +2097,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 1180 - BLOCK - Agent Users Outside Compliant Network\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
       "source": "CA-Policies/CATemplate/GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -2156,7 +2152,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2170 - GRANT - MFA for Intune Enrollment\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.",
       "source": "CA-Policies/CATemplate/GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [
@@ -2203,7 +2199,7 @@
       ],
       "type": "ca-policy-match",
       "what": "Bevat de tenant een Conditional Access-policy die overeenkomt met de afgesproken baseline-policy \"GLOBAL - 2180 - GRANT - Register Security Info TAP Only\"?",
-      "why": "Onderdeel van de tussen ITCE en de klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant met de hand wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per klant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.",
+      "why": "Onderdeel van de tussen beheerder en klant afgesproken CA-baseline (bron: CA-Policies/CATemplate). Groepsuitsluitingen tellen mee (op naam, na resolutie in de klanttenant); individuele gebruikersuitsluitingen bewust niet — dat is per klant een eigen invulling.\n\nNiet bij elke klant van toepassing: vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant met de hand wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per klant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.",
       "source": "CA-Policies/CATemplate/GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only.json (afgesproken baseline)",
       "params": {
         "clientAppTypes": [

@@ -133,9 +133,9 @@ bevestigt ze. Hoort er iets niet in stage 1: zet het template op `disabled` (sta
 
 Wat die rem *niet* weet: wat er in CIPP en in de klanttenants daadwerkelijk staat — dat is
 daar de waarheid, niet hier. Hij vergelijkt met de vorige export in deze repo, en vangt de
-toevoeging dus af bij de auteur, niet bij de uitrol. Twee
+toevoeging dus af bij de auteur, niet bij de uitrol. Drie
 templates blijven daar hoe dan ook op staan, omdat hun randvoorwaarde niet uit deze repo kan
-komen: `1060` (vereist de IP-ranges van die specifieke klant) en `1180` (vereist de
+komen: `1040` (vereist de landenlijst van die klant), `1060` (vereist de IP-ranges van die specifieke klant) en `1180` (vereist de
 compliant-network-locatie die Entra pas levert bij Global Secure Access).
 
 `prerequisites/ca-prerequisites.json` is de bron voor beide scripts.
