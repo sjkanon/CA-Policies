@@ -1,0 +1,269 @@
+{
+  "_comment": [
+    "Normenmapping per Conditional Access-policy, gelezen door scripts/generate-compliance.js in",
+    "de IntuneBackup-repo: node scripts/generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json",
+    "Elke sleutel is een bestandsnaam uit CATemplate/, met of zonder .json.",
+    "",
+    "De vocabulaire is dezelfde als voor de Intune-kant en staat daar: IntuneTemplate/_controls.json.",
+    "De labels moeten letterlijk overeenkomen - generate-compliance.js --strict meldt een label dat",
+    "afwijkt of niet bestaat. Vier frameworks: iso (ISO/IEC 27001:2022 Annex A), nis2 (richtlijn",
+    "(EU) 2022/2555 art. 21 lid 2), cis (CIS Controls v8.1) en nistcsf (NIST CSF 2.0).",
+    "",
+    "De fase komt hier niet uit een manifest maar uit state in het template zelf: enabled = fase 1,",
+    "enabledForReportingButNotEnforced = fase 2 (voorbereid, dwingt niets af), disabled = fase 5.",
+    "Een policy in report-only telt dus niet als afgedekt - hij doet niets.",
+    "",
+    "Bij een nieuwe policy in CATemplate/: hier een regel erbij, anders loopt scripts/check-controls.js",
+    "stuk. Dat is opzet - een CA-policy zonder verantwoording is voor een auditor een policy die er",
+    "niet is."
+  ],
+
+  "GLOBAL__1010__BLOCK__Legacy_Authentication": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.5 Veilige authenticatie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 4.8 Uninstall or Disable Unnecessary Services on Enterprise Assets and Software", "CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-03", "PR.AA-01"]
+  },
+  "GLOBAL__1020__BLOCK__Device_Code_Auth_Flow": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.5 Veilige authenticatie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(g) basispraktijken cyberhygiene en training"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-03", "PR.AA-04"]
+  },
+  "GLOBAL__1030__BLOCK__Unsupported_Device_Platforms": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.1 Eindpuntapparatuur van gebruikers"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 1.2 Address Unauthorized Assets"],
+    "nistcsf": ["ID.AM-01", "PR.AA-05"]
+  },
+  "GLOBAL__1040__BLOCK__Countries_not_Allowed": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.20 Netwerkbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.IR-01"]
+  },
+  "GLOBAL__1050__BLOCK__HighRisk_Countries": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.20 Netwerkbeveiliging", "A.5.7 Informatie en analyses over dreigingen"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.IR-01"]
+  },
+  "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.2 Speciale toegangsrechten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 5.5 Establish and Maintain an Inventory of Service Accounts", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.IR-01"]
+  },
+  "GLOBAL__1070__BLOCK__Explicitly_Blocked_Cloud_Apps": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.5.23 Informatiebeveiliging voor het gebruik van clouddiensten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 2.3 Address Unauthorized Software"],
+    "nistcsf": ["ID.AM-02", "PR.AA-05"]
+  },
+  "GLOBAL__1080__BLOCK__Guest_Access_to_Sensitive_Apps": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.5.18 Toegangsrechten", "A.8.2 Speciale toegangsrechten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(d) beveiliging van de toeleveringsketen"],
+    "cis": ["CIS Controls v8.1 5.4 Restrict Administrator Privileges to Dedicated Administrator Accounts", "CIS Controls v8.1 6.8 Define and Maintain Role-Based Access Control"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__1090__BLOCK__HighRisk_SignIns": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.16 Monitoringactiviteiten", "A.5.25 Beoordelen van en besluiten over informatiebeveiligingsgebeurtenissen"],
+    "nis2": ["art. 21(2)(b) incidentbehandeling", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.1 Centralize Security Event Alerting"],
+    "nistcsf": ["DE.CM-03", "RS.MI-01"]
+  },
+  "GLOBAL__1100__BLOCK__HighRisk_Users": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.16 Monitoringactiviteiten", "A.5.25 Beoordelen van en besluiten over informatiebeveiligingsgebeurtenissen"],
+    "nis2": ["art. 21(2)(b) incidentbehandeling", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.1 Centralize Security Event Alerting"],
+    "nistcsf": ["DE.CM-03", "RS.MI-01"]
+  },
+  "GLOBAL__1110__BLOCK__Unlicensed_Users": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.5.18 Toegangsrechten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 5.1 Establish and Maintain an Inventory of Accounts", "CIS Controls v8.1 5.3 Disable Dormant Accounts"],
+    "nistcsf": ["PR.AA-01", "PR.AA-05"]
+  },
+  "GLOBAL__1120__BLOCK__Guest_Access_Outside_Approved_Apps": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.5.18 Toegangsrechten", "A.8.3 Beperking toegang tot informatie"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(d) beveiliging van de toeleveringsketen"],
+    "cis": ["CIS Controls v8.1 6.8 Define and Maintain Role-Based Access Control"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__1130__BLOCK__Admins_From_Untrusted_Locations": {
+    "iso": ["A.8.2 Speciale toegangsrechten", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 12.8 Establish and Maintain Dedicated Computing Resources for All Administrative Work", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.IR-01"]
+  },
+  "GLOBAL__1140__BLOCK__Managed_Identities_At_Risk": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.8.2 Speciale toegangsrechten", "A.8.16 Monitoringactiviteiten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 5.5 Establish and Maintain an Inventory of Service Accounts"],
+    "nistcsf": ["PR.AA-01", "RS.MI-01"]
+  },
+  "GLOBAL__1150__BLOCK__Risky_Agent_Identities": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.8.16 Monitoringactiviteiten", "A.5.23 Informatiebeveiliging voor het gebruik van clouddiensten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 5.5 Establish and Maintain an Inventory of Service Accounts"],
+    "nistcsf": ["PR.AA-01", "RS.MI-01"]
+  },
+  "GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.3 Beperking toegang tot informatie"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 6.7 Centralize Access Control"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__1170__BLOCK__Risky_Agent_Users": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.5.15 Toegangsbeveiliging", "A.8.16 Monitoringactiviteiten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 13.1 Centralize Security Event Alerting"],
+    "nistcsf": ["DE.CM-03", "RS.MI-01"]
+  },
+  "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.8.20 Netwerkbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.IR-01", "PR.AA-05"]
+  },
+
+  "GLOBAL__2010__GRANT__MediumRisk_Signins": {
+    "iso": ["A.8.5 Veilige authenticatie", "A.5.17 Authenticatie-informatie", "A.8.16 Monitoringactiviteiten"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-03", "DE.CM-03"]
+  },
+  "GLOBAL__2020__GRANT__MediumRisk_Users": {
+    "iso": ["A.8.5 Veilige authenticatie", "A.5.17 Authenticatie-informatie", "A.8.16 Monitoringactiviteiten"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-03", "DE.CM-03"]
+  },
+  "GLOBAL__2050__GRANT__MFA_for_All_Users": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications", "CIS Controls v8.1 6.4 Require MFA for Remote Network Access"],
+    "nistcsf": ["PR.AA-01", "PR.AA-03"]
+  },
+  "GLOBAL__2055__GRANT__Phishing_Resistant_MFA_for_Admins": {
+    "iso": ["A.8.2 Speciale toegangsrechten", "A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 6.5 Require MFA for Administrative Access"],
+    "nistcsf": ["PR.AA-03", "PR.AA-05"]
+  },
+  "GLOBAL__2060__GRANT__Mobile_Apps_and_Desktop_Clients": {
+    "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.5.15 Toegangsbeveiliging", "A.8.9 Configuratiebeheer"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(e) beveiliging bij verwerving, ontwikkeling en onderhoud, incl. kwetsbaarheden"],
+    "cis": ["CIS Controls v8.1 1.2 Address Unauthorized Assets", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.PS-01"]
+  },
+  "GLOBAL__2070__GRANT__Mobile_Device_Access_Requirements": {
+    "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.8.12 Voorkomen van datalekken", "A.6.7 Werken op afstand"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(h) cryptografie en versleuteling"],
+    "cis": ["CIS Controls v8.1 4.12 Separate Enterprise Workspaces on Mobile End-User Devices"],
+    "nistcsf": ["PR.DS-01", "PR.AA-05"]
+  },
+  "GLOBAL__2080__GRANT__MFA_For_Device_Registration": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.8.5 Veilige authenticatie", "A.8.1 Eindpuntapparatuur van gebruikers"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 1.1 Establish and Maintain Detailed Enterprise Asset Inventory", "CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-01", "ID.AM-01"]
+  },
+  "GLOBAL__2090__GRANT__Browser_Access_On_Unmanaged_Devices": {
+    "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.5.15 Toegangsbeveiliging", "A.8.3 Beperking toegang tot informatie"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.IR-01"]
+  },
+  "GLOBAL__2100__GRANT__MFA_For_Admin_Portals": {
+    "iso": ["A.8.2 Speciale toegangsrechten", "A.8.5 Veilige authenticatie", "A.5.17 Authenticatie-informatie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 6.5 Require MFA for Administrative Access"],
+    "nistcsf": ["PR.AA-03", "PR.AA-05"]
+  },
+  "GLOBAL__2110__GRANT__Token_Protection": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie", "A.8.24 Gebruik van cryptografie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(h) cryptografie en versleuteling"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-04", "PR.DS-02"]
+  },
+  "GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(g) basispraktijken cyberhygiene en training"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications", "CIS Controls v8.1 6.4 Require MFA for Remote Network Access"],
+    "nistcsf": ["PR.AA-03", "PR.AA-01"]
+  },
+  "GLOBAL__2130__GRANT__Admins_Compliant_Device": {
+    "iso": ["A.8.2 Speciale toegangsrechten", "A.8.1 Eindpuntapparatuur van gebruikers"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 12.8 Establish and Maintain Dedicated Computing Resources for All Administrative Work", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05", "PR.PS-01"]
+  },
+  "GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access": {
+    "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.6.7 Werken op afstand"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 4.12 Separate Enterprise Workspaces on Mobile End-User Devices", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__2160__GRANT__Agent_Users_Compliant_Device": {
+    "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment": {
+    "iso": ["A.5.16 Identiteitsbeheer", "A.8.5 Veilige authenticatie", "A.8.1 Eindpuntapparatuur van gebruikers"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 1.1 Establish and Maintain Detailed Enterprise Asset Inventory", "CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
+    "nistcsf": ["PR.AA-01", "ID.AM-01"]
+  },
+  "GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.5.16 Identiteitsbeheer"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 6.1 Establish an Access Granting Process"],
+    "nistcsf": ["PR.AA-02", "PR.AA-01"]
+  },
+
+  "GLOBAL__3010__SESSION__Admin_Persistence": {
+    "iso": ["A.8.2 Speciale toegangsrechten", "A.7.7 Clear desk en clear screen", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 4.3 Configure Automatic Session Locking on Enterprise Assets"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__3020__SESSION__BYOD_Persistence": {
+    "iso": ["A.7.7 Clear desk en clear screen", "A.6.7 Werken op afstand", "A.8.1 Eindpuntapparatuur van gebruikers"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 4.3 Configure Automatic Session Locking on Enterprise Assets"],
+    "nistcsf": ["PR.AA-05"]
+  },
+  "GLOBAL__3030__SESSION__Register_Security_Info_Requirements": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.5.16 Identiteitsbeheer"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 6.1 Establish an Access Granting Process"],
+    "nistcsf": ["PR.AA-02", "PR.AA-01"]
+  },
+  "GLOBAL__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices": {
+    "iso": ["A.8.12 Voorkomen van datalekken", "A.8.3 Beperking toegang tot informatie", "A.5.14 Informatieoverdracht"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 3.3 Configure Data Access Control Lists", "CIS Controls v8.1 3.13 Deploy a Data Loss Prevention Solution"],
+    "nistcsf": ["PR.DS-01", "PR.AA-05"]
+  },
+  "GLOBAL__3050__SESSION__Continuous_Access_Evaluation": {
+    "iso": ["A.5.15 Toegangsbeveiliging", "A.5.18 Toegangsrechten", "A.8.16 Monitoringactiviteiten"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen", "art. 21(2)(b) incidentbehandeling"],
+    "cis": ["CIS Controls v8.1 6.2 Establish an Access Revoking Process"],
+    "nistcsf": ["PR.AA-05", "RS.MI-01"]
+  },
+  "GLOBAL__3060__SESSION__Defender_for_Cloud_Apps": {
+    "iso": ["A.8.16 Monitoringactiviteiten", "A.8.15 Logging", "A.5.23 Informatiebeveiliging voor het gebruik van clouddiensten"],
+    "nis2": ["art. 21(2)(b) incidentbehandeling", "art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 8.2 Collect Audit Logs", "CIS Controls v8.1 13.1 Centralize Security Event Alerting"],
+    "nistcsf": ["DE.CM-09", "DE.CM-03"]
+  },
+  "GLOBAL__3070__SESSION__Session_Limits_All_Users": {
+    "iso": ["A.7.7 Clear desk en clear screen", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],
+    "cis": ["CIS Controls v8.1 4.3 Configure Automatic Session Locking on Enterprise Assets"],
+    "nistcsf": ["PR.AA-05"]
+  }
+}

@@ -65,10 +65,42 @@ Dus:
    klant zonder die licentie geen `fail` op voor iets wat hij niet kán hebben.
 4. Verwijst het template naar een groep of named location? Zorg dat die in
    `prerequisites/ca-prerequisites.json` staat — de generator weigert anders te draaien.
-5. `node scripts/generate-baseline.js && node scripts/export-cipp-baseline.js && node --test scripts/*.test.js`.
+5. Geef het een normenmapping in `controls/ca-controls.json` — welke ISO-, NIS2-, CIS- en
+   CSF-controls deze policy invult. `scripts/check-controls.js` weigert een template zonder.
+6. `node scripts/generate-baseline.js && node scripts/export-cipp-baseline.js && node scripts/check-controls.js && node --test scripts/*.test.js`.
 
 De generator faalt hard op een template zonder pin en noemt het eerstvolgende vrije nummer;
 de test bewaakt hetzelfde in CI, ná het genereren.
+
+## Verantwoording naar ISO 27001, NIS2, CIS en NIST CSF
+
+`controls/ca-controls.json` zegt per policy welke controls hij technisch invult. Dat bestand is
+geen document op zichzelf: het voedt `COMPLIANCE.md` in de
+[IntuneBackup-repo](https://github.com/sjkanon/IntuneBackup), die de Intune- en de CA-kant in één
+matrix zet — per ISO/IEC 27001:2022 Annex A-control, per NIS2-maatregel (art. 21 lid 2), per CIS
+Controls v8.1-safeguard en per NIST CSF 2.0-subcategorie.
+
+```
+cd ../IntuneBackup
+node scripts/generate-compliance.js --strict --ca ../CA-Policies/controls/ca-controls.json
+```
+
+Zonder `--ca` — en dat is wat er in git staat, want dat is wat CI daar regenereert — mist die
+matrix de CA-kant. Dat scheelt het meest bij NIS2 (j), multifactorauthenticatie en beveiligde
+communicatie: dat punt hangt vrijwel helemaal aan deze repo en nauwelijks aan Intune.
+
+De fase komt niet uit een manifest maar uit `state` in het template zelf: `enabled` telt als
+afgedwongen, report-only als voorbereid, `disabled` als niet uitgerold. Een policy in report-only
+telt dus niet als afgedekt — hij doet niets, en zo hoort een auditor hem ook te zien.
+
+De vocabulaire (de exacte labels) staat in `IntuneTemplate/_controls.json` in die andere repo.
+`check-controls.js` toetst de labels daartegen als die repo ernaast staat; in CI kan dat niet, en
+doet `generate-compliance.js --strict` het daar.
+
+**Wat dit níet is:** een uitspraak dat een klant ISO-gecertificeerd of NIS2-conform is. Dit zegt
+wat de baseline afdwingt, niet wat een tenant doet (dat toetst het platform), en beide kaders
+vragen governance, risicobeheer, ketenafspraken en incidentmelding die met geen enkele
+CA-policy in te vullen zijn.
 
 ## Uitrollen via CIPP
 

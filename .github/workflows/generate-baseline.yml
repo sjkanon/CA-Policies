@@ -18,6 +18,8 @@ on:
       - "scripts/generate-baseline.js"
       - "scripts/prerequisites.js"
       - "scripts/export-cipp-baseline.js"
+      - "controls/**"
+      - "scripts/check-controls.js"
       - ".github/workflows/generate-baseline.yml"
   # Ook op een PR, en dat is de belangrijkste van de twee: een template zonder gepind
   # checkId of met een verwijzing naar een ongedefinieerde groep moet stuklopen terwijl de
@@ -30,6 +32,8 @@ on:
       - "scripts/generate-baseline.js"
       - "scripts/prerequisites.js"
       - "scripts/export-cipp-baseline.js"
+      - "controls/**"
+      - "scripts/check-controls.js"
       - ".github/workflows/generate-baseline.yml"
   workflow_dispatch:
 
@@ -64,8 +68,15 @@ jobs:
       # stap, dan wordt er géén PR geopend: een baseline met een hernummerd checkId is
       # schadelijker dan geen bijgewerkte baseline — dat id is de sleutel voor drift over
       # runs heen en voor de klantuitzonderingen in het gekoppelde platform.
+      # De normenmapping die COMPLIANCE.md in de IntuneBackup-repo voedt. Hier alleen de
+      # structuur: heeft elk template een regel, en noemt geen regel een template dat niet
+      # bestaat. Of de labels in de vocabulaire staan kan hier niet - die woont in die andere
+      # repo - en wordt daar door generate-compliance.js --strict bewaakt.
+      - name: Controleer de normenmapping
+        run: node scripts/check-controls.js
+
       - name: Bewaak de gepinde checkId-nummers en de randvoorwaarden
-        run: node --test scripts/generate-baseline.test.js scripts/prerequisites.test.js scripts/export-cipp-baseline.test.js
+        run: node --test scripts/generate-baseline.test.js scripts/prerequisites.test.js scripts/export-cipp-baseline.test.js scripts/check-controls.test.js
       # Alleen op main. Op een pull_request is genereren de toets ("blijft dit deterministisch
       # en compleet?"); een PR openen bovenop een PR is dat niet.
       - name: Open PR met de gegenereerde baseline (als er iets veranderde)
