@@ -505,3 +505,53 @@ de landen van één klant. Nu is `Allowed Countries` leeg en gemarkeerd als `req
 de CIPP-export zet `1040` vast op Report tot de klant zijn landen heeft, en
 `New-CaPrerequisites.ps1` maakt de locatie alleen aan met `-AllowedCountry`. Een lege
 landenlijst uitrollen zou élke aanmelding buiten "geen enkel land" blokkeren.
+
+# Ronde 5 — de normenmapping die alleen als pad bestond (15 september 2026)
+
+## De aanleiding
+
+`scripts/generate-compliance.js` in de IntuneBackup-repo leest sinds augustus
+`../CA-Policies/controls/ca-controls.json`. Het pad stond in de scriptkop, de leesfunctie
+`readConditionalAccess()` bestond, COMPLIANCE.md had er een kolom **CA actief** voor — alleen het
+bestand is er nooit gekomen. Iedereen draaide daarom `--no-ca`, en dat document zei vervolgens
+letterlijk dat Conditional Access "bewust niet meegenomen" was.
+
+Dat is geen ontbrekende regel maar een verkeerd beeld. De verantwoording beweerde dat NIS2 (j),
+multifactorauthenticatie, met drie Intune-policies wordt ingevuld. Die tien CA-policies die het
+echte werk doen stonden al jaren in de tenant, maar in geen enkel document dat een auditor leest.
+
+## Wat is toegevoegd
+
+**`controls/ca-controls.json`** — alle 41 templates gemapt op ISO/IEC 27001:2022 Annex A, NIS2
+art. 21 lid 2, CIS Controls v8.1 en NIST CSF 2.0, in exact dezelfde vocabulaire als
+`IntuneTemplate/_controls.json` in de andere repo. De fase komt niet uit een manifest maar uit
+`state` in het template zelf: `enabled` telt als afgedwongen, report-only als voorbereid,
+`disabled` als niet uitgerold.
+
+**`scripts/check-controls.js`** en zijn test — bewaken de twee kanten waarop dit stil scheef
+groeit. Een template zonder mapping verdwijnt geruisloos uit de verantwoording; een mapping
+zonder template dekt daar een control af met een policy die niet bestaat, en dat merkt pas de
+auditor die de verwijzing volgt. De labels zelf worden alleen lokaal getoetst — de vocabulaire
+woont in de andere repo, dus in CI doet `generate-compliance.js --strict` dat.
+
+## Wat het oplevert
+
+| NIS2 art. 21(2) | zonder CA | met CA |
+|---|---:|---:|
+| (j) multifactorauthenticatie en beveiligde communicatie | 3 | 13 |
+| (i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen | 22 | 39 |
+| (b) incidentbehandeling | 8 | 15 |
+
+## Wat hierna nog openstaat
+
+- **Wat in git staat is nog steeds de `--no-ca`-versie**, want dat is wat de workflow daar
+  regenereert; CI ziet deze repo niet. De CA-versie in git krijgen vraagt een
+  `CA_POLICIES_TOKEN`-secret en het uitcommentariëren van de CA-checkout in
+  `.github/workflows/generate-baseline.yml` daar — de twee stappen staan in open punt 3 van
+  `IntuneBackup/ANALYSE.md`.
+- **De mapping is een oordeel, geen norm.** Er bestaat geen gezaghebbende bron die CA-policies aan
+  Annex A-controls koppelt; deze is met de hand gelegd naar analogie van de Intune-kant. Bij een
+  audit is dat verdedigbaar, niet bewijsbaar.
+- **Zes policies staan op report-only** en tellen dus niet als afgedekt. Dat is juist — ze doen
+  niets — maar het betekent wel dat de matrix verbetert zodra iemand die zes aanzet, zonder dat er
+  één policy bijkomt.
