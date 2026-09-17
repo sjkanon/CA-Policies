@@ -50,10 +50,10 @@
     Standaard SecurityKey: dat is het scenario waarin niets elkaar in de weg zit.
 
 .EXAMPLE
-    ./scripts/Test-PasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be
+    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be
 
 .EXAMPLE
-    ./scripts/Test-PasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be -Scenario WindowsHelloPasskey
+    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be -Scenario WindowsHelloPasskey
 #>
 [CmdletBinding()]
 param(

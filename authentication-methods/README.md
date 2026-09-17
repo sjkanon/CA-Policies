@@ -29,8 +29,8 @@ Wat er wél is:
 |---|---|
 | `node scripts/authentication-methods.js` | Bewaakt het bestand zelf en de twee koppelingen. Blokkerend in CI |
 | `node --test scripts/authentication-methods.test.js` | Acht tests, waaronder de uitzetvolgorde |
-| `./scripts/Set-AuthenticationMethods.ps1 -TenantId <tenant>` | Vergelijkt een echte tenant met dit bestand. Zonder `-Apply` wijzigt het niets |
-| `./scripts/Test-PasskeyReadiness.ps1 -TenantId <tenant> -UserPrincipalName <upn>` | Zegt vóór de uitrol of een gebruiker een passkey kán registreren, en zo niet: waarom |
+| `./scripts/Set-EntraAuthenticationMethods.ps1 -TenantId <tenant>` | Vergelijkt een echte tenant met dit bestand. Zonder `-Apply` wijzigt het niets |
+| `./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId <tenant> -UserPrincipalName <upn>` | Zegt vóór de uitrol of een gebruiker een passkey kán registreren, en zo niet: waarom |
 
 Komt die categorie er ooit in het platform, dan staat dit bestand al in de vorm die hij nodig
 heeft: één regel per methode, met `state` en `configuration`.
@@ -47,7 +47,7 @@ heeft: één regel per methode, met `state` en `configuration`.
    hebben, en de weg waarlangs ze een passkey in Authenticator registreren.
 4. **SMS** en 5. **spraak** — gaan uit, en alleen nadat 2 en 3 staan.
 
-Stap 4 en 5 zijn de enige die iets wégnemen. `Set-AuthenticationMethods.ps1` weigert ze met
+Stap 4 en 5 zijn de enige die iets wégnemen. `Set-EntraAuthenticationMethods.ps1` weigert ze met
 `-CheckRegistrationFirst` zolang er gebruikers zijn zonder MFA-methode, en de test bewaakt dat
 een uit te zetten methode nooit vóór een aan te zetten methode staat.
 
@@ -58,7 +58,7 @@ Policies › Passkey (FIDO2)**, via de banner) en is **onomkeerbaar**. Je bestaa
 instellingen verhuizen dan naar een *Default passkey profile*; er passen er maximaal drie, dat
 profiel meegerekend. Dat is geen stap die een script voor je hoort te zetten.
 
-`Set-AuthenticationMethods.ps1` leest de profielen daarna uit en meldt wat er afwijkt van dit
+`Set-EntraAuthenticationMethods.ps1` leest de profielen daarna uit en meldt wat er afwijkt van dit
 bestand, maar zet ze niet — profielen bepalen wie er nog kan inloggen, en een script dat dat
 half doet is gevaarlijker dan een script dat het niet doet. Of CIPP ze wél kan zetten, zie
 hieronder.
@@ -67,10 +67,10 @@ De twee profielen hier:
 
 | Profiel | Doelgroep | Types | Attestation |
 |---|---|---|---|
-| Beheerders | `Passkey Profile Admins` | Alleen device-bound | Aan |
+| Beheerders | `SEC-Passkey-Profile-Admins` | Alleen device-bound | Aan |
 | Alle gebruikers | AllUsers | Device-bound en synced | Uit |
 
-`Passkey Profile Admins` staat in [`../prerequisites/ca-prerequisites.json`](../prerequisites/ca-prerequisites.json)
+`SEC-Passkey-Profile-Admins` staat in [`../prerequisites/ca-prerequisites.json`](../prerequisites/ca-prerequisites.json)
 en wordt aangemaakt door `New-CaPrerequisites.ps1` — een passkey profile kan niet op
 directory-rollen richten zoals een CA-policy dat doet, alleen op groepen.
 
@@ -123,7 +123,7 @@ WHfB de juiste keuze, niet Entra passkey on Windows. WHfB doet ook het Windows-a
 Entra passkey on Windows niet. Die laatste is bedoeld voor niet-joined, persoonlijke of gedeelde
 pc's.
 
-`scripts/Test-PasskeyReadiness.ps1` controleert dit vooraf, samen met vijf andere blokkades die
+`scripts/Test-EntraPasskeyReadiness.ps1` controleert dit vooraf, samen met vijf andere blokkades die
 even stil zijn: methode uit, self-service uit, gast-account, attestation afgedwongen, en een
 AAGUID-lijst die Windows Hello uitsluit. Draai hem met `-Scenario WindowsHelloPasskey` als je
 een passkey in de Windows Hello-container wilt.

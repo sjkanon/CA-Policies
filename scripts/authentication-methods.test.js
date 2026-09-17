@@ -5,7 +5,7 @@
  * ========================== WAAROM DIT EEN TEST IS ==========================
  *
  * Dit bestand heeft als enige deel van de baseline geen checkId en dus geen toetsing tegen een
- * klanttenant. Set-AuthenticationMethods.ps1 vergelijkt wel, maar draait pas als iemand hem
+ * klanttenant. Set-EntraAuthenticationMethods.ps1 vergelijkt wel, maar draait pas als iemand hem
  * draait — en bij één klant tegelijk. Deze test is het enige dat in CI faalt wanneer de
  * afspraken zichzelf tegenspreken.
  *

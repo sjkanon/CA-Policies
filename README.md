@@ -43,7 +43,7 @@ scripts/export-cipp-baseline.js`.
 | De baseline ín CIPP | `cipp/baseline-stages.json` is een bestand; de baseline in CIPP is een aparte kopie die iemand bijwerkt |
 | De klanttenants | een template dat een nieuwe groep of locatie introduceert vraagt `New-CaPrerequisites.ps1`, per tenant |
 | Het id van een custom authentication strength | Entra bepaalt het bij aanmaken, dus het template draagt een placeholder (nul-GUID). `New-CaPrerequisites.ps1` maakt de strength aan en meldt het echte id; dat moet met de hand in de CIPP-uitrol. Vandaag alleen `2180` |
-| Passkey profiles | de opt-in is onomkeerbaar en het beheer loopt via het portaal. `Set-AuthenticationMethods.ps1` meldt het verschil, maar zet ze niet — zie [`authentication-methods/`](authentication-methods/README.md) |
+| Passkey profiles | de opt-in is onomkeerbaar en het beheer loopt via het portaal. `Set-EntraAuthenticationMethods.ps1` meldt het verschil, maar zet ze niet — zie [`authentication-methods/`](authentication-methods/README.md) |
 
 ## Wat er naast de CA-policies staat
 

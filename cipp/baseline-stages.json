@@ -48,7 +48,7 @@
         "requiresMembers": true
       },
       {
-        "displayName": "Passkey Profile Admins",
+        "displayName": "SEC-Passkey-Profile-Admins",
         "danger": "medium",
         "requiresMembers": false
       }

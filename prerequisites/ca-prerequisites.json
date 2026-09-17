@@ -81,8 +81,8 @@
       "requiresEntraIdP1": true
     },
     {
-      "displayName": "Passkey Profile Admins",
-      "mailNickname": "passkey-profile-admins",
+      "displayName": "SEC-Passkey-Profile-Admins",
+      "mailNickname": "sec-passkey-profile-admins",
       "membershipType": "assigned",
       "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar GLOBAL__2055 en 2100 zich op richten.",
       "danger": "medium",

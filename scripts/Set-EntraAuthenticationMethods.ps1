@@ -46,10 +46,10 @@
     Pad naar authentication-methods.json. Standaard die in deze repo.
 
 .EXAMPLE
-    ./scripts/Set-AuthenticationMethods.ps1 -TenantId contoso.onmicrosoft.com
+    ./scripts/Set-EntraAuthenticationMethods.ps1 -TenantId contoso.onmicrosoft.com
 
 .EXAMPLE
-    ./scripts/Set-AuthenticationMethods.ps1 -TenantId contoso.onmicrosoft.com -Apply -CheckRegistrationFirst -WhatIf
+    ./scripts/Set-EntraAuthenticationMethods.ps1 -TenantId contoso.onmicrosoft.com -Apply -CheckRegistrationFirst -WhatIf
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(

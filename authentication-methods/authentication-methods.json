@@ -12,7 +12,7 @@
     "",
     "Waarom dit geen baseline-v1.0.json voedt: de platform-engine kent de categorie",
     "'authentication-methods' niet. Er is dus geen checkId en geen automatische toetsing —",
-    "Set-AuthenticationMethods.ps1 is de enige manier om dit te vergelijken en te zetten.",
+    "Set-EntraAuthenticationMethods.ps1 is de enige manier om dit te vergelijken en te zetten.",
     "Komt die categorie er ooit, dan is dit bestand er al in de vorm die hij nodig heeft.",
     "",
     "De volgorde in 'order' is de uitrolvolgorde en is niet vrij: zonder Temporary Access Pass",
@@ -50,7 +50,7 @@
       "profiles": [
         {
           "displayName": "Beheerders — alleen aangetoonde apparaatgebonden passkeys",
-          "target": "Passkey Profile Admins",
+          "target": "SEC-Passkey-Profile-Admins",
           "passkeyTypes": [
             "deviceBound"
           ],
@@ -96,7 +96,7 @@
           "En de valkuil die op 16 september 2026 bij tejo.be dertien mislukte pogingen kostte:",
           "op een Entra joined of registered toestel blokkeert een bestaande WHfB-credential de",
           "registratie van een passkey voor datzelfde account in dezelfde container. De registratie",
-          "faalt dan met 'passkey is already registered'. Zie scripts/Test-PasskeyReadiness.ps1.",
+          "faalt dan met 'passkey is already registered'. Zie scripts/Test-EntraPasskeyReadiness.ps1.",
           "",
           "Op een beheerd, Entra joined toestel is dit meestal niet wat je wilt: WHfB is daar de",
           "juiste keuze en doet ook het Windows-aanmeldscherm, wat Entra passkey on Windows niet doet.",
