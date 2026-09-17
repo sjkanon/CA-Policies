@@ -1,6 +1,6 @@
 {
   "version": "ca-prerequisites-v1.0",
-  "reviewedAt": "2026-09-04",
+  "reviewedAt": "2026-09-17",
   "_comment": [
     "De groepen en named locations waar CATemplate/GLOBAL__*.json naar verwijzen. Zonder deze",
     "bestaat de verwijzing bij de klant niet, en dat faalt de verkeerde kant op: een",
@@ -12,7 +12,13 @@
     "verwijzing in een template die hier geen tegenhanger heeft, en generate-baseline.js roept",
     "die validatie aan vóór het genereren. Welke templates een groep gebruiken staat er",
     "bewust NIET in — dat leidt de validator live uit CATemplate/ af, zodat er geen tweede",
-    "lijst is die kan verouderen."
+    "lijst is die kan verouderen.",
+    "",
+    "Sinds 17 september staan hier ook authenticationStrengths en authenticationContexts.",
+    "Beide zijn, net als named locations, een object dat de klanttenant niet vanzelf heeft en",
+    "waar een template naar verwijst met een id dat pas bij aanmaken ontstaat. Een custom",
+    "authentication strength draagt in het template daarom een nul-GUID als placeholder; komt",
+    "die ongewijzigd in een tenant terecht, dan verwijst de grant naar niets."
   ],
   "builtInLocationIds": {
     "_comment": "Gereserveerde Entra-waarden, geen named location om aan te maken.",
@@ -73,6 +79,16 @@
       "dangerReason": "1110 staat op 'enabled' en includeUsers 'All'. Deze groep als lege statische groep aanmaken blokkeert daarmee élke gebruiker in de tenant. Hij MOET dynamisch zijn en de regel moet zijn verwerkt (membershipRuleProcessingState 'On') vóór 1110 wordt uitgerold — vandaar dat de PowerShell-variant wacht tot de eerste evaluatie leden heeft opgeleverd.",
       "requiresMembers": true,
       "requiresEntraIdP1": true
+    },
+    {
+      "displayName": "Passkey Profile Admins",
+      "mailNickname": "passkey-profile-admins",
+      "membershipType": "assigned",
+      "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar GLOBAL__2055 en 2100 zich op richten.",
+      "danger": "medium",
+      "dangerReason": "Leeg is hier ongevaarlijk: het profiel geldt dan voor niemand en iedereen valt onder het ruimere profiel voor alle gebruikers. Vergeten te vullen betekent dus geen lock-out, maar wél dat beheerders stilzwijgend een gesynchroniseerde passkey mogen gebruiken.",
+      "requiresMembers": false,
+      "usedBy": "authentication-methods"
     }
   ],
   "namedLocations": [
@@ -95,7 +111,11 @@
       "definition": {
         "@odata.type": "#microsoft.graph.countryNamedLocation",
         "displayName": "High-Risk Countries",
-        "countriesAndRegions": ["KP", "RU", "IR"],
+        "countriesAndRegions": [
+          "KP",
+          "RU",
+          "IR"
+        ],
         "includeUnknownCountriesAndRegions": true,
         "countryLookupMethod": "clientIpAddress"
       },
@@ -126,5 +146,38 @@
       "requiresIpRanges": true,
       "danger": "high"
     }
+  ],
+  "authenticationStrengths": [
+    {
+      "displayName": "Temporary Access Pass only",
+      "definition": {
+        "displayName": "Temporary Access Pass only",
+        "description": "Alleen een eenmalige Temporary Access Pass voldoet. Bedoeld voor de user action \"Register security information\": een nieuwe MFA-methode of passkey registreren kan dan alleen nadat de helpdesk een TAP heeft uitgegeven, niet vanuit een bestaande (mogelijk gekaapte) sessie.",
+        "policyType": "custom",
+        "requirementsSatisfied": "mfa",
+        "allowedCombinations": [
+          "temporaryAccessPassOneTime"
+        ]
+      },
+      "purpose": "De grant van 2180. Zonder deze strength verwijst die policy naar een niet-bestaande id.",
+      "placeholderId": "00000000-0000-0000-0000-000000000000",
+      "tenantSpecific": "Entra kent het id pas toe bij aanmaken. New-CaPrerequisites.ps1 maakt de strength aan en meldt het echte id; dat id moet in de CIPP-uitrol van 2180 terecht in plaats van de nul-GUID. Het template in CATemplate/ houdt de placeholder — het is een bron voor alle tenants, niet voor één.",
+      "danger": "high",
+      "dangerReason": "Een grant die naar een niet-bestaande authentication strength verwijst is niet 'strenger dan bedoeld' maar onvoorspelbaar: Entra weigert de policy bij het aanmaken, of hij landt en niemand kan zijn beveiligingsinformatie meer registreren. 2180 staat daarom op report-only tot dit id klopt."
+    }
+  ],
+  "authenticationContexts": [],
+  "_authenticationContextsComment": [
+    "Leeg, en dat is vandaag juist: geen enkel template in CATemplate/ vult",
+    "includeAuthenticationContextClassReferences. Een authentication context is geen",
+    "baselinemaatregel maar een klantkeuze — hij bestaat pas zodra iemand één specifieke bron",
+    "(een SharePoint-site met een gevoeligheidslabel, een PIM-rolactivatie, een eigen app)",
+    "zwaarder wil beveiligen dan de rest.",
+    "",
+    "Vul je hem wel, dan hoort een regel er zo uit te zien:",
+    "  { \"id\": \"c1\", \"displayName\": \"Vertrouwelijk\", \"description\": \"...\",",
+    "    \"isAvailable\": true, \"purpose\": \"Doel van CA-policy 2xxx\", \"danger\": \"medium\" }",
+    "De id's lopen van c1 tot en met c99 en zijn niet hernoembaar; isAvailable false betekent",
+    "dat geen enkele app hem kan kiezen, wat de meest gemaakte fout is."
   ]
 }

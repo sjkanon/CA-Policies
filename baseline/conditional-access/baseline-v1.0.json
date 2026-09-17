@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-09-14",
+  "reviewedAt": "2026-09-17",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",

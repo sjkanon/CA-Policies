@@ -1,0 +1,124 @@
+{
+  "version": "authentication-methods-v1.0",
+  "reviewedAt": "2026-09-17",
+  "_comment": [
+    "De gewenste stand van het authentication methods policy in een klanttenant: welke",
+    "methodes aan staan, en onder welke voorwaarden een passkey geregistreerd mag worden.",
+    "",
+    "Waarom dit een eigen map is en geen CATemplate: dit is geen Conditional Access. Een",
+    "CA-policy zegt wanneer je iets mag; dit zegt waarmee je je überhaupt kunt aanmelden.",
+    "De twee grijpen wel in elkaar — GLOBAL__2120 eist een phishing-bestendige methode, en",
+    "die eis is onvervulbaar zolang hier geen passkey aan staat.",
+    "",
+    "Waarom dit geen baseline-v1.0.json voedt: de platform-engine kent de categorie",
+    "'authentication-methods' niet. Er is dus geen checkId en geen automatische toetsing —",
+    "Set-AuthenticationMethods.ps1 is de enige manier om dit te vergelijken en te zetten.",
+    "Komt die categorie er ooit, dan is dit bestand er al in de vorm die hij nodig heeft.",
+    "",
+    "De volgorde in 'order' is de uitrolvolgorde en is niet vrij: zonder Temporary Access Pass",
+    "heeft een nieuwe medewerker niets om zijn eerste passkey mee te registreren."
+  ],
+  "methods": [
+    {
+      "order": 1,
+      "id": "TemporaryAccessPass",
+      "displayName": "Temporary Access Pass",
+      "state": "enabled",
+      "doel": "De enige methode waarmee iemand zónder bestaande methode kan beginnen. Vereist voor de eerste registratie van een passkey, en de terugvaloptie als iemand zijn apparaat kwijt is.",
+      "configuration": {
+        "defaultLifetimeInMinutes": 60,
+        "defaultLength": 8,
+        "minimumLifetimeInMinutes": 10,
+        "maximumLifetimeInMinutes": 480,
+        "isUsableOnce": true
+      },
+      "note": "isUsableOnce true: een TAP die meerdere keren werkt is een wachtwoord met een houdbaarheidsdatum. Dit sluit aan op GLOBAL__2180, dat registratie van beveiligingsinformatie alleen achter een eenmalige TAP toestaat.",
+      "danger": "high",
+      "dangerReason": "Een TAP is een volwaardige inloggegeven die de helpdesk uitgeeft. Zonder proces voor identiteitscontrole vóór uitgifte is dit de makkelijkste weg naar een accountovername in de hele tenant."
+    },
+    {
+      "order": 2,
+      "id": "Fido2",
+      "displayName": "Passkey (FIDO2)",
+      "state": "enabled",
+      "doel": "Passkeys op een beveiligingssleutel, in Microsoft Authenticator, of gesynchroniseerd via een cloudprovider. Dit is de methode die GLOBAL__2120 afdwingt.",
+      "configuration": {
+        "isSelfServiceRegistrationAllowed": true,
+        "isAttestationEnforced": false
+      },
+      "note": "isSelfServiceRegistrationAllowed staat op tenantniveau, niet per profiel. Op false kan niemand via Security info registreren, ook niet als de methode aan staat — en dan is de phishing-bestendige eis van 2120 onvervulbaar.",
+      "profiles": [
+        {
+          "displayName": "Beheerders — alleen aangetoonde apparaatgebonden passkeys",
+          "target": "Passkey Profile Admins",
+          "passkeyTypes": [
+            "deviceBound"
+          ],
+          "enforceAttestation": true,
+          "keyRestrictions": {
+            "isEnforced": false,
+            "enforcementType": "allow",
+            "aaGuids": []
+          },
+          "doel": "Rolhouders krijgen de strengste eis: alleen passkeys waarvan Entra merk en model kan verifiëren. Sluit gesynchroniseerde passkeys uit — die ondersteunen geen attestation.",
+          "danger": "medium",
+          "dangerReason": "Attestation geldt alleen bij registratie. Zet je hem later aan, dan blijven eerder geregistreerde passkeys zonder attestation gewoon werken; die moet je per gebruiker verwijderen."
+        },
+        {
+          "displayName": "Alle gebruikers — apparaatgebonden en gesynchroniseerd",
+          "target": "AllUsers",
+          "passkeyTypes": [
+            "deviceBound",
+            "synced"
+          ],
+          "enforceAttestation": false,
+          "keyRestrictions": {
+            "isEnforced": false,
+            "enforcementType": "allow",
+            "aaGuids": []
+          },
+          "doel": "De rest van de organisatie mag ook iCloud Keychain, Google Password Manager of een wachtwoordmanager gebruiken. Phishing-bestendig, zonder dat iedereen een sleutel hoeft te kopen.",
+          "danger": "medium",
+          "dangerReason": "Een passkeytype later uitzetten sluit mensen buiten die er al een hadden geregistreerd. Hetzelfde geldt voor het weghalen van een eerder toegestane AAGUID uit een allow-list."
+        }
+      ],
+      "tenantSpecific": "Passkey profiles vragen een eenmalige, ONOMKEERBARE opt-in in het Entra-portaal (Security → Authentication methods → Passkey (FIDO2) → banner). De bestaande globale instellingen verhuizen dan naar een Default passkey profile. Er passen er maximaal drie, dat profiel meegerekend.",
+      "danger": "high",
+      "dangerReason": "Dit is de methode waar de phishing-bestendige CA-policies op steunen. Staat hij uit, dan kan niemand aan GLOBAL__2120 voldoen en is de tenant dicht voor iedereen die geen andere phishing-bestendige methode heeft."
+    },
+    {
+      "order": 3,
+      "id": "MicrosoftAuthenticator",
+      "displayName": "Microsoft Authenticator",
+      "state": "enabled",
+      "doel": "Push- en passwordless-aanmelding. Blijft aan naast passkeys: het is de methode die de meeste gebruikers al hebben, en de weg waarlangs ze een passkey in Authenticator registreren.",
+      "configuration": {
+        "isSoftwareOathEnabled": false,
+        "numberMatchingRequiredState": "enabled",
+        "displayAppInformationRequiredState": "enabled",
+        "displayLocationInformationRequiredState": "enabled"
+      },
+      "note": "Number matching en de context-weergave zijn wat pushbevestiging van een simpele ja/nee-vraag onderscheidt. Zonder die twee is push-MFA vatbaar voor MFA-fatigue.",
+      "danger": "low"
+    },
+    {
+      "order": 4,
+      "id": "Sms",
+      "displayName": "SMS",
+      "state": "disabled",
+      "doel": "Uitzetten. SMS is phishbaar en kwetsbaar voor SIM-swapping, en voldoet niet aan GLOBAL__2120.",
+      "note": "Zet dit pas uit nadat iedereen een passkey of Authenticator heeft. Uitzetten terwijl gebruikers alleen SMS hebben sluit ze buiten — controleer eerst de registratierapportage in Entra.",
+      "danger": "high",
+      "dangerReason": "Dit is de enige regel in dit bestand die iets wégneemt. Volgorde is hier alles: eerst registreren, dan pas uitzetten."
+    },
+    {
+      "order": 5,
+      "id": "Voice",
+      "displayName": "Spraakoproep",
+      "state": "disabled",
+      "doel": "Uitzetten, om dezelfde reden als SMS.",
+      "danger": "high",
+      "dangerReason": "Zelfde volgorde-eis als SMS: eerst een alternatief geregistreerd, dan pas uit."
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 #Requires -Modules Microsoft.Graph.Groups, Microsoft.Graph.Identity.SignIns
 <#
 .SYNOPSIS
-    Maakt in een klanttenant de groepen en named locations aan waar de CA-templates in
-    CATemplate/ naar verwijzen. Draaien VOORDAT de baseline wordt uitgerold.
+    Maakt in een klanttenant de groepen, named locations, custom authentication strengths en
+    authentication contexts aan waar de CA-templates in CATemplate/ naar verwijzen. Draaien
+    VOORDAT de baseline wordt uitgerold.
 
 .DESCRIPTION
     De templates verwijzen naar zes groepen en drie named locations die geen enkele tenant
@@ -18,8 +19,16 @@
     Vandaar dat dit script die twee expliciet controleert en met -RequireSafeToDeploy zelfs
     weigert af te ronden zolang ze leeg zijn.
 
-    Het script is idempotent: bestaande groepen en locaties worden herkend op displayName en
-    niet overschreven - alleen gerapporteerd. Wat er afwijkt zegt het erbij.
+    Een custom authentication strength faalt op een derde manier. Entra kent zijn id pas toe
+    bij aanmaken, dus het template in CATemplate/ draagt een nul-GUID - het is de bron voor
+    alle tenants en kan het id van een van hen niet dragen. Dit script maakt de strength aan
+    en meldt het echte id; zolang dat niet in de CIPP-uitrol staat, verwijst de grant van 2180
+    naar een id dat in die tenant niet bestaat.
+
+    Het script is idempotent: bestaande objecten worden herkend op displayName (een context op
+    zijn id) en niet overschreven - alleen gerapporteerd. Wat er afwijkt zegt het erbij. Bij een
+    bestaande authentication strength vergelijkt het wel de toegestane combinaties: dezelfde naam
+    met andere combinaties is gevaarlijker dan geen strength, want die ziet er goed uit.
 
 .PARAMETER TenantId
     De klanttenant. Wordt doorgegeven aan Connect-MgGraph.
@@ -70,7 +79,7 @@ $ErrorActionPreference = 'Stop'
 $prereq = Get-Content -Path $PrerequisitesPath -Raw | ConvertFrom-Json
 Write-Host "Randvoorwaarden uit $($prereq.version) (herzien $($prereq.reviewedAt))" -ForegroundColor Cyan
 
-Connect-MgGraph -TenantId $TenantId -Scopes 'Group.ReadWrite.All', 'Policy.ReadWrite.ConditionalAccess', 'User.Read.All' -NoWelcome
+Connect-MgGraph -TenantId $TenantId -Scopes 'Group.ReadWrite.All', 'Policy.ReadWrite.ConditionalAccess', 'Policy.ReadWrite.AuthenticationMethod', 'User.Read.All' -NoWelcome
 
 $resultaat = [System.Collections.Generic.List[object]]::new()
 $blokkerend = [System.Collections.Generic.List[string]]::new()
@@ -220,6 +229,101 @@ foreach ($locatie in $prereq.namedLocations) {
     }
     else {
         $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $locatie.danger })
+    }
+}
+
+# ------------------------------------------- authentication strengths ----
+
+# Een custom authentication strength krijgt zijn id pas bij aanmaken. Het template in
+# CATemplate/ draagt daarom een nul-GUID: het is de bron voor alle tenants en kan geen id van
+# een van hen dragen. Dit script maakt de strength aan en meldt het echte id, zodat dat in de
+# CIPP-uitrol terechtkomt. Zolang dat niet gebeurd is, wijst de grant naar niets.
+
+$bestaandeStrengths = @(Get-MgPolicyAuthenticationStrengthPolicy -All)
+
+foreach ($strength in $prereq.authenticationStrengths) {
+    $bestaand = @($bestaandeStrengths | Where-Object DisplayName -eq $strength.displayName)
+
+    if ($bestaand.Count -gt 1) {
+        Write-Warning "Meerdere authentication strengths heten '$($strength.displayName)'. Welke de grant pakt is dan niet te zeggen - ruim dat eerst op."
+        $blokkerend.Add("dubbele authentication strength '$($strength.displayName)'")
+        continue
+    }
+
+    if ($bestaand.Count -eq 1) {
+        $huidig = $bestaand[0]
+        Write-Host "  = $($strength.displayName) bestaat al ($($huidig.Id))"
+
+        # De combinaties zijn de maatregel zelf. Een strength die dezelfde naam draagt maar
+        # andere combinaties toestaat is gevaarlijker dan geen strength: hij ziet er goed uit.
+        $verwacht = @($strength.definition.allowedCombinations | Sort-Object)
+        $gevonden = @($huidig.AllowedCombinations | Sort-Object)
+        if (Compare-Object $verwacht $gevonden) {
+            Write-Warning "'$($strength.displayName)' staat op [$($gevonden -join ', ')] maar hoort op [$($verwacht -join ', ')]."
+            $blokkerend.Add("'$($strength.displayName)' laat andere combinaties toe dan de baseline voorschrijft")
+        }
+
+        Write-Host "    id voor de uitrol: $($huidig.Id)  (vervang hiermee $($strength.placeholderId) in de CIPP-uitrol)" -ForegroundColor Cyan
+        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $huidig.Id; Status = 'bestond al'; Gevaar = $strength.danger })
+        continue
+    }
+
+    $body = @{
+        displayName         = $strength.definition.displayName
+        description         = $strength.definition.description
+        allowedCombinations = @($strength.definition.allowedCombinations)
+    }
+
+    if ($PSCmdlet.ShouldProcess($strength.displayName, 'Authentication strength aanmaken')) {
+        $nieuwStrength = New-MgPolicyAuthenticationStrengthPolicy -BodyParameter $body
+        Write-Host "  + $($strength.displayName) aangemaakt ($($nieuwStrength.Id))" -ForegroundColor Green
+        Write-Host "    id voor de uitrol: $($nieuwStrength.Id)  (vervang hiermee $($strength.placeholderId) in de CIPP-uitrol)" -ForegroundColor Cyan
+        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $nieuwStrength.Id; Status = 'aangemaakt'; Gevaar = $strength.danger })
+    }
+    else {
+        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $strength.danger })
+    }
+}
+
+# -------------------------------------------- authentication contexts ----
+
+# Vandaag leeg: geen enkel template verwijst naar een context, want een context is een
+# klantkeuze (een SharePoint-site met een label, een PIM-activatie) en geen baselinemaatregel.
+# De lus staat er zodat het aanmaken al geregeld is op het moment dat er wel een bij komt.
+
+if ($prereq.authenticationContexts -and $prereq.authenticationContexts.Count -gt 0) {
+    $bestaandeContexts = @(Get-MgIdentityConditionalAccessAuthenticationContextClassReference -All)
+
+    foreach ($context in $prereq.authenticationContexts) {
+        $bestaand = @($bestaandeContexts | Where-Object Id -eq $context.id)
+
+        if ($bestaand.Count -eq 1) {
+            Write-Host "  = $($context.id) ($($context.displayName)) bestaat al"
+            # Niet-gepubliceerd is de stille fout: de context bestaat, de CA-policy pakt hem,
+            # maar geen app kan hem kiezen - dus hij wordt nooit aangeroepen.
+            if (-not $bestaand[0].IsAvailable) {
+                Write-Warning "'$($context.id)' staat op isAvailable false: geen enkele app kan hem kiezen, dus de policy die hem als target heeft beschermt niets."
+                $blokkerend.Add("'$($context.id)' is niet gepubliceerd naar apps")
+            }
+            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $context.id; Status = 'bestond al'; Gevaar = $context.danger })
+            continue
+        }
+
+        $body = @{
+            id          = $context.id
+            displayName = $context.displayName
+            description = $context.description
+            isAvailable = $true
+        }
+
+        if ($PSCmdlet.ShouldProcess("$($context.id) ($($context.displayName))", 'Authentication context aanmaken')) {
+            $nieuwContext = New-MgIdentityConditionalAccessAuthenticationContextClassReference -BodyParameter $body
+            Write-Host "  + $($context.id) ($($context.displayName)) aangemaakt" -ForegroundColor Green
+            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $nieuwContext.Id; Status = 'aangemaakt'; Gevaar = $context.danger })
+        }
+        else {
+            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $context.danger })
+        }
     }
 }
 

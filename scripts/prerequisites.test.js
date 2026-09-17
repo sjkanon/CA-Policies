@@ -18,7 +18,7 @@ const path = require("path");
 const assert = require("node:assert");
 const { test } = require("node:test");
 
-const { readPrerequisites, collectReferences, validate } = require("./prerequisites");
+const { readPrerequisites, collectReferences, strengthVerschil, validate } = require("./prerequisites");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const IMPORT_PATH = path.join(REPO_ROOT, "cipp", "ca-templates-import.json");
@@ -91,5 +91,81 @@ test("de CIPP-export draagt geen tenant-specifieke IP-ranges", () => {
         `${rij.GUID} draagt IP-ranges voor "${li.displayName}" mee. Dat is het adres van één specifieke tenant; uitrollen bij een andere klant maakt daar een trusted location van iemand anders.`
       );
     }
+  }
+});
+
+// ------------------------------------------- authentication strengths ----
+
+test("elke custom authentication strength in een template heeft een definitie", () => {
+  const prereq = readPrerequisites();
+  const refs = collectReferences();
+  const opNaam = new Set((prereq.authenticationStrengths || []).map((s) => s.displayName));
+  for (const naam of refs.strengths.keys()) {
+    assert.ok(
+      opNaam.has(naam),
+      `"${naam}" wordt door een template gebruikt maar staat niet in prerequisites — New-CaPrerequisites.ps1 maakt hem dan niet aan en de grant wijst bij de klant naar niets.`
+    );
+  }
+});
+
+test("de combinaties in het template en in prerequisites lopen niet uit elkaar", () => {
+  const prereq = readPrerequisites();
+  const refs = collectReferences();
+  const opNaam = new Map((prereq.authenticationStrengths || []).map((s) => [s.displayName, s]));
+  for (const [naam, { definition }] of refs.strengths) {
+    const uitPrereq = opNaam.get(naam);
+    if (!uitPrereq) continue;
+    assert.deepStrictEqual(
+      strengthVerschil(definition, uitPrereq.definition),
+      [],
+      `"${naam}" laat in het template andere combinaties toe dan in prerequisites. Welke combinaties voldoen ís de maatregel.`
+    );
+  }
+});
+
+/**
+ * De placeholder moet blijven staan. Een echt id in het template betekent dat er een id uit
+ * één tenant is blijven plakken, en bij elke andere klant wijst de grant dan naar niets —
+ * dezelfde fout als het IP-adres dat in ronde 4 uit 1060 is gehaald.
+ */
+test("geen enkel template draagt een echt authentication-strength-id", () => {
+  const prereq = readPrerequisites();
+  const refs = collectReferences();
+  const opNaam = new Map((prereq.authenticationStrengths || []).map((s) => [s.displayName, s]));
+  for (const [naam, { file, definition }] of refs.strengths) {
+    const uitPrereq = opNaam.get(naam);
+    if (!uitPrereq?.placeholderId) continue;
+    assert.strictEqual(
+      definition.id,
+      uitPrereq.placeholderId,
+      `${file} draagt id ${definition.id} voor "${naam}" in plaats van de placeholder ${uitPrereq.placeholderId}.`
+    );
+  }
+});
+
+// -------------------------------------------- authentication contexts ----
+
+test("elke authentication context in een template heeft een definitie, en is gepubliceerd", () => {
+  const prereq = readPrerequisites();
+  const refs = collectReferences();
+  const opId = new Map((prereq.authenticationContexts || []).map((c) => [c.id, c]));
+  for (const id of refs.contexts.keys()) {
+    const definitie = opId.get(id);
+    assert.ok(definitie, `context "${id}" wordt gebruikt maar staat niet in prerequisites.`);
+    assert.notStrictEqual(
+      definitie.isAvailable,
+      false,
+      `context "${id}" is niet naar apps gepubliceerd; geen enkele app kan hem dan kiezen en de policy die hem als target heeft beschermt niets.`
+    );
+  }
+});
+
+test("een gedefinieerde context heeft een id in de vorm c1 tot en met c99", () => {
+  for (const context of readPrerequisites().authenticationContexts || []) {
+    assert.match(
+      context.id,
+      /^c([1-9]|[1-9]\d)$/,
+      `"${context.id}" is geen geldig context-id. Entra kent alleen c1 t/m c99, en ze zijn niet hernoembaar.`
+    );
   }
 });

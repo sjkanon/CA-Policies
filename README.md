@@ -42,7 +42,24 @@ scripts/export-cipp-baseline.js`.
 | `OPTIONAL_TEMPLATES` | een licentiegebonden template dat je hier vergeet belandt stil in stage 1 of 2 — hier faalt niets op |
 | De baseline ín CIPP | `cipp/baseline-stages.json` is een bestand; de baseline in CIPP is een aparte kopie die iemand bijwerkt |
 | De klanttenants | een template dat een nieuwe groep of locatie introduceert vraagt `New-CaPrerequisites.ps1`, per tenant |
-| Een custom authentication strength | `prerequisites/ca-prerequisites.json` kent alleen groepen en named locations, dus de validator ziet hem niet. Entra bepaalt zijn id bij aanmaken: het id in het template is een placeholder, per tenant te vervangen. Vandaag alleen `2180` |
+| Het id van een custom authentication strength | Entra bepaalt het bij aanmaken, dus het template draagt een placeholder (nul-GUID). `New-CaPrerequisites.ps1` maakt de strength aan en meldt het echte id; dat moet met de hand in de CIPP-uitrol. Vandaag alleen `2180` |
+| Passkey profiles | de opt-in is onomkeerbaar en het beheer loopt via het portaal. `Set-AuthenticationMethods.ps1` meldt het verschil, maar zet ze niet — zie [`authentication-methods/`](authentication-methods/README.md) |
+
+## Wat er naast de CA-policies staat
+
+`CATemplate/` is niet het hele verhaal. Twee mappen ernaast dragen wat een CA-policy nodig
+heeft maar zelf niet is:
+
+| Map | Wat erin staat | Bewaakt door |
+|---|---|---|
+| [`prerequisites/`](prerequisites/ca-prerequisites.json) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | `scripts/prerequisites.js`, blokkerend in CI |
+| [`authentication-methods/`](authentication-methods/README.md) | Welke aanmeldmethodes aan staan, en de passkey-profielen | `scripts/authentication-methods.js`, blokkerend in CI |
+
+Die tweede map is het enige deel zonder checkId: de platform-engine kent de categorie niet, dus
+er is geen toetsing tegen een klanttenant. Twee afhankelijkheden lopen van daar naar hier en
+falen allebei stil — `2120` eist een phishing-bestendige methode die er niet is, of `2180` eist
+een Temporary Access Pass die uit staat. De validator controleert precies die twee tegen de
+werkelijke `state` van die templates.
 
 ## Een policy toevoegen
 

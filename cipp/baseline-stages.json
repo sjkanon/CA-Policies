@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-09-14",
+  "generatedAt": "2026-09-17",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "GLOBAL CA Baseline v1.0",
   "_comment": [
@@ -46,6 +46,11 @@
         "displayName": "Licensed Users",
         "danger": "critical",
         "requiresMembers": true
+      },
+      {
+        "displayName": "Passkey Profile Admins",
+        "danger": "medium",
+        "requiresMembers": false
       }
     ],
     "namedLocations": [
