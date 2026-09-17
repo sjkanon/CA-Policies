@@ -52,6 +52,7 @@ function validate(gewenst = readMethods()) {
   const errors = [];
   const warnings = [];
   const methodes = gewenst.methods || [];
+  const aaGuids = Object.fromEntries(Object.entries(gewenst.knownAaGuids || {}).filter(([k]) => k !== "_comment"));
 
   if (methodes.length === 0) errors.push("Geen enkele methode gedefinieerd.");
 
@@ -96,6 +97,26 @@ function validate(gewenst = readMethods()) {
       if (profiel.enforceAttestation && (profiel.passkeyTypes || []).includes("synced")) {
         errors.push(
           `${pNaam}: enforceAttestation staat aan én synced staat in passkeyTypes. Gesynchroniseerde passkeys ondersteunen geen attestation, dus dit profiel laat ze in werkelijkheid niet toe — het bestand belooft iets anders dan de tenant doet.`
+        );
+      }
+
+      // Windows Hello-passkeys kunnen niet met attestation. Een profiel dat ze toestaat én
+      // attestation afdwingt laat in werkelijkheid niets toe: de gebruiker probeert, het
+      // faalt, en niets in het portaal zegt waarom.
+      const helloGuids = new Set(Object.values(aaGuids).filter((v) => typeof v === "string"));
+      const toegestaneHello = (profiel.keyRestrictions?.aaGuids || []).filter(
+        (g) => helloGuids.has(String(g).toLowerCase()) || Object.keys(aaGuids).includes(g)
+      );
+      if (profiel.enforceAttestation && toegestaneHello.length > 0) {
+        errors.push(
+          `${pNaam}: staat Windows Hello-AAGUID's toe (${toegestaneHello.join(", ")}) én dwingt attestation af. Microsoft: "The profile can't Enforce attestation" — met deze combinatie kan niemand een Windows Hello-passkey registreren.`
+        );
+      }
+
+      // Een allow-lijst die aan staat maar leeg is, staat niets toe.
+      if (profiel.keyRestrictions?.isEnforced && profiel.keyRestrictions?.enforcementType === "allow" && (profiel.keyRestrictions?.aaGuids || []).length === 0) {
+        errors.push(
+          `${pNaam}: keyRestrictions staat op allow en is afgedwongen, maar de AAGUID-lijst is leeg. Dat staat geen enkele authenticator toe — niemand kan registreren.`
         );
       }
     }

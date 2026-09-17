@@ -84,7 +84,40 @@
       ],
       "tenantSpecific": "Passkey profiles vragen een eenmalige, ONOMKEERBARE opt-in in het Entra-portaal (Security → Authentication methods → Passkey (FIDO2) → banner). De bestaande globale instellingen verhuizen dan naar een Default passkey profile. Er passen er maximaal drie, dat profiel meegerekend.",
       "danger": "high",
-      "dangerReason": "Dit is de methode waar de phishing-bestendige CA-policies op steunen. Staat hij uit, dan kan niemand aan GLOBAL__2120 voldoen en is de tenant dicht voor iedereen die geen andere phishing-bestendige methode heeft."
+      "dangerReason": "Dit is de methode waar de phishing-bestendige CA-policies op steunen. Staat hij uit, dan kan niemand aan GLOBAL__2120 voldoen en is de tenant dicht voor iedereen die geen andere phishing-bestendige methode heeft.",
+      "windowsHelloPasskeys": {
+        "_comment": [
+          "Entra passkey on Windows: een passkey in de lokale Windows Hello-container, los van de",
+          "WHfB-credential. Twee regels van Microsoft die allebei hard zijn:",
+          "",
+          "1. Het profiel MOET de Windows Hello-AAGUID's expliciet toestaan.",
+          "2. Het profiel mag GEEN attestation afdwingen.",
+          "",
+          "En de valkuil die op 16 september 2026 bij tejo.be dertien mislukte pogingen kostte:",
+          "op een Entra joined of registered toestel blokkeert een bestaande WHfB-credential de",
+          "registratie van een passkey voor datzelfde account in dezelfde container. De registratie",
+          "faalt dan met 'passkey is already registered'. Zie scripts/Test-PasskeyReadiness.ps1.",
+          "",
+          "Op een beheerd, Entra joined toestel is dit meestal niet wat je wilt: WHfB is daar de",
+          "juiste keuze en doet ook het Windows-aanmeldscherm, wat Entra passkey on Windows niet doet.",
+          "Entra passkey on Windows is bedoeld voor niet-joined, persoonlijke of gedeelde pc's."
+        ],
+        "vereistProfiel": {
+          "passkeyTypes": [
+            "deviceBound"
+          ],
+          "enforceAttestation": false,
+          "keyRestrictions": {
+            "isEnforced": true,
+            "enforcementType": "allow",
+            "aaGuids": [
+              "windowsHelloHardware",
+              "windowsHelloVbsHardware"
+            ]
+          }
+        },
+        "blokkeertBijBestaandeWhfb": true
+      }
     },
     {
       "order": 3,
@@ -120,5 +153,16 @@
       "danger": "high",
       "dangerReason": "Zelfde volgorde-eis als SMS: eerst een alternatief geregistreerd, dan pas uit."
     }
-  ]
+  ],
+  "knownAaGuids": {
+    "_comment": [
+      "De AAGUID's die je in een keyRestrictions-lijst zet. Hier vastgelegd omdat ze bij de",
+      "klant met de hand ingetypt worden en een typfout in stilte betekent dat niemand kan",
+      "registreren — de lijst is dan syntactisch geldig en inhoudelijk leeg.",
+      "Bron: Microsoft Learn, 'Enable Microsoft Entra passkey on Windows'."
+    ],
+    "windowsHelloHardware": "08987058-cadc-4b81-b6e1-30de50dcbe96",
+    "windowsHelloVbsHardware": "9ddd1817-af5a-4672-a2b9-3e3dd95000a9",
+    "windowsHelloSoftware": "6028b017-b1d4-4c02-b4b3-afcdafc96bb2"
+  }
 }

@@ -28,8 +28,9 @@ Wat er wél is:
 | | Doet |
 |---|---|
 | `node scripts/authentication-methods.js` | Bewaakt het bestand zelf en de twee koppelingen. Blokkerend in CI |
-| `node --test scripts/authentication-methods.test.js` | Zes tests, waaronder de uitzetvolgorde |
+| `node --test scripts/authentication-methods.test.js` | Acht tests, waaronder de uitzetvolgorde |
 | `./scripts/Set-AuthenticationMethods.ps1 -TenantId <tenant>` | Vergelijkt een echte tenant met dit bestand. Zonder `-Apply` wijzigt het niets |
+| `./scripts/Test-PasskeyReadiness.ps1 -TenantId <tenant> -UserPrincipalName <upn>` | Zegt vóór de uitrol of een gebruiker een passkey kán registreren, en zo niet: waarom |
 
 Komt die categorie er ooit in het platform, dan staat dit bestand al in de vorm die hij nodig
 heeft: één regel per methode, met `state` en `configuration`.
@@ -50,16 +51,17 @@ Stap 4 en 5 zijn de enige die iets wégnemen. `Set-AuthenticationMethods.ps1` we
 `-CheckRegistrationFirst` zolang er gebruikers zijn zonder MFA-methode, en de test bewaakt dat
 een uit te zetten methode nooit vóór een aan te zetten methode staat.
 
-## Passkey profiles: handwerk, en dat blijft zo
+## Passkey profiles
 
-Profielen vragen een eenmalige opt-in in het portaal (**Entra ID › Security › Authentication
-methods › Policies › Passkey (FIDO2)**, via de banner). **Die opt-in is onomkeerbaar.** Je
-bestaande globale instellingen verhuizen dan naar een *Default passkey profile*; er passen er
-maximaal drie, dat profiel meegerekend.
+De opt-in gebeurt één keer in het portaal (**Entra ID › Security › Authentication methods ›
+Policies › Passkey (FIDO2)**, via de banner) en is **onomkeerbaar**. Je bestaande globale
+instellingen verhuizen dan naar een *Default passkey profile*; er passen er maximaal drie, dat
+profiel meegerekend. Dat is geen stap die een script voor je hoort te zetten.
 
-`Set-AuthenticationMethods.ps1` leest de profielen wel uit en meldt wat er afwijkt van dit
-bestand, maar zet ze niet. Een script dat dit half doet is gevaarlijker dan een script dat het
-niet doet: profielen bepalen wie er nog kan inloggen.
+`Set-AuthenticationMethods.ps1` leest de profielen daarna uit en meldt wat er afwijkt van dit
+bestand, maar zet ze niet — profielen bepalen wie er nog kan inloggen, en een script dat dat
+half doet is gevaarlijker dan een script dat het niet doet. Of CIPP ze wél kan zetten, zie
+hieronder.
 
 De twee profielen hier:
 
@@ -72,6 +74,27 @@ De twee profielen hier:
 en wordt aangemaakt door `New-CaPrerequisites.ps1` — een passkey profile kan niet op
 directory-rollen richten zoals een CA-policy dat doet, alleen op groepen.
 
+## Uitrollen via CIPP
+
+CIPP heeft een **Authentication Methods**-standard die de methodes hierboven zet: per methode
+Enabled / Disabled / Not Configured, met optioneel een doelgroep. `Not Configured` laat de
+huidige tenantinstelling staan — dat is de veilige stand voor wat je (nog) niet wilt aanraken.
+
+Eén detail uit [CIPP's eigen documentatie](https://docs.cipp.app/user-documentation/tenant/administration/authentication-methods)
+dat je een middag kan kosten:
+
+> "Enabling FIDO2 with **Enable Policy** rather than **Configure** turns on attestation
+> enforcement and self-service registration, as those are the defaults CIPP applies."
+
+Attestation aan betekent: geen gesynchroniseerde passkeys, en **geen Windows Hello-passkeys** —
+Microsoft schrijft voor dat een profiel daarvoor géén attestation mag afdwingen. Gebruik dus
+**Configure** en niet **Enable Policy**, en zet attestation expliciet op de waarde uit dit
+bestand (`false` voor het brede profiel).
+
+Of CIPP ook de passkey *profielen* met hun AAGUID-lijsten kan zetten, verschilt per versie —
+controleer dat in je eigen CIPP voordat je ervan uitgaat. Lukt het niet, dan is dat het enige
+deel dat in het portaal blijft.
+
 ## Twee dingen die stil misgaan
 
 **Attestation geldt alleen bij registratie.** Zet je hem later aan, dan blijven passkeys die
@@ -80,3 +103,27 @@ bestaande sleutels.
 
 **Iets weghalen sluit mensen buiten.** Een passkeytype uitzetten of een AAGUID uit een allow-list
 halen geldt voor registratie én aanmelding: wie daarmee registreerde, kan niet meer inloggen.
+
+## De valkuil die dit bij tejo.be een avond kostte
+
+Op 16 september 2026 mislukte het registreren van een passkey dertien keer over tachtig minuten.
+Het auditlog toonde alleen `User started the registration for Passkey` zonder afloop. De oorzaak
+staat bij [Microsoft](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-entra-passkeys-on-windows)
+maar niet in de foutmelding:
+
+> "If you then attempt to register a passkey on Windows for that same account, registration
+> fails because the Windows Hello for Business credential already exists."
+
+Op een Entra joined of registered toestel bezet de WHfB-credential de Windows Hello-container
+voor dat account. Een passkey ernaast kan niet. Toen de credential om 19:45:54 werd verwijderd,
+slaagde de registratie 83 seconden later.
+
+**De vraag die daaraan voorafgaat is belangrijker:** op een beheerd, Entra joined toestel is
+WHfB de juiste keuze, niet Entra passkey on Windows. WHfB doet ook het Windows-aanmeldscherm;
+Entra passkey on Windows niet. Die laatste is bedoeld voor niet-joined, persoonlijke of gedeelde
+pc's.
+
+`scripts/Test-PasskeyReadiness.ps1` controleert dit vooraf, samen met vijf andere blokkades die
+even stil zijn: methode uit, self-service uit, gast-account, attestation afgedwongen, en een
+AAGUID-lijst die Windows Hello uitsluit. Draai hem met `-Scenario WindowsHelloPasskey` als je
+een passkey in de Windows Hello-container wilt.

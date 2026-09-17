@@ -76,3 +76,41 @@ test("geen profiel belooft attestation én gesynchroniseerde passkeys", () => {
     }
   }
 });
+
+/**
+ * De twee valstrikken die op 16 september 2026 bij tejo.be dertien mislukte registraties
+ * kostten, of er dichtbij liggen. Allebei falen ze stil: de gebruiker probeert, het lukt niet,
+ * en niets in het portaal zegt waarom.
+ */
+test("geen profiel staat Windows Hello toe én dwingt attestation af", () => {
+  const gewenst = readMethods();
+  const hello = new Set(
+    Object.entries(gewenst.knownAaGuids || {})
+      .filter(([k]) => k !== "_comment")
+      .map(([, v]) => String(v).toLowerCase())
+  );
+  for (const methode of gewenst.methods) {
+    for (const profiel of methode.profiles || []) {
+      if (!profiel.enforceAttestation) continue;
+      const toegestaan = (profiel.keyRestrictions?.aaGuids || []).filter((g) => hello.has(String(g).toLowerCase()));
+      assert.deepStrictEqual(
+        toegestaan,
+        [],
+        `${profiel.displayName}: Microsoft schrijft voor dat een profiel voor Windows Hello-passkeys géén attestation mag afdwingen.`
+      );
+    }
+  }
+});
+
+test("een afgedwongen allow-lijst is nooit leeg", () => {
+  for (const methode of readMethods().methods) {
+    for (const profiel of methode.profiles || []) {
+      const kr = profiel.keyRestrictions;
+      if (!kr?.isEnforced || kr.enforcementType !== "allow") continue;
+      assert.ok(
+        (kr.aaGuids || []).length > 0,
+        `${profiel.displayName}: een lege allow-lijst staat geen enkele authenticator toe — niemand kan registreren.`
+      );
+    }
+  }
+});
