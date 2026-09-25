@@ -300,9 +300,10 @@ function main() {
       "Add Baseline-scherm, met dat template en die state.",
       "",
       "Vóór stage 1 op Remediate gaat: scripts/New-CaPrerequisites.ps1 -RequireSafeToDeploy moet",
-      "groen afsluiten in de doeltenant. De groepen 'Excluded from Conditional Access' en",
-      "'Licensed Users' moeten leden hebben; zonder de eerste is er geen break-glass, zonder de",
-      "tweede blokkeert 1110 elke gebruiker.",
+      "groen afsluiten in de doeltenant. De groepen 'Excluded from Conditional Access',",
+      "'SG-U-CA-Exclude-Breakglass' en 'Licensed Users' moeten leden hebben; zonder de eerste",
+      "twee — één break-glass-uitsluiting onder twee namen, allebei in dezelfde 35 templates —",
+      "is er geen break-glass, zonder de derde blokkeert 1110 elke gebruiker.",
     ],
     prerequisites: {
       script: "scripts/New-CaPrerequisites.ps1",

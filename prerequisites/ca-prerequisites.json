@@ -30,10 +30,21 @@
       "displayName": "Excluded from Conditional Access",
       "mailNickname": "excluded-from-conditional-access",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting. Staat in de excludeGroups van 35 van de 41 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'.",
+      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 35 van de 41 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 35 ernaast.",
       "danger": "critical",
       "dangerReason": "Deze groep leeg laten is het scenario waar CA-BASE-008-BreakGlassExclusion voor waarschuwt: tientallen policies actief en geen enkel account dat er buiten valt. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
-      "requiresMembers": true
+      "requiresMembers": true,
+      "breakGlassTarget": true
+    },
+    {
+      "displayName": "SG-U-CA-Exclude-Breakglass",
+      "mailNickname": "sg-u-ca-exclude-breakglass",
+      "membershipType": "assigned",
+      "purpose": "De break-glass-uitsluiting onder de SG-U-naamconventie van de klanttenant, naast 'Excluded from Conditional Access' en in exact dezelfde 35 templates. Twee namen voor één mechanisme is hier bewust: een tenant die de eerste naam al in gebruik heeft hoeft niets te hernoemen, en een tenant die alleen de SG-U-conventie kent hoeft geen prose-groep te introduceren. Beide moeten bestaan — een excludeGroup die de klant niet heeft sluit niemand uit.",
+      "danger": "critical",
+      "dangerReason": "Leeg is hier net zo gevaarlijk als bij 'Excluded from Conditional Access', en makkelijker te missen: de andere groep hééft leden, dus de uitsluiting líjkt geregeld. New-CaPrerequisites.ps1 vult daarom beide groepen uit -BreakGlassUserId; vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
+      "requiresMembers": true,
+      "breakGlassTarget": true
     },
     {
       "displayName": "Excluded from Legacy Authentication Block",

@@ -1,7 +1,7 @@
 {
   "category": "conditional-access",
   "version": "baseline-v1.0",
-  "reviewedAt": "2026-09-17",
+  "reviewedAt": "2026-09-25",
   "rules": [
     {
       "checkId": "CA-BASE-001-MFAAllUsers",
@@ -238,6 +238,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Excluded from Legacy Authentication Block"
           ]
         },
@@ -285,6 +286,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Excluded from Device Code Auth Flow Block"
           ]
         },
@@ -337,6 +339,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Excluded from Legacy Authentication Block"
           ]
         },
@@ -378,6 +381,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Excluded from Country Block List"
           ]
         },
@@ -433,7 +437,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "locations": {
@@ -489,7 +494,8 @@
             "Conditional Access Service Accounts"
           ],
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "locations": {
@@ -544,7 +550,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -585,7 +592,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "guestsOrExternalUsers": {
@@ -637,7 +645,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -680,7 +689,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -723,7 +733,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -773,7 +784,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -829,6 +841,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -899,7 +912,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -947,6 +961,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -998,6 +1013,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1070,7 +1086,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "sessionControls": {
@@ -1117,7 +1134,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "sessionControls": {
@@ -1164,7 +1182,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "sessionControls": {
@@ -1208,7 +1227,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "sessionControls": {
@@ -1248,6 +1268,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts",
             "Licensed Users"
           ]
@@ -1293,7 +1314,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "guestsOrExternalUsers": {
@@ -1374,7 +1396,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "locations": {
@@ -1474,7 +1497,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -1517,6 +1541,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1559,7 +1584,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -1605,6 +1631,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1645,6 +1672,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1716,7 +1744,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -1767,6 +1796,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1809,7 +1839,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "sessionControls": {
@@ -1849,6 +1880,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -1891,6 +1923,7 @@
         "groups": {
           "excludeGroups": [
             "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass",
             "Conditional Access Service Accounts"
           ]
         },
@@ -2165,7 +2198,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {
@@ -2212,7 +2246,8 @@
         },
         "groups": {
           "excludeGroups": [
-            "Excluded from Conditional Access"
+            "Excluded from Conditional Access",
+            "SG-U-CA-Exclude-Breakglass"
           ]
         },
         "grantControls": {

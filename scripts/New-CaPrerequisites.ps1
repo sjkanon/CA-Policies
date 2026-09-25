@@ -6,13 +6,16 @@
     VOORDAT de baseline wordt uitgerold.
 
 .DESCRIPTION
-    De templates verwijzen naar zes groepen en drie named locations die geen enkele tenant
+    De templates verwijzen naar acht groepen en vier named locations die geen enkele tenant
     vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: een uitzonderingsgroep
     die niet bestaat sluit niemand uit, dus de policy wordt strenger dan bedoeld. Twee
     gevallen zijn daarbij niet "strenger" maar "gesloten":
 
-      Excluded from Conditional Access  staat in 32 van de 33 templates. Leeg = geen enkel
-                                        account valt buiten de baseline = geen break-glass.
+      Excluded from Conditional Access  staan allebei in 35 van de 41 templates en zijn
+      SG-U-CA-Exclude-Breakglass        samen één mechanisme onder twee namen. Allebei leeg
+                                        = geen enkel account valt buiten de baseline = geen
+                                        break-glass. Eén van de twee leeg is verraderlijker:
+                                        de uitsluiting líjkt dan geregeld.
       Licensed Users                    1110 (state: enabled) blokkeert All behalve deze
                                         groep. Leeg of statisch = elke gebruiker geblokkeerd.
 
@@ -44,9 +47,10 @@
     hangt af van vestigingen, thuiswerkers en reizigers van deze klant.
 
 .PARAMETER BreakGlassUserId
-    Object-id('s) van de noodaccounts die in 'Excluded from Conditional Access' moeten. Laat
-    je dit leeg, dan wordt de groep wel aangemaakt maar blijft hij leeg - en dan mag de
-    baseline niet op Remediate.
+    Object-id('s) van de noodaccounts. Ze gaan in elke groep die in ca-prerequisites.json
+    breakGlassTarget draagt - vandaag 'Excluded from Conditional Access' en
+    'SG-U-CA-Exclude-Breakglass', allebei. Laat je dit leeg, dan worden de groepen wel
+    aangemaakt maar blijven ze leeg - en dan mag de baseline niet op Remediate.
 
 .PARAMETER RequireSafeToDeploy
     Sluit af met een fout zolang de kritieke groepen geen leden hebben. Gebruik dit in een
@@ -129,9 +133,11 @@ foreach ($groep in $prereq.groups) {
         }
     }
 
-    # Break-glass-leden. Alleen voor de groep die daarom vraagt; de rest vult de beheerder
-    # zelf, want wie daar in hoort is per klant een afweging en geen script.
-    if ($groepObject -and $groep.displayName -eq 'Excluded from Conditional Access' -and $BreakGlassUserId) {
+    # Break-glass-leden. Alleen voor de groepen die daarom vragen - welke dat zijn staat in
+    # ca-prerequisites.json (breakGlassTarget) en niet hier, zodat een tweede break-glass-naam
+    # geen scriptwijziging kost. De rest vult de beheerder zelf, want wie daar in hoort is per
+    # klant een afweging en geen script.
+    if ($groepObject -and $groep.breakGlassTarget -and $BreakGlassUserId) {
         $huidigeLeden = @(Get-MgGroupMember -GroupId $groepObject.Id -All).Id
         foreach ($userId in $BreakGlassUserId) {
             if ($huidigeLeden -contains $userId) {

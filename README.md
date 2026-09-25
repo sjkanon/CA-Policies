@@ -144,14 +144,17 @@ De stage-indeling volgt de metadata die de repo al had:
 
 ### Eerst de randvoorwaarden, dan pas Remediate
 
-De templates verwijzen naar zes groepen en vier named locations die geen enkele tenant
+De templates verwijzen naar acht groepen en vier named locations die geen enkele tenant
 vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: **een uitzonderingsgroep
 die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld en niets slaat
 alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
 
-- `Excluded from Conditional Access` staat in 35 van de 41 templates. De zes zonder richten
-  zich op workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raakt hij niets.
-  Leeg = geen break-glass.
+- `Excluded from Conditional Access` en `SG-U-CA-Exclude-Breakglass` staan allebei in 35 van
+  de 41 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
+  te hernoemen om de conventie te volgen die hij al voert. De zes zonder richten zich op
+  workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raken ze niets.
+  Allebei leeg = geen break-glass; één van de twee leeg is verraderlijker, want dan líjkt de
+  uitsluiting geregeld. `-BreakGlassUserId` vult ze daarom allebei.
 - `Licensed Users` — 1110 staat op `enabled` en blokkeert `All` behalve deze groep. Statisch
   of leeg aangemaakt blokkeert dat élke gebruiker in de tenant. Hij moet dynamisch zijn.
 
