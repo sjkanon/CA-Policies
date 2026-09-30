@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /**
- * Bewaakt de afspraken in authentication-methods/authentication-methods.json.
+ * Guards the agreements in authentication-methods/authentication-methods.json.
  *
- * ========================== WAAROM DIT EEN TEST IS ==========================
+ * ========================== WHY THIS IS A TEST ==========================
  *
- * Dit bestand heeft als enige deel van de baseline geen checkId en dus geen toetsing tegen een
- * klanttenant. Set-EntraAuthenticationMethods.ps1 vergelijkt wel, maar draait pas als iemand hem
- * draait — en bij één klant tegelijk. Deze test is het enige dat in CI faalt wanneer de
- * afspraken zichzelf tegenspreken.
+ * Nothing compares this file with a tenant automatically. Set-EntraAuthenticationMethods.ps1
+ * does, but only when someone runs it — and one tenant at a time. This test is the only thing
+ * that fails in CI when the agreements contradict themselves.
  *
- * Draaien: node --test scripts/authentication-methods.test.js
+ * Run: node --test scripts/authentication-methods.test.js
  */
 const assert = require("node:assert");
 const { test } = require("node:test");
@@ -78,7 +77,7 @@ test("geen profiel belooft attestation én gesynchroniseerde passkeys", () => {
 });
 
 /**
- * De twee valstrikken die op 16 september 2026 bij tejo.be dertien mislukte registraties
+ * De twee valstrikken die in september 2026 in één tenant dertien mislukte registraties
  * kostten, of er dichtbij liggen. Allebei falen ze stil: de gebruiker probeert, het lukt niet,
  * en niets in het portaal zegt waarom.
  */

@@ -2,7 +2,7 @@
   "version": "authentication-methods-v1.0",
   "reviewedAt": "2026-09-17",
   "_comment": [
-    "De gewenste stand van het authentication methods policy in een klanttenant: welke",
+    "De gewenste stand van het authentication methods policy in een tenant: welke",
     "methodes aan staan, en onder welke voorwaarden een passkey geregistreerd mag worden.",
     "",
     "Waarom dit een eigen map is en geen CATemplate: dit is geen Conditional Access. Een",
@@ -10,10 +10,9 @@
     "De twee grijpen wel in elkaar — GLOBAL__2120 eist een phishing-bestendige methode, en",
     "die eis is onvervulbaar zolang hier geen passkey aan staat.",
     "",
-    "Waarom dit geen baseline-v1.0.json voedt: de platform-engine kent de categorie",
-    "'authentication-methods' niet. Er is dus geen checkId en geen automatische toetsing —",
-    "Set-EntraAuthenticationMethods.ps1 is de enige manier om dit te vergelijken en te zetten.",
-    "Komt die categorie er ooit, dan is dit bestand er al in de vorm die hij nodig heeft.",
+    "Er is geen automatische toetsing tegen een tenant: Set-EntraAuthenticationMethods.ps1 is",
+    "de enige manier om dit te vergelijken en te zetten. scripts/authentication-methods.js",
+    "bewaakt in CI dat het bestand zichzelf en de CA-templates niet tegenspreekt.",
     "",
     "De volgorde in 'order' is de uitrolvolgorde en is niet vrij: zonder Temporary Access Pass",
     "heeft een nieuwe medewerker niets om zijn eerste passkey mee te registreren."
@@ -93,7 +92,7 @@
           "1. Het profiel MOET de Windows Hello-AAGUID's expliciet toestaan.",
           "2. Het profiel mag GEEN attestation afdwingen.",
           "",
-          "En de valkuil die op 16 september 2026 bij tejo.be dertien mislukte pogingen kostte:",
+          "En de valkuil die in september 2026 in één tenant dertien mislukte pogingen kostte:",
           "op een Entra joined of registered toestel blokkeert een bestaande WHfB-credential de",
           "registratie van een passkey voor datzelfde account in dezelfde container. De registratie",
           "faalt dan met 'passkey is already registered'. Zie scripts/Test-EntraPasskeyReadiness.ps1.",
@@ -156,8 +155,8 @@
   ],
   "knownAaGuids": {
     "_comment": [
-      "De AAGUID's die je in een keyRestrictions-lijst zet. Hier vastgelegd omdat ze bij de",
-      "klant met de hand ingetypt worden en een typfout in stilte betekent dat niemand kan",
+      "De AAGUID's die je in een keyRestrictions-lijst zet. Hier vastgelegd omdat ze per",
+      "tenant met de hand ingetypt worden en een typfout in stilte betekent dat niemand kan",
       "registreren — de lijst is dan syntactisch geldig en inhoudelijk leeg.",
       "Bron: Microsoft Learn, 'Enable Microsoft Entra passkey on Windows'."
     ],

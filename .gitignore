@@ -1,0 +1,6 @@
+# Working copies with tenant-specific values: country lists, IP ranges, break-glass account ids,
+# output of the readiness and prerequisite scripts. This repo holds templates for every tenant; a
+# value that ends up here once stays in the history forever, even after a commit that removes it.
+# Whatever is in local/ never goes along — also not to a mirror (scripts/sync-mirror.js copies
+# only what git tracks).
+/local/

@@ -1,8 +1,10 @@
+**Nederlands** · [English](README.en.md) · [Français](README.fr.md)
+
 # authentication-methods/
 
 `authentication-methods.json` is de gewenste stand van het **authentication methods policy** in
-een klanttenant: welke methodes aan staan, en onder welke voorwaarden een passkey geregistreerd
-mag worden.
+een tenant: welke methodes aan staan, en onder welke voorwaarden een passkey geregistreerd mag
+worden.
 
 **Dit is geen Conditional Access.** Een CA-policy zegt *wanneer* je ergens bij mag; dit zegt
 *waarmee* je je überhaupt kunt aanmelden. De twee grijpen wel in elkaar, en precies daar gaat het
@@ -17,13 +19,10 @@ mis als je er één los bekijkt:
 van die templates, en faalt hard. Dat is geen schemavalidatie maar de enige plek waar deze
 afhankelijkheid wordt bewaakt.
 
-## Waarom hier geen checkId bij zit
+## Wat dit bestand bewaakt
 
-De platform-engine kent de categorie `authentication-methods` niet. Er is dus geen
-`baseline-v1.0.json`, geen toetsing tegen een klanttenant en geen driftsignaal — wat hier
-scheefstaat, staat scheef tot iemand het merkt.
-
-Wat er wél is:
+Niets vergelijkt dit bestand vanzelf met een tenant. Wat hier scheefstaat, staat scheef tot
+iemand het merkt — daarom deze vier:
 
 | | Doet |
 |---|---|
@@ -31,9 +30,6 @@ Wat er wél is:
 | `node --test scripts/authentication-methods.test.js` | Acht tests, waaronder de uitzetvolgorde |
 | `./scripts/Set-EntraAuthenticationMethods.ps1 -TenantId <tenant>` | Vergelijkt een echte tenant met dit bestand. Zonder `-Apply` wijzigt het niets |
 | `./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId <tenant> -UserPrincipalName <upn>` | Zegt vóór de uitrol of een gebruiker een passkey kán registreren, en zo niet: waarom |
-
-Komt die categorie er ooit in het platform, dan staat dit bestand al in de vorm die hij nodig
-heeft: één regel per methode, met `state` en `configuration`.
 
 ## De volgorde is niet vrij
 
@@ -104,19 +100,19 @@ bestaande sleutels.
 **Iets weghalen sluit mensen buiten.** Een passkeytype uitzetten of een AAGUID uit een allow-list
 halen geldt voor registratie én aanmelding: wie daarmee registreerde, kan niet meer inloggen.
 
-## De valkuil die dit bij tejo.be een avond kostte
+## De valkuil die een avond kostte
 
-Op 16 september 2026 mislukte het registreren van een passkey dertien keer over tachtig minuten.
-Het auditlog toonde alleen `User started the registration for Passkey` zonder afloop. De oorzaak
-staat bij [Microsoft](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-entra-passkeys-on-windows)
+In september 2026 mislukte in één tenant het registreren van een passkey dertien keer over
+tachtig minuten. Het auditlog toonde alleen `User started the registration for Passkey` zonder
+afloop. De oorzaak staat bij [Microsoft](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-entra-passkeys-on-windows)
 maar niet in de foutmelding:
 
 > "If you then attempt to register a passkey on Windows for that same account, registration
 > fails because the Windows Hello for Business credential already exists."
 
 Op een Entra joined of registered toestel bezet de WHfB-credential de Windows Hello-container
-voor dat account. Een passkey ernaast kan niet. Toen de credential om 19:45:54 werd verwijderd,
-slaagde de registratie 83 seconden later.
+voor dat account. Een passkey ernaast kan niet. Nadat de credential was verwijderd, slaagde de
+registratie 83 seconden later.
 
 **De vraag die daaraan voorafgaat is belangrijker:** op een beheerd, Entra joined toestel is
 WHfB de juiste keuze, niet Entra passkey on Windows. WHfB doet ook het Windows-aanmeldscherm;

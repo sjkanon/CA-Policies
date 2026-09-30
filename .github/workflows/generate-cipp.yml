@@ -1,0 +1,103 @@
+# Validates everything that is derived from CATemplate/ and regenerates the CIPP export in cipp/
+# on every push to main that changes it, and opens a PR for it: never a silent commit on main. A
+# generated file that nobody reviews is exactly the kind of unseen change that causes baseline
+# drift.
+#
+# Run the pipeline from scripts/README.md locally to see what a change to a template produces
+# before you push it.
+
+name: Generate CIPP export from CATemplate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "CATemplate/**"
+      - "prerequisites/**"
+      - "controls/**"
+      - "authentication-methods/**"
+      - "scripts/prerequisites.js"
+      - "scripts/export-cipp-baseline.js"
+      - "scripts/check-controls.js"
+      - "scripts/authentication-methods.js"
+      - "scripts/*.test.js"
+      - ".github/workflows/generate-cipp.yml"
+  # Also on a PR, and that is the more important of the two: a template that refers to an
+  # undefined group, or that has no standards mapping, must fail while the author still knows
+  # what he meant. If this only ran on main, you would only see it after the merge.
+  pull_request:
+    paths:
+      - "CATemplate/**"
+      - "prerequisites/**"
+      - "controls/**"
+      - "authentication-methods/**"
+      - "scripts/prerequisites.js"
+      - "scripts/export-cipp-baseline.js"
+      - "scripts/check-controls.js"
+      - "scripts/authentication-methods.js"
+      - "scripts/*.test.js"
+      - ".github/workflows/generate-cipp.yml"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      # Before generating: does every template refer only to groups and named locations defined
+      # in prerequisites/ca-prerequisites.json? A reference without a definition is a lock-out
+      # in the making: an exclusion group that does not exist in the tenant excludes nobody.
+      - name: Check the prerequisites
+        run: node scripts/prerequisites.js
+
+      # The standards mapping that feeds COMPLIANCE.md in the IntuneBackup repo. Only the
+      # structure here: does every template have an entry, and does no entry name a template
+      # that does not exist. Whether the labels are in the vocabulary cannot be checked here -
+      # that lives in the other repo - and is guarded there by generate-compliance.js --strict.
+      - name: Check the standards mapping
+        run: node scripts/check-controls.js
+
+      # Nothing compares the authentication methods policy with a tenant automatically. This
+      # step is the only thing that fails when the agreements contradict themselves - notably
+      # the two links that break silently: 2120 requires a phishing-resistant method that is
+      # not there, or 2180 requires a TAP that is off.
+      - name: Check the authentication methods policy
+        run: node scripts/authentication-methods.js
+
+      # The CIPP deployment side. Always without --remediate-stage1: which stage may enforce is
+      # a decision per tenant, after New-CaPrerequisites.ps1, and not something that belongs in
+      # a generated file on main.
+      - name: Generate cipp/ (template import and stage split)
+        run: node scripts/export-cipp-baseline.js
+
+      # After generating, because some tests look at the result. If this step fails, no PR is
+      # opened.
+      - name: Run the tests
+        run: node --test scripts/*.test.js
+
+      # Only on main. On a pull_request, generating is the check ("does this stay deterministic
+      # and complete?"); opening a PR on top of a PR is not.
+      - name: Open PR with the regenerated CIPP export (if anything changed)
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: regenerate cipp/ from CATemplate/"
+          title: "CIPP export regenerated from CATemplate/"
+          body: >
+            Generated automatically by `.github/workflows/generate-cipp.yml` after a change in
+            `CATemplate/`. Review the diff before you merge — in particular templates that are
+            new in, moved between or gone from a stage in `cipp/baseline-stages.json` (the run
+            summary lists them). `cipp/` is the deployment side and is always entirely on
+            `Report`: switching stage 1 to `Remediate` happens per tenant, after
+            `scripts/New-CaPrerequisites.ps1`.
+          branch: auto/regenerate-cipp
+          delete-branch: true
+          add-paths: |
+            cipp/ca-templates-import.json
+            cipp/baseline-stages.json

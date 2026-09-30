@@ -1,0 +1,9 @@
+# Keep line endings in the repository LF, whatever the contributor's core.autocrlf says. The
+# generated files in cipp/ are written with LF by Node; without this rule a checkout on Windows
+# without autocrlf can commit them back with CRLF, and every line then shows up as changed in the
+# PR that the workflow opens.
+* text=auto
+
+# The templates in CATemplate/ are single-line JSON exported from CIPP, without a trailing
+# newline. Leave them byte for byte as CIPP wrote them.
+CATemplate/GLOBAL__*.json -text

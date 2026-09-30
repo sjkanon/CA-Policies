@@ -1,19 +1,20 @@
+**Nederlands** · [English](ANALYSE.en.md) · [Français](ANALYSE.fr.md)
+
 # Gapanalyse — wat mist de CA-baseline, en wat moet er veranderen
 
-Handgeschreven, in tegenstelling tot [`README.md`](README.md) ernaast. Dit legt vast waar de
+Handgeschreven. Dit legt vast waar de
 33 templates vandaan komen, waartegen ze zijn getoetst, en — belangrijker — wat er bewust
 **niet** in zit en waarom. Zonder dat laatste weegt een volgende ronde dezelfde policies
 opnieuw.
 
-Datum: 3 september 2026. De set telde toen 33 templates plus 10 losse checks in
-`EXISTING_RULES` — samen 43 regels in `baseline/conditional-access/baseline-v1.0.json`.
-Sinds de tweede ronde (4 september 2026, onderaan) zijn het er 40 + 10 = 50; de cijfers in
-de rest van dit document zijn die van de eerste ronde en zijn bewust niet herschreven.
+Datum: 3 september 2026. De set telde toen 33 templates. Na de latere rondes (onderaan) zijn
+het er 41; de cijfers in de rest van dit document zijn die van de ronde waarin ze staan en zijn
+bewust niet herschreven.
 
 ## De vraag
 
-De Intune-set is in augustus 2026 tegen IntuneAdmin gelegd (874 profielen,
-[`ANALYSE.md` in IntuneBackup](https://github.com/sjkanon/IntuneBackup/blob/main/ANALYSE.md)).
+De Intune-set is in augustus 2026 tegen IntuneAdmin gelegd (874 profielen, zie
+`docs/ANALYSE.md` in de IntuneBackup-repo).
 Voor CA gebeurde iets vergelijkbaars, maar de uitkomst staat ergens anders en is inmiddels
 verlopen. Deze ronde beantwoordt twee vragen die daar niet in zaten:
 
@@ -21,15 +22,14 @@ verlopen. Deze ronde beantwoordt twee vragen die daar niet in zaten:
    Foundations en Microsofts eigen CA-templates — in plaats van tot community-frameworks?
 2. Wat mankeert er aan de set **als geheel**, los van welke maatregelen erin zitten?
 
-Die tweede vraag kwam op door de toetsing van een echte klanttenant (september
+Die tweede vraag kwam op door de set naast een echte tenant te leggen (september
 2026). Daar bleek dat drie eigenschappen van de set uitrol in de weg zitten, en die zijn met
 geen enkele policyvergelijking te vinden.
 
 ## Wat er al lag
 
-[`docs/ca-baseline-gap.md`](https://github.com/sjkanon/Platform) in **sjkanon/Platform**, van
-13 augustus 2026, gegenereerd door `npm run ca-baseline-gap`. Dat rapport legde de set naast
-drie persona- of nummergebaseerde frameworks:
+Een gaprapport van 13 augustus 2026, gegenereerd buiten deze repo. Dat rapport legde de set
+naast drie persona- of nummergebaseerde frameworks:
 
 | Framework | Policies | Toen gedekt |
 |---|---:|---:|
@@ -57,14 +57,15 @@ achterstand maar het tegendeel: **elke kandidaat die het aandroeg is inmiddels g
 | *optional* — sessies via Defender for Cloud Apps | `3060` |
 | *optional* — managed identities bij verhoogd risico | `1140` |
 | *optional* — Cloud PC-toegang vanaf mobiel | `2150` |
-| *klantbesluit* — Terms of Use | `CA-BASE-040` (eigen rule-type, geen template) |
-| *klantbesluit* — phishing-resistant MFA voor iedereen | `2120` |
-| *klantbesluit* — beheerders alleen vanaf compliant apparaat | `2130` |
-| *klantbesluit* — beheerders niet vanaf onvertrouwde locaties | `1130` |
-| *klantbesluit* — CAE expliciet afdwingen | `3050` |
+| *besluit per tenant* — Terms of Use | geen template — toen een losse controle zonder uitrol, die in september 2026 is vervallen |
+| *besluit per tenant* — phishing-resistant MFA voor iedereen | `2120` |
+| *besluit per tenant* — beheerders alleen vanaf compliant apparaat | `2130` |
+| *besluit per tenant* — beheerders niet vanaf onvertrouwde locaties | `1130` |
+| *besluit per tenant* — CAE expliciet afdwingen | `3050` |
 | *nog niet* — agent-identiteiten | **nog steeds niet** — zie hieronder |
 
-Veertien van de vijftien afgehandeld. De vergelijking met community-frameworks is daarmee
+Veertien van de vijftien afgehandeld; Terms of Use is nooit een template geworden en staat
+sinds september 2026 nergens meer. De vergelijking met community-frameworks is daarmee
 uitgeput; wat overblijft moet uit een andere hoek komen.
 
 ## Bronnen van deze ronde
@@ -74,10 +75,10 @@ uitgeput; wat overblijft moet uit een andere hoek komen.
 | [Microsoft cloud security benchmark — Identity Management](https://learn.microsoft.com/en-us/security/benchmark/azure/mcsb-identity-management) | IM-1 t/m IM-9; IM-7 somt zeven CA-toepassingen op | alle zeven nagelopen |
 | [CIS Microsoft 365 Foundations Benchmark](https://www.cisecurity.org/benchmark/microsoft_365), sectie 5.2.2 | v4/v5 controls 1–12, plus de vijf die v7.0.0 toevoegde | de vijf nieuwe apart getoetst |
 | [Microsofts eigen CA-templates](https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-policy-common) | zes categorieën, waaronder de nieuwe **AI Agents** | per categorie vergeleken |
-| Toetsing van een klanttenant, september 2026 | 33 templates tegen 16 werkelijke policies | leverde de structurele bevindingen |
+| Vergelijking met een echte tenant, september 2026 | 33 templates tegen 16 werkelijke policies | leverde de structurele bevindingen |
 
-De frameworks van Chronlund, van Surksum en Verlinden zijn **niet** opnieuw gedraaid — dat
-doet `npm run ca-baseline-gap` in Platform, en dat script hoort daar te blijven.
+De frameworks van Chronlund, van Surksum en Verlinden zijn **niet** opnieuw gedraaid; het
+rapport van 13 augustus volstond daarvoor.
 
 ## Uitkomst in cijfers
 
@@ -118,7 +119,7 @@ access*, *Configure policy for on-behalf-of agent access*), en de conditie `agen
 het Graph-schema van élke policy — hij staat in alle 33 van onze templates, op `null`.
 
 Dat verandert de afweging maar niet het antwoord. Het argument tegen was nooit "de maatregel
-deugt niet" maar "de voorziening is er niet". Zodra `agents` bij klanten daadwerkelijk te
+deugt niet" maar "de voorziening is er niet". Zodra `agents` in tenants daadwerkelijk te
 configureren is, is dit een `optional`-template van hetzelfde soort als `1140` — en het
 `optional`-mechanisme bestaat juist om die ruis te voorkomen. **Actie: opnieuw beoordelen
 zodra Entra Agent ID algemeen beschikbaar is, en dan als `optional` toevoegen, niet als
@@ -135,12 +136,12 @@ gewoon template.**
 - **CIS 5.2.2.16** (token protection) — `2110`.
 - **CIS 5.2.2.17** (authentication transfer blokkeren) — `1020` dekt dit, met
   `authenticationFlows.transferMethods = "deviceCodeFlow,authenticationTransfer"`. **Maar dat
-  template staat op `disabled`** en levert dus nooit een `pass` op. Zie hieronder.
+  template staat op `disabled`** en dwingt dus niets af. Zie hieronder.
 
 ## Wat er stuk is aan de set zelf
 
 Vier eigenschappen die met geen policyvergelijking te vinden zijn, maar die uitrol in de weg
-zitten. Alle vier gevonden door de set op een echte klanttenant te leggen.
+zitten. Alle vier gevonden door de set op een echte tenant te leggen.
 
 ### 1. De randvoorwaarden worden niet meegeleverd — en dat is gevaarlijk
 
@@ -161,19 +162,18 @@ Het probleem is niet dat de uitrol dan faalt. Het probleem is dat hij *slaagt*: 
 uitzonderingsgroep die niet bestaat sluit niemand uit, dus de policy wordt strenger dan
 bedoeld. `Excluded from Conditional Access` is de break-glass-uitsluiting. Een set van 33
 policies uitrollen waarvan de break-glass-groep niet bestaat is de klassieke manier om een
-tenant volledig buiten te sluiten — precies waar `CA-BASE-008-BreakGlassExclusion` voor
-waarschuwt, maar dan veroorzaakt door onze eigen templates.
+tenant volledig buiten te sluiten — en dan veroorzaakt door onze eigen templates.
 
 **Wat moet veranderen:** de repo levert de groepen en named locations als aanmaakscript mee,
-en `generate-baseline.js` faalt op een template dat naar een groep of locatie verwijst die
+en de generator faalt op een template dat naar een groep of locatie verwijst die
 niet in die lijst staat. Zoals `check-scope.js` in IntuneBackup bewaakt dat elk bestand op
 zijn plek staat, moet hier bewaakt worden dat elke verwijzing een gedefinieerde tegenhanger
 heeft.
 
-### 2. Twaalf van de 33 templates kunnen nooit een `pass` opleveren
+### 2. Twaalf van de 33 templates dwingen niets af
 
-De README zegt het zelf: *"een structureel matchende maar disabled/report-only policy levert
-`warning` op, geen `pass`."* Elf templates staan op `disabled`, één op report-only.
+Elf templates staan op `disabled`, één op report-only. Ze worden meegeleverd, maar een tenant
+die de set overneemt krijgt van deze twaalf niets afgedwongen.
 
 ```
 disabled    1020  Device Code Auth Flow            <- dekt CIS 5.2.2.17 (L1)
@@ -190,11 +190,11 @@ disabled    3040  Block File Downloads On Unmanaged Devices
 report-only 3020  BYOD Persistence
 ```
 
-Dat is een derde van de set die per definitie geel oplevert. Nergens staat wélke, of waarom.
+Dat is een derde van de set die per definitie niets doet. Nergens staat wélke, of waarom.
 Twee gevallen zijn bovendien onderling tegenstrijdig:
 
 - **`2055` staat uit, `2120` staat aan.** 2055 is phishing-resistant MFA voor beheerders,
-  2120 voor álle gebruikers. `OPTIONAL_TEMPLATES` noemt 2120 *"het einddoel waar de
+  2120 voor álle gebruikers. De lijst met optionele templates (nu `CATemplate/_manifest.json`) noemt 2120 *"het einddoel waar de
   admin-variant (2055) de eerste stap van is… een uitrolproject en geen instelling"*. De set
   levert dus de eerste stap uit en het einddoel aan. Omgedraaid.
 - **`1090` staat aan, `1100` staat uit.** Beide risicopolicies, beide Entra ID P2. Geen reden
@@ -206,11 +206,11 @@ template zonder die reden. Daarna 2055 aanzetten en de 1090/1100-keuze rechttrek
 
 ### 3. De licentiemarkering is half
 
-`OPTIONAL_TEMPLATES` bestaat precies om te voorkomen dat een klant een `fail` krijgt voor
-iets wat hij niet kán hebben. Zes templates staan erin. **Vijf die Entra ID P2 vereisen staan
-er niet in:**
+De optionele lijst bestaat precies om te voorkomen dat een tenant iets afgedwongen krijgt wat
+hij zonder licentie niet kán hebben. Zes templates staan erin. **Vijf die Entra ID P2 vereisen
+staan er niet in:**
 
-| Template | Vereist | In `OPTIONAL_TEMPLATES` |
+| Template | Vereist | Optioneel |
 |---|---|---|
 | `1090` High-Risk Sign-Ins | Entra ID P2 | nee |
 | `1100` High-Risk Users | Entra ID P2 | nee |
@@ -220,25 +220,22 @@ er niet in:**
 | `1140` Managed Identities At Risk | Workload ID Premium | ja |
 | `3060` Defender for Cloud Apps | MDCA | ja |
 
-De inconsistentie is aantoonbaar en niet bedoeld: de oudere checks `CA-BASE-004` en `005`
-dragen wél `params: { requiresEntraIdP2: true }`. De templates die ze vervingen (`1090`,
-`1100`, `2010`, `2020`) namen die markering niet mee.
+De inconsistentie is aantoonbaar en niet bedoeld: de oudere, losse controles die deze
+templates vervingen droegen de P2-markering wél. De templates (`1090`, `1100`, `2010`,
+`2020`) namen die markering niet mee.
 
-**Wat moet veranderen:** die vijf in `OPTIONAL_TEMPLATES` met de licentie als reden. Bij een
-klant zonder P2 zijn dat nu vijf permanente rode vinkjes voor iets wat niet te kopen is
-zonder licentie-upgrade — en een check die altijd rood staat leert iedereen om rood te
-negeren.
+**Wat moet veranderen:** die vijf optioneel, met de licentie als reden. In een tenant zonder P2
+zijn dat nu vijf policies in de kern die daar niet kunnen werken — en een kern waarvan een deel
+nooit werkt leert iedereen om de rest ook niet serieus te nemen.
 
-### 4. De gapanalyse staat in de verkeerde repo
+### 4. De gapanalyse stond buiten deze repo
 
-`docs/ca-baseline-gap.md` in Platform beschrijft de baseline van deze repo. De README hier
-zegt bij *Een policy toevoegen* niets over het bijwerken daarvan, dus het rapport liep
+Het rapport van 13 augustus beschreef de templates van deze repo, maar stond ergens anders. De
+README hier zei bij *Een policy toevoegen* niets over het bijwerken daarvan, dus het rapport liep
 onopgemerkt drie weken achter — 20 templates beschreven, 33 aanwezig.
 
-**Wat moet veranderen:** `npm run ca-baseline-gap` draaien bij elke wijziging in
-`CATemplate/`, net zoals `.github/workflows/generate-baseline.yml` de baseline al
-regenereert. Het generatorscript hoort in Platform te blijven (het leest daar de
-frameworkbronnen), maar de trigger hoort hier.
+**Wat moet veranderen:** de analyse hoort naast de templates, en bij elke inhoudelijke wijziging
+in `CATemplate/` een ronde erbij. Dat is dit document.
 
 ## Waarom er geen persona's zijn
 
@@ -254,7 +251,7 @@ plaats van in de naam.
 
 Persona's toevoegen zou betekenen: dezelfde maatregel in twee policies knippen zodra hij voor
 twee groepen anders uitpakt. Dat is precies wat het rapport van 13 augustus expliciet
-afwijst — *"één regel per maatregel, niet per policy"* — omdat het bij elke klant twee checks
+afwijst — *"één regel per maatregel, niet per policy"* — omdat het twee policies
 oplevert voor één vraag.
 
 **Wat wél moet:** het prefix `GLOBAL__` suggereert een tweede dimensie die er niet is en ook
@@ -269,8 +266,8 @@ eraan, maar leg in de README uit dat het geen belofte is.
 | **Persona-splitsing** | Zie hierboven. Eén regel per maatregel; het onderscheid zit in `includeRoles`. |
 | **MFA voor serviceaccounts** (Verlinden `CA300`) | Spreekt onszelf tegen: `1060` beperkt serviceaccounts tot vertrouwde IP's en `2050` sluit ze juist uit van de MFA-eis. Een niet-interactief account kan geen MFA doen. |
 | **Linux toestaan vanaf compliant apparaat** (van Surksum `CAD011`) | Spreekt `1030` tegen, dat alles buiten Android/iOS/Windows/macOS blokkeert. Wie Linux wil ondersteunen past `1030` aan — één wijziging, geen tweede policy. |
-| **Microsofts templates rechtstreeks via Graph** (`/identity/conditionalAccess/templates`) | De meest onderhoudsarme toetssteen, en nog steeds niet uitgezocht of de service principal van het beheerportaal er met zijn huidige permissies bij kan. Deze ronde is de templatelijst uit de documentatie gebruikt in plaats van uit de API. Blijft openstaan. |
-| **[AlexFilipin/ConditionalAccess](https://github.com/AlexFilipin/ConditionalAccess)** | Vierde persona-gebaseerde set. Niet meegenomen — de drie die Platform al draait leverden bij de laatste ronde nul nieuwe maatregelen op die niet al uit CIS of Microsoft kwamen. Opnieuw bekijken zodra die drie niets meer opleveren. |
+| **Microsofts templates rechtstreeks via Graph** (`/identity/conditionalAccess/templates`) | De meest onderhoudsarme toetssteen, en nog steeds niet uitgezocht welke permissies dat vraagt. Deze ronde is de templatelijst uit de documentatie gebruikt in plaats van uit de API. Blijft openstaan. |
+| **[AlexFilipin/ConditionalAccess](https://github.com/AlexFilipin/ConditionalAccess)** | Vierde persona-gebaseerde set. Niet meegenomen — de drie uit het rapport van 13 augustus leverden nul nieuwe maatregelen op die niet al uit CIS of Microsoft kwamen. Opnieuw bekijken zodra die drie niets meer opleveren. |
 
 ## Wat er moet veranderen — de lijst
 
@@ -278,17 +275,15 @@ Op volgorde. De eerste drie zijn dringender dan elk nieuw template, want ze rake
 er al staat.
 
 1. **Randvoorwaarden meeleveren.** Groepen en named locations als aanmaakscript, plus een
-   controle in `generate-baseline.js` die faalt op een verwijzing zonder definitie. Zonder
+   controle die faalt op een verwijzing zonder definitie. Zonder
    dit is elke uitrol een lock-outrisico.
-2. **`OPTIONAL_TEMPLATES` aanvullen** met `1090`, `1100`, `2010`, `2020` en `2110`, reden
+2. **De optionele lijst aanvullen** met `1090`, `1100`, `2010`, `2020` en `2110`, reden
    Entra ID P2.
 3. **Een reden verplichten bij elke niet-`enabled` `state`,** en de twaalf gevallen
    langslopen. Begin met `2055` aanzetten en de `1090`/`1100`-tegenstrijdigheid oplossen.
 4. **Nieuw template:** periodieke herauthenticatie voor alle gebruikers (CIS 5.2.2.13).
-   Eerstvolgende vrije checkId volgens `eerstvolgendVrijNummer()`.
 5. **Nieuw template (`optional`):** insider risk, licentie Microsoft Purview.
-6. **`npm run ca-baseline-gap` koppelen** aan wijzigingen in `CATemplate/`, zodat het rapport
-   in Platform niet opnieuw drie weken achterloopt.
+6. **De gapanalyse naast de templates houden**, zodat hij niet opnieuw drie weken achterloopt.
 7. **Agent-identiteiten opnieuw beoordelen** zodra Entra Agent ID algemeen beschikbaar is —
    dan als `optional`.
 8. **Microsofts templates via Graph** uitzoeken als vervanging voor de handmatige
@@ -302,36 +297,34 @@ voegen twee templates toe. Punt 6 t/m 8 zijn proces.
 # Ronde 2 — j0eyv Conditional Access Baseline 2026.6.1
 
 Datum: 4 september 2026. De eerste ronde legde de set naast MCSB, CIS en Microsofts eigen
-templates en zette de community-frameworks bewust opzij ("die doet `npm run ca-baseline-gap`
-in Platform"). Deze ronde doet er alsnog één met de hand, en wel de enige die sinds augustus
+templates en zette de community-frameworks bewust opzij. Deze ronde doet er alsnog één met de hand, en wel de enige die sinds augustus
 is bijgewerkt: [`j0eyv/ConditionalAccessBaseline`](https://github.com/j0eyv/ConditionalAccessBaseline),
-versie **2026.6.1** (12 juni 2026), 36 policies. Niet via Platform — die koppeling is voor de
-rapportage, en wat hier moest gebeuren is templates schrijven in het CIPP-formaat van
-`CATemplate/`.
+versie **2026.6.1** (12 juni 2026), 36 policies. Met de hand, want wat hier moest gebeuren is
+templates schrijven in het CIPP-formaat van `CATemplate/`.
 
 **Uitkomst: 26 van zijn 36 waren gedekt (72%, was 67% in augustus).** Wat ontbrak zat in twee
 hoeken — agent-identiteiten en gastsessies — plus vier fouten in policies die er al stonden.
 
 ## Wat is toegevoegd
 
-| Template | checkId | Bron | Waarom |
-|---|---|---|---|
-| `3070 SESSION` Session Limits All Users | 044 | CA402/CA403 + CIS 5.2.2.13 | Sessieduur gold alleen voor beheerders (`3010`) en BYOD (`3020`), en `3020` sloot gasten expliciet uit. Een gast had dus een **onbeperkte sessie op een onbeheerd apparaat**. Nu 12 uur voor iedereen behalve break-glass en serviceaccounts; `3010` blijft met 9 uur strenger voor beheerders. |
-| `1150 BLOCK` Risky Agent Identities | 045 | CA501 | `agentIdRiskLevels: high` op agent-service-principals. `1140` dekt alleen `servicePrincipalRiskLevels` — een andere identiteit, geen dubbeling. |
-| `1160 BLOCK` Agent Identities To Agent Resources | 046 | CA502 | Allow-list op `AllAgentIdResources`. |
-| `2160 GRANT` Agent Users Compliant Device | 047 | CA503 | `agentContext: agentUserSessionsInitiatedFromEndpoints`. |
-| `1170 BLOCK` Risky Agent Users | 048 | CA504 | `agentIdRiskLevels: medium,high` op agent-*users*. |
-| `1180 BLOCK` Agent Users Outside Compliant Network | 049 | CA505 | Enige plek in de set met een compliant-network-conditie (Global Secure Access). |
-| `2170 GRANT` MFA for Intune Enrollment | 050 | CA203 | `2080` dekt de user action `urn:user:registerdevice`, niet de app `d4ebce55` (Intune Enrollment) met `frequencyInterval: everyTime`. Ander pad, zelfde moment. |
+| Template | Bron | Waarom |
+|---|---|---|
+| `3070 SESSION` Session Limits All Users | CA402/CA403 + CIS 5.2.2.13 | Sessieduur gold alleen voor beheerders (`3010`) en BYOD (`3020`), en `3020` sloot gasten expliciet uit. Een gast had dus een **onbeperkte sessie op een onbeheerd apparaat**. Nu 12 uur voor iedereen behalve break-glass en serviceaccounts; `3010` blijft met 9 uur strenger voor beheerders. |
+| `1150 BLOCK` Risky Agent Identities | CA501 | `agentIdRiskLevels: high` op agent-service-principals. `1140` dekt alleen `servicePrincipalRiskLevels` — een andere identiteit, geen dubbeling. |
+| `1160 BLOCK` Agent Identities To Agent Resources | CA502 | Allow-list op `AllAgentIdResources`. |
+| `2160 GRANT` Agent Users Compliant Device | CA503 | `agentContext: agentUserSessionsInitiatedFromEndpoints`. |
+| `1170 BLOCK` Risky Agent Users | CA504 | `agentIdRiskLevels: medium,high` op agent-*users*. |
+| `1180 BLOCK` Agent Users Outside Compliant Network | CA505 | Enige plek in de set met een compliant-network-conditie (Global Secure Access). |
+| `2170 GRANT` MFA for Intune Enrollment | CA203 | `2080` dekt de user action `urn:user:registerdevice`, niet de app `d4ebce55` (Intune Enrollment) met `frequencyInterval: everyTime`. Ander pad, zelfde moment. |
 
-De vijf agent-templates staan in `OPTIONAL_TEMPLATES` (vereisen Entra Agent ID, `1180` ook
+De vijf agent-templates zijn optioneel (vereisen Entra Agent ID, `1180` ook
 GSA). Vier ervan staan op report-only, net als bij Verlinden — `1160` is een allow-list die
 bij blind inschakelen elke bestaande agent stillegt, `2160` en `1170` blokkeren op iets wat
-bij vrijwel geen klant in kaart is. **De reden staat per template in `OPTIONAL_TEMPLATES` en
-komt daarmee in de `why` van de regel terecht.** Dat is de mechanisme-loze variant van punt 3
+in vrijwel geen tenant in kaart is. **De reden staat per template in de optionele lijst (nu
+`CATemplate/_manifest.json`) en komt daarmee als `optionalReason` in `cipp/baseline-stages.json`.** Dat is de mechanisme-loze variant van punt 3
 hieronder ("een reden verplichten bij elke niet-`enabled` state"); het veld bestaat nog niet,
 dus dit is de beste plek die er vandaag is. Daarmee staat de teller op **16 van de 40
-templates die geen `pass` kunnen opleveren** — het probleem uit ronde 1 is niet opgelost,
+templates die niets afdwingen** — het probleem uit ronde 1 is niet opgelost,
 alleen niet vergroot zonder uitleg.
 
 Hiermee is punt 4 van de lijst uit ronde 1 afgehandeld (periodieke herauthenticatie) en punt
@@ -359,21 +352,6 @@ als `optional`, precies zoals ronde 1 voorschreef.
    een gast zijn uitnodiging niet inwisselen. Toegevoegd, zoals in CA401.
 5. **`3020` sloot gasten uit.** De policy die onbeheerde apparaten begrenst, sloeg niet aan
    op juist de groep die per definitie geen beheerd apparaat heeft. Uitsluiting verwijderd.
-
-## Wat er aan de generator moest
-
-`extractParams` kende de agent-condities niet, en een regel die risicovolle agents blokkeert
-zou dan in de baseline overblijven als "applications: All + block" — niet te onderscheiden van
-elke andere blokkeerregel. Toegevoegd: `agentIdRiskLevels` (Graph levert een komma-gescheiden
-string, hier gesplitst), `agents`, `agentContext` en
-`clientApplications.includeAgentIdServicePrincipals` — dezelfde redenering die er al stond bij
-`servicePrincipalRiskLevels`.
-
-Bij het nalopen bleek `authenticationFlows` om dezelfde reden te ontbreken. **`1020` (device
-code auth flow) vergeleek daardoor als een gewone "blokkeer alles voor iedereen"-policy en
-dekte CIS 5.2.2.17 alleen op papier.** Ook toegevoegd. Dit verandert de vergelijking van een
-bestaande check: een klant met een device-code-policy zonder `transferMethods` gaat hierdoor
-van `pass` naar `fail` — terecht, maar het is een uitslagverandering en geen nieuwe check.
 
 ## Wat we van hem niet overnemen
 
@@ -424,28 +402,17 @@ registratie zelf stond daarmee open voor precies de sessie die een aanvaller al 
 
 ## Wat is toegevoegd
 
-| Template | checkId | Waarom |
-|---|---|---|
-| `2180 GRANT` Register Security Info TAP Only | 051 | `grantControls` op de user action die `3030` alleen in duur begrenst: alleen een eenmalige Temporary Access Pass voldoet. Een gekaapte sessie kan er geen methode bij zetten; de helpdesk geeft een TAP uit of het gebeurt niet. |
+| Template | Waarom |
+|---|---|
+| `2180 GRANT` Register Security Info TAP Only | `grantControls` op de user action die `3030` alleen in duur begrenst: alleen een eenmalige Temporary Access Pass voldoet. Een gekaapte sessie kan er geen methode bij zetten; de helpdesk geeft een TAP uit of het gebeurt niet. |
 
 **Waarom apart en niet ín 3030.** Het zijn twee maatregelen met een verschillende
 levenscyclus: `3030` is een sessiebegrenzing die overal aan kan, `2180` is een grant die pas
-kan zodra de klant een custom authentication strength én een TAP-proces heeft. Samengevoegd
-zou `CA-BASE-027` bovendien iets anders gaan betekenen dan waarop klanten vandaag een `pass`
-scoren — en dat is precies de stille herdefinitie die het pin-mechanisme moet voorkomen.
+kan zodra de tenant een custom authentication strength én een TAP-proces heeft.
 
-`2180` staat in `OPTIONAL_TEMPLATES` (stage 3, report-only): hij vraagt een randvoorwaarde
+`2180` is optioneel (stage 3, report-only): hij vraagt een randvoorwaarde
 per tenant, en hij verlegt het aanvalsoppervlak naar de servicedesk. Zonder identiteits-
 verificatie bij de TAP-aanvraag is de winst kleiner dan hij lijkt.
-
-## Wat er aan de generator moest
-
-Een **custom** authentication strength krijgt zijn id van Entra bij het aanmaken: in elke
-tenant een andere. Op dat id vergelijken is dezelfde valstrik als bij `termsOfUse` (zie het
-docblok bij `CA-BASE-040`) — de check faalt dan altijd, om een reden die niets met die klant
-te maken heeft. `extractParams` schrijft daarom voor custom strengths
-`authenticationStrengthAllowedCombinations` (gesorteerd) in plaats van
-`authenticationStrengthId`; ingebouwde strengths houden hun id, want dat is overal hetzelfde.
 
 ## Wat hierna nog openstaat
 
@@ -478,31 +445,27 @@ typfout in de namen van CA403/CA404.
 **`3040` dekt nu ook Exchange Online** (`00000002-0000-0ff1-ce00-000000000000`). Ronde 2 schreef
 "CA005/CA006 los: gedekt door `2070`, `2090` en `3040` samen"; dat klopte voor SharePoint en
 OneDrive, maar een bijlage downloaden via Outlook op het web op een onbeheerd apparaat ging er
-langs. Twee kanttekeningen:
+langs. Eén kanttekening:
 
 - Voor Exchange doet de sessiecontrole alleen iets als de OWA-mailboxpolicy meewerkt:
   `Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -ConditionalAccessPolicy ReadOnly` (of
   `ReadOnlyPlusAttachmentsBlocked`). Zonder die stap is de policy voor Exchange stil. Die instelling
-  staat niet in deze repo; hij hoort in de randvoorwaarden per klant.
-- Dit verandert de vergelijking van een bestaande check: een klant met een `3040`-achtige policy
-  op alleen SharePoint gaat van structureel `pass` naar `fail`. Omdat `3040` in het template op
-  `disabled` staat, is de uitslag daar vandaag `warning` — maar het blijft een uitslagverandering
-  en geen nieuwe check.
+  staat niet in deze repo; hij hoort in de randvoorwaarden per tenant.
 
 Het apparaatfilter van j0eyv (compliant **én** `deviceOwnership -eq "Company"`) is niet
 overgenomen. Dat zou een ingeschreven, compliant privéapparaat ook onder de beperking brengen;
-dat is een klantkeuze over BYOD, geen baselinemaatregel.
+dat is een keuze per tenant over BYOD, geen baselinemaatregel.
 
 **`1060` draagt geen IP-range meer.** Het template bevatte één publiek IP uit de tenant waaruit
 het ooit geëxporteerd is. De generator haalde het er bij de CIPP-export al uit en
-`New-CaPrerequisites.ps1` gebruikte het niet, maar het stond wel in `CATemplate/`,
-`baseline-v1.0.json` en `cipp/baseline-stages.json`. Nu is de named location in het template leeg,
-gelijk aan `prerequisites/ca-prerequisites.json`; de waarde komt per klant binnen via
+`New-CaPrerequisites.ps1` gebruikte het niet, maar het stond wel in `CATemplate/` en in de
+gegenereerde bestanden. Nu is de named location in het template leeg,
+gelijk aan `prerequisites/ca-prerequisites.json`; de waarde komt per tenant binnen via
 `-ServiceAccountIpRange`. Het IP staat nog wel in de git-geschiedenis.
 
 **`1040` draagt geen standaardlanden meer.** Het template en `prerequisites/` noemden BE en NL —
-de landen van één klant. Nu is `Allowed Countries` leeg en gemarkeerd als `requiresCountries`:
-de CIPP-export zet `1040` vast op Report tot de klant zijn landen heeft, en
+de landen van één organisatie. Nu is `Allowed Countries` leeg en gemarkeerd als `requiresCountries`:
+de CIPP-export zet `1040` vast op Report tot de landen van de tenant bekend zijn, en
 `New-CaPrerequisites.ps1` maakt de locatie alleen aan met `-AllowedCountry`. Een lege
 landenlijst uitrollen zou élke aanmelding buiten "geen enkel land" blokkeren.
 
@@ -546,9 +509,8 @@ woont in de andere repo, dus in CI doet `generate-compliance.js --strict` dat.
 
 - **Wat in git staat is nog steeds de `--no-ca`-versie**, want dat is wat de workflow daar
   regenereert; CI ziet deze repo niet. De CA-versie in git krijgen vraagt een
-  `CA_POLICIES_TOKEN`-secret en het uitcommentariëren van de CA-checkout in
-  `.github/workflows/generate-baseline.yml` daar — de twee stappen staan in open punt 3 van
-  `IntuneBackup/ANALYSE.md`.
+  `CA_POLICIES_TOKEN`-secret en het aanzetten van de CA-checkout in de workflow van de
+  IntuneBackup-repo — de twee stappen staan in open punt 3 van zijn `docs/ANALYSE.md`.
 - **De mapping is een oordeel, geen norm.** Er bestaat geen gezaghebbende bron die CA-policies aan
   Annex A-controls koppelt; deze is met de hand gelegd naar analogie van de Intune-kant. Bij een
   audit is dat verdedigbaar, niet bewijsbaar.

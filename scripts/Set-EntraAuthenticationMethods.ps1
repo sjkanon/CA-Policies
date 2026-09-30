@@ -1,49 +1,49 @@
 #Requires -Modules Microsoft.Graph.Identity.SignIns, Microsoft.Graph.Groups
 <#
 .SYNOPSIS
-    Vergelijkt het authentication methods policy van een klanttenant met
-    authentication-methods/authentication-methods.json, en zet het desgevraagd goed.
+    Compares the authentication methods policy of a tenant with
+    authentication-methods/authentication-methods.json, and sets it right on request.
 
 .DESCRIPTION
-    Dit is de enige toetsing die deze kant van de baseline heeft. De platform-engine kent de
-    categorie 'authentication-methods' niet, dus er is geen checkId en geen automatische
-    vergelijking - wat dit script niet meldt, ziet niemand.
+    This is the only comparison against a tenant that this side of the baseline has. Nothing
+    else checks the authentication methods policy automatically - what this script does not
+    report, nobody sees.
 
-    De volgorde in het JSON-bestand is de uitrolvolgorde en is niet vrij:
+    The order in the JSON file is the deployment order and is not arbitrary:
 
-      1. Temporary Access Pass    zonder TAP heeft een nieuwe medewerker niets om zijn eerste
-                                  passkey mee te registreren, en geen terugval als hij zijn
-                                  apparaat kwijt is.
-      2. Passkey (FIDO2)          de methode waar GLOBAL__2120 op steunt.
-      3. Microsoft Authenticator  blijft aan naast passkeys.
-      4/5. SMS en spraak          gaan UIT - en alleen als 2 en 3 staan.
+      1. Temporary Access Pass    without a TAP a new employee has nothing to register his
+                                  first passkey with, and no fallback if he loses his
+                                  device.
+      2. Passkey (FIDO2)          the method GLOBAL__2120 relies on.
+      3. Microsoft Authenticator  stays on next to passkeys.
+      4/5. SMS and voice          go OFF - and only once 2 and 3 are in place.
 
-    Draai dit standaard zonder -Apply. Dan vergelijkt het alleen en verandert er niets.
+    Run this without -Apply by default. It then only compares and changes nothing.
 
-    WAT DIT SCRIPT NIET DOET
+    WHAT THIS SCRIPT DOES NOT DO
 
-    Passkey profiles. Die vragen een eenmalige, onomkeerbare opt-in in het portaal en zijn via
-    Graph niet volledig te beheren; het script leest ze wel uit en meldt het verschil met de
-    profielen in het JSON-bestand, zodat je weet wat er met de hand moet. Zie de README in
+    Passkey profiles. They require a one-time, irreversible opt-in in the portal and cannot be
+    fully managed through Graph; the script does read them and reports the difference with the
+    profiles in the JSON file, so you know what has to be done by hand. See the README in
     authentication-methods/.
 
-    De uitschakel-volgorde bewaakt het wel actief: SMS of spraak uitzetten terwijl gebruikers
-    nog geen phishing-bestendige methode hebben, sluit die gebruikers buiten. Met
-    -CheckRegistrationFirst telt het script eerst hoeveel gebruikers alleen op een af te
-    schakelen methode zitten, en weigert de wijziging zolang dat er meer dan nul zijn.
+    It does actively guard the disable order: turning off SMS or voice while users do not yet
+    have a phishing-resistant method locks those users out. With -CheckRegistrationFirst the
+    script first counts how many users rely only on a method that is about to be disabled, and
+    refuses the change while that number is above zero.
 
 .PARAMETER TenantId
-    De klanttenant. Wordt doorgegeven aan Connect-MgGraph.
+    The tenant. Passed to Connect-MgGraph.
 
 .PARAMETER Apply
-    Zet de methodes daadwerkelijk. Zonder deze schakelaar vergelijkt het script alleen.
+    Actually sets the methods. Without this switch the script only compares.
 
 .PARAMETER CheckRegistrationFirst
-    Weiger een methode uit te zetten zolang er gebruikers zijn die geen phishing-bestendige
-    methode geregistreerd hebben. Vraagt AuditLog.Read.All / Reports.Read.All.
+    Refuse to disable a method while there are users who have no MFA method registered.
+    Requires AuditLog.Read.All / Reports.Read.All.
 
 .PARAMETER MethodsPath
-    Pad naar authentication-methods.json. Standaard die in deze repo.
+    Path to authentication-methods.json. Defaults to the one in this repo.
 
 .EXAMPLE
     ./scripts/Set-EntraAuthenticationMethods.ps1 -TenantId contoso.onmicrosoft.com
@@ -65,119 +65,119 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$gewenst = Get-Content -Path $MethodsPath -Raw | ConvertFrom-Json
-Write-Host "Gewenste stand uit $($gewenst.version) (herzien $($gewenst.reviewedAt))" -ForegroundColor Cyan
+$desired = Get-Content -Path $MethodsPath -Raw | ConvertFrom-Json
+Write-Host "Desired state from $($desired.version) (reviewed $($desired.reviewedAt))" -ForegroundColor Cyan
 if (-not $Apply) {
-    Write-Host 'Vergelijkingsmodus: er wordt niets gewijzigd. Gebruik -Apply om te zetten.' -ForegroundColor Cyan
+    Write-Host 'Compare mode: nothing is changed. Use -Apply to set.' -ForegroundColor Cyan
 }
 
 $scopes = @('Policy.ReadWrite.AuthenticationMethod', 'Group.Read.All')
 if ($CheckRegistrationFirst) { $scopes += 'AuditLog.Read.All' }
 Connect-MgGraph -TenantId $TenantId -Scopes $scopes -NoWelcome
 
-$resultaat = [System.Collections.Generic.List[object]]::new()
-$blokkerend = [System.Collections.Generic.List[string]]::new()
+$result = [System.Collections.Generic.List[object]]::new()
+$blocking = [System.Collections.Generic.List[string]]::new()
 
-# ----------------------------------------------- registratie eerst tellen ----
+# -------------------------------------------------- count registrations first ----
 
-# Alleen relevant als er iets uitgezet wordt. Een methode uitzetten is de enige handeling hier
-# die iets wegneemt, en dus de enige die mensen buiten kan sluiten.
-$zonderSterkeMethode = $null
-if ($CheckRegistrationFirst -and ($gewenst.methods | Where-Object state -eq 'disabled')) {
+# Only relevant if something is disabled. Disabling a method is the only action here that
+# takes something away, and therefore the only one that can lock people out.
+$withoutStrongMethod = $null
+if ($CheckRegistrationFirst -and ($desired.methods | Where-Object state -eq 'disabled')) {
     try {
-        $registraties = @(Get-MgReportAuthenticationMethodUserRegistrationDetail -All)
-        $zonderSterkeMethode = @($registraties | Where-Object { -not $_.IsMfaCapable }).Count
-        Write-Host "  $zonderSterkeMethode gebruiker(s) zonder MFA-methode" -ForegroundColor $(if ($zonderSterkeMethode -gt 0) { 'Yellow' } else { 'Green' })
+        $registrations = @(Get-MgReportAuthenticationMethodUserRegistrationDetail -All)
+        $withoutStrongMethod = @($registrations | Where-Object { -not $_.IsMfaCapable }).Count
+        Write-Host "  $withoutStrongMethod user(s) without an MFA method" -ForegroundColor $(if ($withoutStrongMethod -gt 0) { 'Yellow' } else { 'Green' })
     }
     catch {
-        Write-Warning "Registratierapportage niet op te halen: $($_.Exception.Message). Zonder dat cijfer is uitzetten een gok."
-        $blokkerend.Add('registratierapportage niet beschikbaar - zet geen methode uit')
+        Write-Warning "Could not retrieve the registration report: $($_.Exception.Message). Without that number, disabling is a guess."
+        $blocking.Add('registration report not available - do not disable any method')
     }
 }
 
-# --------------------------------------------------------------- methodes ----
+# ----------------------------------------------------------------- methods ----
 
-foreach ($methode in ($gewenst.methods | Sort-Object order)) {
-    $huidig = $null
+foreach ($method in ($desired.methods | Sort-Object order)) {
+    $current = $null
     try {
-        $huidig = Get-MgPolicyAuthenticationMethodPolicyAuthenticationMethodConfiguration -AuthenticationMethodConfigurationId $methode.id
+        $current = Get-MgPolicyAuthenticationMethodPolicyAuthenticationMethodConfiguration -AuthenticationMethodConfigurationId $method.id
     }
     catch {
-        Write-Warning "Methode '$($methode.id)' niet gevonden in deze tenant: $($_.Exception.Message)"
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = 'onbekend'; Gewenst = $methode.state; Actie = 'overgeslagen'; Gevaar = $methode.danger })
+        Write-Warning "Method '$($method.id)' not found in this tenant: $($_.Exception.Message)"
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = 'unknown'; Desired = $method.state; Action = 'skipped'; Danger = $method.danger })
         continue
     }
 
-    $nu = $huidig.State
+    $now = $current.State
 
-    if ($nu -eq $methode.state) {
-        Write-Host "  = $($methode.displayName): $nu"
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = $nu; Gewenst = $methode.state; Actie = 'staat goed'; Gevaar = $methode.danger })
+    if ($now -eq $method.state) {
+        Write-Host "  = $($method.displayName): $now"
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = $now; Desired = $method.state; Action = 'correct'; Danger = $method.danger })
         continue
     }
 
-    Write-Host "  ! $($methode.displayName): staat op $nu, hoort op $($methode.state)" -ForegroundColor Yellow
+    Write-Host "  ! $($method.displayName): is $now, should be $($method.state)" -ForegroundColor Yellow
 
-    # Uitzetten terwijl mensen er nog op zitten is het enige onomkeerbare in dit script.
-    if ($methode.state -eq 'disabled' -and $null -ne $zonderSterkeMethode -and $zonderSterkeMethode -gt 0) {
-        Write-Warning "'$($methode.displayName)' NIET uitgezet: er zijn $zonderSterkeMethode gebruiker(s) zonder MFA-methode. $($methode.note)"
-        $blokkerend.Add("'$($methode.displayName)' kan niet uit zolang $zonderSterkeMethode gebruiker(s) geen andere methode hebben")
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = $nu; Gewenst = $methode.state; Actie = 'geweigerd (registratie)'; Gevaar = $methode.danger })
+    # Disabling while people still rely on it is the only irreversible thing in this script.
+    if ($method.state -eq 'disabled' -and $null -ne $withoutStrongMethod -and $withoutStrongMethod -gt 0) {
+        Write-Warning "'$($method.displayName)' NOT disabled: there are $withoutStrongMethod user(s) without an MFA method. $($method.note)"
+        $blocking.Add("'$($method.displayName)' cannot be disabled while $withoutStrongMethod user(s) have no other method")
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = $now; Desired = $method.state; Action = 'refused (registration)'; Danger = $method.danger })
         continue
     }
 
     if (-not $Apply) {
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = $nu; Gewenst = $methode.state; Actie = 'zou wijzigen'; Gevaar = $methode.danger })
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = $now; Desired = $method.state; Action = 'would change'; Danger = $method.danger })
         continue
     }
 
-    $body = @{ '@odata.type' = $huidig.AdditionalProperties['@odata.type']; id = $methode.id; state = $methode.state }
-    foreach ($sleutel in $methode.configuration.PSObject.Properties.Name) {
-        $body[$sleutel] = $methode.configuration.$sleutel
+    $body = @{ '@odata.type' = $current.AdditionalProperties['@odata.type']; id = $method.id; state = $method.state }
+    foreach ($key in $method.configuration.PSObject.Properties.Name) {
+        $body[$key] = $method.configuration.$key
     }
 
-    if ($PSCmdlet.ShouldProcess($methode.displayName, "State op $($methode.state) zetten")) {
-        Update-MgPolicyAuthenticationMethodPolicyAuthenticationMethodConfiguration -AuthenticationMethodConfigurationId $methode.id -BodyParameter $body
-        Write-Host "  + $($methode.displayName) op $($methode.state) gezet" -ForegroundColor Green
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = $nu; Gewenst = $methode.state; Actie = 'gewijzigd'; Gevaar = $methode.danger })
+    if ($PSCmdlet.ShouldProcess($method.displayName, "Set state to $($method.state)")) {
+        Update-MgPolicyAuthenticationMethodPolicyAuthenticationMethodConfiguration -AuthenticationMethodConfigurationId $method.id -BodyParameter $body
+        Write-Host "  + $($method.displayName) set to $($method.state)" -ForegroundColor Green
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = $now; Desired = $method.state; Action = 'changed'; Danger = $method.danger })
     }
     else {
-        $resultaat.Add([pscustomobject]@{ Volgorde = $methode.order; Methode = $methode.displayName; Nu = $nu; Gewenst = $methode.state; Actie = 'overgeslagen (WhatIf)'; Gevaar = $methode.danger })
+        $result.Add([pscustomobject]@{ Order = $method.order; Method = $method.displayName; Now = $now; Desired = $method.state; Action = 'skipped (WhatIf)'; Danger = $method.danger })
     }
 }
 
 # -------------------------------------------------------- passkey profiles ----
 
-# Alleen lezen en melden. De opt-in is onomkeerbaar en het beheer van profielen loopt via het
-# portaal; een script dat dit half doet is gevaarlijker dan een script dat het niet doet.
-$fido = $gewenst.methods | Where-Object id -eq 'Fido2'
+# Read and report only. The opt-in is irreversible and profiles are managed in the portal; a
+# script that does this halfway is more dangerous than a script that does not do it.
+$fido = $desired.methods | Where-Object id -eq 'Fido2'
 if ($fido -and $fido.profiles) {
     Write-Host ''
-    Write-Host 'Passkey profiles (handwerk in het portaal):' -ForegroundColor Cyan
-    foreach ($profiel in $fido.profiles) {
-        $types = $profiel.passkeyTypes -join ', '
-        Write-Host "  - $($profiel.displayName)"
-        Write-Host "      doelgroep : $($profiel.target)"
-        Write-Host "      types     : $types"
-        Write-Host "      attestation: $($profiel.enforceAttestation)"
+    Write-Host 'Passkey profiles (manual work in the portal):' -ForegroundColor Cyan
+    foreach ($passkeyProfile in $fido.profiles) {
+        $types = $passkeyProfile.passkeyTypes -join ', '
+        Write-Host "  - $($passkeyProfile.displayName)"
+        Write-Host "      target     : $($passkeyProfile.target)"
+        Write-Host "      types      : $types"
+        Write-Host "      attestation: $($passkeyProfile.enforceAttestation)"
     }
     Write-Host "  $($fido.tenantSpecific)" -ForegroundColor Yellow
 }
 
-# ------------------------------------------------------------- afsluiting ----
+# ---------------------------------------------------------------- summary ----
 
 Write-Host ''
-$resultaat | Sort-Object Volgorde | Format-Table -AutoSize
+$result | Sort-Object Order | Format-Table -AutoSize
 
-if ($blokkerend.Count -gt 0) {
-    Write-Host 'NIET AF:' -ForegroundColor Yellow
-    $blokkerend | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+if ($blocking.Count -gt 0) {
+    Write-Host 'NOT DONE:' -ForegroundColor Yellow
+    $blocking | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
     Write-Host ''
-    Write-Host 'Los dit op voordat je verder gaat. Een methode uitzetten terwijl gebruikers er nog op zitten is geen verscherping maar een lock-out.' -ForegroundColor Yellow
+    Write-Host 'Resolve this before you continue. Disabling a method while users still rely on it is not hardening but a lock-out.' -ForegroundColor Yellow
 }
 elseif ($Apply) {
-    Write-Host 'Het authentication methods policy staat zoals afgesproken.' -ForegroundColor Green
+    Write-Host 'The authentication methods policy is as agreed.' -ForegroundColor Green
 }
 else {
-    Write-Host 'Vergelijking klaar. Draai met -Apply om de afwijkingen te zetten.' -ForegroundColor Green
+    Write-Host 'Comparison done. Run with -Apply to set the differences.' -ForegroundColor Green
 }

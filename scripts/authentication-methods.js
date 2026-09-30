@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 /**
- * Bewaakt authentication-methods/authentication-methods.json: de gewenste stand van het
- * authentication methods policy in een klanttenant.
+ * Guards authentication-methods/authentication-methods.json: the desired state of the
+ * authentication methods policy in a tenant.
  *
- * ===================== WAAROM DIT BESTAND BEWAAKT MOET WORDEN =====================
+ * ===================== WHY THIS FILE NEEDS GUARDING =====================
  *
- * Dit is het enige deel van de baseline zonder checkId. De platform-engine kent de categorie
- * 'authentication-methods' niet, dus er is geen toetsing tegen een klanttenant en geen drift-
- * signaal. Wat hier scheefstaat, staat scheef tot iemand het met de hand opmerkt.
+ * Nothing compares this file with a tenant automatically. Set-EntraAuthenticationMethods.ps1
+ * does, but only when someone runs it, one tenant at a time. What is wrong here stays wrong
+ * until somebody notices by hand.
  *
- * Twee afhankelijkheden lopen van hier naar de CA-kant, en beide falen stil:
+ * Two dependencies run from here to the CA side, and both fail silently:
  *
- *   GLOBAL__2120 eist een phishing-bestendige methode. Staat Passkey (FIDO2) hier uit, dan is
- *                die eis door niemand te vervullen en is de tenant dicht.
- *   GLOBAL__2180 eist een eenmalige Temporary Access Pass bij het registreren van
- *                beveiligingsinformatie. Staat TAP hier uit, dan kan een nieuwe medewerker
- *                niets registreren — en dus nooit aan 2120 voldoen.
+ *   GLOBAL__2120 requires a phishing-resistant method. If Passkey (FIDO2) is off here, nobody
+ *                can meet that requirement and the tenant is closed.
+ *   GLOBAL__2180 requires a one-time Temporary Access Pass to register security info. If TAP
+ *                is off here, a new employee cannot register anything — and so can never
+ *                meet 2120.
  *
- * Vandaar dat dit script die twee koppelingen expliciet controleert in plaats van alleen het
- * schema te valideren.
+ * That is why this script checks those two links explicitly instead of only validating the
+ * schema.
  *
- * Gebruik: node scripts/authentication-methods.js   (rapporteert, exit 1 bij fouten)
- * Als module: readMethods(), validate()
+ * Usage: node scripts/authentication-methods.js   (reports, exit 1 on errors)
+ * As a module: readMethods(), validate()
  */
 
 const fs = require("fs");

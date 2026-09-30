@@ -1,66 +1,70 @@
 #Requires -Modules Microsoft.Graph.Groups, Microsoft.Graph.Identity.SignIns
 <#
 .SYNOPSIS
-    Maakt in een klanttenant de groepen, named locations, custom authentication strengths en
-    authentication contexts aan waar de CA-templates in CATemplate/ naar verwijzen. Draaien
-    VOORDAT de baseline wordt uitgerold.
+    Creates in a tenant the groups, named locations, custom authentication strengths and
+    authentication contexts that the CA templates in CATemplate/ refer to. Run this BEFORE the
+    baseline is deployed.
 
 .DESCRIPTION
-    De templates verwijzen naar acht groepen en vier named locations die geen enkele tenant
-    vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: een uitzonderingsgroep
-    die niet bestaat sluit niemand uit, dus de policy wordt strenger dan bedoeld. Twee
-    gevallen zijn daarbij niet "strenger" maar "gesloten":
+    The templates refer to eight groups and four named locations that no tenant has out of the
+    box. If they are missing, that fails in the wrong direction: an exclusion group that does
+    not exist excludes nobody, so the policy becomes stricter than intended. Two cases are not
+    "stricter" but "closed":
 
-      Excluded from Conditional Access  staan allebei in 35 van de 41 templates en zijn
-      SG-U-CA-Exclude-Breakglass        samen één mechanisme onder twee namen. Allebei leeg
-                                        = geen enkel account valt buiten de baseline = geen
-                                        break-glass. Eén van de twee leeg is verraderlijker:
-                                        de uitsluiting líjkt dan geregeld.
-      Licensed Users                    1110 (state: enabled) blokkeert All behalve deze
-                                        groep. Leeg of statisch = elke gebruiker geblokkeerd.
+      Excluded from Conditional Access  both are in 35 of the 41 templates and are one
+      SG-U-CA-Exclude-Breakglass        mechanism under two names. Both empty = no account
+                                        falls outside the baseline = no break-glass. One of
+                                        the two empty is more treacherous: the exclusion
+                                        then looks as if it is in place.
+      Licensed Users                    1110 (state: enabled) blocks All except this group.
+                                        Empty or static = every user blocked.
 
-    Vandaar dat dit script die twee expliciet controleert en met -RequireSafeToDeploy zelfs
-    weigert af te ronden zolang ze leeg zijn.
+    That is why this script checks those explicitly and, with -RequireSafeToDeploy, refuses to
+    finish while they are empty.
 
-    Een custom authentication strength faalt op een derde manier. Entra kent zijn id pas toe
-    bij aanmaken, dus het template in CATemplate/ draagt een nul-GUID - het is de bron voor
-    alle tenants en kan het id van een van hen niet dragen. Dit script maakt de strength aan
-    en meldt het echte id; zolang dat niet in de CIPP-uitrol staat, verwijst de grant van 2180
-    naar een id dat in die tenant niet bestaat.
+    A custom authentication strength fails in a third way. Entra assigns its id only on
+    creation, so the template in CATemplate/ carries a zero GUID - it is the source for all
+    tenants and cannot carry the id of one of them. This script creates the strength and
+    reports the real id; until that id is in the CIPP deployment, the grant of 2180 points at
+    an id that does not exist in that tenant.
 
-    Het script is idempotent: bestaande objecten worden herkend op displayName (een context op
-    zijn id) en niet overschreven - alleen gerapporteerd. Wat er afwijkt zegt het erbij. Bij een
-    bestaande authentication strength vergelijkt het wel de toegestane combinaties: dezelfde naam
-    met andere combinaties is gevaarlijker dan geen strength, want die ziet er goed uit.
+    The script is idempotent: existing objects are recognised by displayName (a context by its
+    id) and not overwritten - only reported, with what differs. For an existing authentication
+    strength it does compare the allowed combinations: the same name with different
+    combinations is more dangerous than no strength, because it looks right.
 
 .PARAMETER TenantId
-    De klanttenant. Wordt doorgegeven aan Connect-MgGraph.
+    The tenant. Passed to Connect-MgGraph.
 
 .PARAMETER ServiceAccountIpRange
-    De publieke IP-range(s) van waaraf de serviceaccounts van DEZE klant mogen aanmelden,
-    als CIDR. Verplicht zodra je 1060 wilt uitrollen. Het template in CATemplate/ draagt hier
-    bewust geen IP-range: die hoort bij één klant en komt dus alleen via deze parameter binnen.
+    The public IP range(s) from which the service accounts of THIS tenant may sign in, as CIDR.
+    Required as soon as you want to deploy 1060. The template in CATemplate/ deliberately
+    carries no IP range: it belongs to one tenant and therefore only comes in via this
+    parameter.
 
 .PARAMETER AllowedCountry
-    De landen waarbinnen aanmelden mag, als ISO 3166-1 alpha-2 (bijv. 'NL','BE'). Verplicht
-    zodra je 1040 wilt uitrollen: de repo draagt bewust geen standaardlanden, want de lijst
-    hangt af van vestigingen, thuiswerkers en reizigers van deze klant.
+    The countries in which sign-in is allowed, as ISO 3166-1 alpha-2 (e.g. 'NL','BE'). Required
+    as soon as you want to deploy 1040: the repo deliberately carries no default countries,
+    because the list depends on the offices, remote workers and travellers of this tenant.
 
 .PARAMETER BreakGlassUserId
-    Object-id('s) van de noodaccounts. Ze gaan in elke groep die in ca-prerequisites.json
-    breakGlassTarget draagt - vandaag 'Excluded from Conditional Access' en
-    'SG-U-CA-Exclude-Breakglass', allebei. Laat je dit leeg, dan worden de groepen wel
-    aangemaakt maar blijven ze leeg - en dan mag de baseline niet op Remediate.
+    Object id(s) of the emergency access accounts. They go into every group that carries
+    breakGlassTarget in ca-prerequisites.json - today 'Excluded from Conditional Access' and
+    'SG-U-CA-Exclude-Breakglass', both. If you leave this empty, the groups are created but stay
+    empty - and then the baseline must not go to Remediate.
 
 .PARAMETER RequireSafeToDeploy
-    Sluit af met een fout zolang de kritieke groepen geen leden hebben. Gebruik dit in een
-    uitrolpijplijn, zodat de CA-stap niet draait na een half geslaagde voorbereiding.
+    Ends with an error while the critical groups have no members. Use this in a deployment
+    pipeline, so the CA step does not run after a half-successful preparation.
+
+.PARAMETER PrerequisitesPath
+    Path to ca-prerequisites.json. Defaults to the one in this repo.
 
 .EXAMPLE
     ./scripts/New-CaPrerequisites.ps1 -TenantId contoso.onmicrosoft.com -WhatIf
 
 .EXAMPLE
-    ./scripts/New-CaPrerequisites.ps1 -TenantId contoso.onmicrosoft.com -ServiceAccountIpRange '203.0.113.10/32' -BreakGlassUserId '00000000-1111-2222-3333-444444444444' -RequireSafeToDeploy
+    ./scripts/New-CaPrerequisites.ps1 -TenantId contoso.onmicrosoft.com -ServiceAccountIpRange '203.0.113.10/32' -AllowedCountry 'NL','BE' -BreakGlassUserId '00000000-1111-2222-3333-444444444444' -RequireSafeToDeploy
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
@@ -81,146 +85,149 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $prereq = Get-Content -Path $PrerequisitesPath -Raw | ConvertFrom-Json
-Write-Host "Randvoorwaarden uit $($prereq.version) (herzien $($prereq.reviewedAt))" -ForegroundColor Cyan
+Write-Host "Prerequisites from $($prereq.version) (reviewed $($prereq.reviewedAt))" -ForegroundColor Cyan
 
 Connect-MgGraph -TenantId $TenantId -Scopes 'Group.ReadWrite.All', 'Policy.ReadWrite.ConditionalAccess', 'Policy.ReadWrite.AuthenticationMethod', 'User.Read.All' -NoWelcome
 
-$resultaat = [System.Collections.Generic.List[object]]::new()
-$blokkerend = [System.Collections.Generic.List[string]]::new()
+$result = [System.Collections.Generic.List[object]]::new()
+$blocking = [System.Collections.Generic.List[string]]::new()
 
-# ---------------------------------------------------------------- groepen ----
+# ----------------------------------------------------------------- groups ----
 
-foreach ($groep in $prereq.groups) {
-    $bestaand = @(Get-MgGroup -Filter "displayName eq '$($groep.displayName)'" -All)
+foreach ($group in $prereq.groups) {
+    $existing = @(Get-MgGroup -Filter "displayName eq '$($group.displayName)'" -All)
 
-    if ($bestaand.Count -gt 1) {
-        Write-Warning "Meerdere groepen heten '$($groep.displayName)'. De CA-templates matchen op naam, dus dit is dubbelzinnig - ruim dat eerst op."
-        $blokkerend.Add("dubbele groep '$($groep.displayName)'")
+    if ($existing.Count -gt 1) {
+        Write-Warning "Several groups are named '$($group.displayName)'. The CA templates match by name, so this is ambiguous - clean that up first."
+        $blocking.Add("duplicate group '$($group.displayName)'")
         continue
     }
 
-    $groepObject = $null
+    $groupObject = $null
 
-    if ($bestaand.Count -eq 1) {
-        $groepObject = $bestaand[0]
-        Write-Host "  = $($groep.displayName) bestaat al ($($groepObject.Id))"
+    if ($existing.Count -eq 1) {
+        $groupObject = $existing[0]
+        Write-Host "  = $($group.displayName) already exists ($($groupObject.Id))"
 
-        # Een 'Licensed Users' die statisch blijkt te zijn is gevaarlijker dan geen groep:
-        # 1110 blokkeert dan iedereen die er niet handmatig in staat.
-        if ($groep.membershipType -eq 'dynamic' -and $groepObject.GroupTypes -notcontains 'DynamicMembership') {
-            Write-Warning "'$($groep.displayName)' bestaat maar is NIET dynamisch. $($groep.dangerReason)"
-            $blokkerend.Add("'$($groep.displayName)' is statisch terwijl hij dynamisch moet zijn")
+        # A 'Licensed Users' that turns out to be static is more dangerous than no group:
+        # 1110 then blocks everyone who has not been added by hand.
+        if ($group.membershipType -eq 'dynamic' -and $groupObject.GroupTypes -notcontains 'DynamicMembership') {
+            Write-Warning "'$($group.displayName)' exists but is NOT dynamic. $($group.dangerReason)"
+            $blocking.Add("'$($group.displayName)' is static while it must be dynamic")
         }
     }
     else {
+        # description is what an admin sees on the group in the tenant; purpose is the
+        # explanation for whoever reads the repo.
+        $description = if ($group.description) { $group.description } else { $group.purpose }
         $body = @{
-            displayName     = $groep.displayName
-            mailNickname    = $groep.mailNickname
-            description     = $groep.purpose
+            displayName     = $group.displayName
+            mailNickname    = $group.mailNickname
+            description     = $description
             securityEnabled = $true
             mailEnabled     = $false
             groupTypes      = @()
         }
-        if ($groep.membershipType -eq 'dynamic') {
+        if ($group.membershipType -eq 'dynamic') {
             $body.groupTypes = @('DynamicMembership')
-            $body.membershipRule = $groep.membershipRule
-            $body.membershipRuleProcessingState = $groep.membershipRuleProcessingState
+            $body.membershipRule = $group.membershipRule
+            $body.membershipRuleProcessingState = $group.membershipRuleProcessingState
         }
 
-        if ($PSCmdlet.ShouldProcess($groep.displayName, 'Groep aanmaken')) {
-            $groepObject = New-MgGroup -BodyParameter $body
-            Write-Host "  + $($groep.displayName) aangemaakt ($($groepObject.Id))" -ForegroundColor Green
+        if ($PSCmdlet.ShouldProcess($group.displayName, 'Create group')) {
+            $groupObject = New-MgGroup -BodyParameter $body
+            Write-Host "  + $($group.displayName) created ($($groupObject.Id))" -ForegroundColor Green
         }
     }
 
-    # Break-glass-leden. Alleen voor de groepen die daarom vragen - welke dat zijn staat in
-    # ca-prerequisites.json (breakGlassTarget) en niet hier, zodat een tweede break-glass-naam
-    # geen scriptwijziging kost. De rest vult de beheerder zelf, want wie daar in hoort is per
-    # klant een afweging en geen script.
-    if ($groepObject -and $groep.breakGlassTarget -and $BreakGlassUserId) {
-        $huidigeLeden = @(Get-MgGroupMember -GroupId $groepObject.Id -All).Id
+    # Break-glass members. Only for the groups that ask for it - which ones is in
+    # ca-prerequisites.json (breakGlassTarget), not here, so a second break-glass name does not
+    # cost a script change. The admin fills the rest: who belongs there is a judgement per
+    # tenant, not a script.
+    if ($groupObject -and $group.breakGlassTarget -and $BreakGlassUserId) {
+        $currentMembers = @(Get-MgGroupMember -GroupId $groupObject.Id -All).Id
         foreach ($userId in $BreakGlassUserId) {
-            if ($huidigeLeden -contains $userId) {
-                Write-Host "    = $userId zit er al in"
+            if ($currentMembers -contains $userId) {
+                Write-Host "    = $userId is already a member"
                 continue
             }
-            if ($PSCmdlet.ShouldProcess("$userId -> $($groep.displayName)", 'Lid toevoegen')) {
-                New-MgGroupMember -GroupId $groepObject.Id -DirectoryObjectId $userId
-                Write-Host "    + $userId toegevoegd" -ForegroundColor Green
+            if ($PSCmdlet.ShouldProcess("$userId -> $($group.displayName)", 'Add member')) {
+                New-MgGroupMember -GroupId $groupObject.Id -DirectoryObjectId $userId
+                Write-Host "    + $userId added" -ForegroundColor Green
             }
         }
     }
 
-    # De kritieke groepen moeten leden hebben voordat de baseline mag afdwingen. Bij een
-    # dynamische groep kan de eerste evaluatie een paar minuten duren - leeg betekent daar
-    # dus 'nog niet klaar', niet per se 'fout'.
-    if ($groepObject -and $groep.requiresMembers) {
-        $leden = @(Get-MgGroupMember -GroupId $groepObject.Id -Top 1)
-        if ($leden.Count -eq 0) {
-            $tekst = "'$($groep.displayName)' heeft geen leden. $($groep.dangerReason)"
-            if ($groep.membershipType -eq 'dynamic') {
-                $tekst += " De dynamische regel is net gezet; wacht op de eerste evaluatie en controleer opnieuw voordat je 1110 uitrolt."
+    # The critical groups must have members before the baseline may enforce. For a dynamic
+    # group the first evaluation can take a few minutes - empty there means 'not ready yet',
+    # not necessarily 'wrong'.
+    if ($groupObject -and $group.requiresMembers) {
+        $members = @(Get-MgGroupMember -GroupId $groupObject.Id -Top 1)
+        if ($members.Count -eq 0) {
+            $text = "'$($group.displayName)' has no members. $($group.dangerReason)"
+            if ($group.membershipType -eq 'dynamic') {
+                $text += " The dynamic rule has just been set; wait for the first evaluation and check again before you deploy 1110."
             }
-            Write-Warning $tekst
-            $blokkerend.Add("'$($groep.displayName)' is leeg")
+            Write-Warning $text
+            $blocking.Add("'$($group.displayName)' is empty")
         }
     }
 
-    $status = if ($bestaand.Count -eq 1) { 'bestond al' } elseif ($groepObject) { 'aangemaakt' } else { 'overgeslagen (WhatIf)' }
-    $resultaat.Add([pscustomobject]@{
-            Soort  = 'Groep'
-            Naam   = $groep.displayName
-            Id     = $groepObject.Id
+    $status = if ($existing.Count -eq 1) { 'already existed' } elseif ($groupObject) { 'created' } else { 'skipped (WhatIf)' }
+    $result.Add([pscustomobject]@{
+            Kind   = 'Group'
+            Name   = $group.displayName
+            Id     = $groupObject.Id
             Status = $status
-            Gevaar = $groep.danger
+            Danger = $group.danger
         })
 }
 
 # -------------------------------------------------------- named locations ----
 
-$bestaandeLocaties = @(Get-MgIdentityConditionalAccessNamedLocation -All)
+$existingLocations = @(Get-MgIdentityConditionalAccessNamedLocation -All)
 
-foreach ($locatie in $prereq.namedLocations) {
-    $bestaand = @($bestaandeLocaties | Where-Object DisplayName -eq $locatie.displayName)
+foreach ($location in $prereq.namedLocations) {
+    $existing = @($existingLocations | Where-Object DisplayName -eq $location.displayName)
 
-    if ($bestaand.Count -ge 1) {
-        Write-Host "  = $($locatie.displayName) bestaat al ($($bestaand[0].Id))"
-        Write-Host "    let op: de inhoud wordt NIET bijgewerkt. De platform-engine vergelijkt named locations op volledige inhoud - controleer landcodes/IP-ranges met de hand."
-        $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $bestaand[0].Id; Status = 'bestond al'; Gevaar = $locatie.danger })
+    if ($existing.Count -ge 1) {
+        Write-Host "  = $($location.displayName) already exists ($($existing[0].Id))"
+        Write-Host "    note: the content is NOT updated. Check country codes / IP ranges by hand against prerequisites/ca-prerequisites.json."
+        $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $existing[0].Id; Status = 'already existed'; Danger = $location.danger })
         continue
     }
 
-    # Een compliantNetworkNamedLocation levert Entra zelf zodra Global Secure Access is
-    # ingericht; aanmaken kan niet. Ontbreekt hij, dan is dat geen stap die dit script kan
-    # zetten maar een blokkade voor de templates die ernaar verwijzen (1180).
-    if ($locatie.notCreatable) {
-        Write-Warning "'$($locatie.displayName)' bestaat niet in deze tenant en is niet aan te maken. $($locatie.notCreatable)"
-        $blokkerend.Add("'$($locatie.displayName)' ontbreekt - rol de templates die ernaar verwijzen niet uit")
-        $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'ontbreekt (niet aan te maken)'; Gevaar = $locatie.danger })
+    # Entra provides a compliantNetworkNamedLocation itself once Global Secure Access is set
+    # up; it cannot be created. If it is missing, that is not a step this script can take but a
+    # blocker for the templates that refer to it (1180).
+    if ($location.notCreatable) {
+        Write-Warning "'$($location.displayName)' does not exist in this tenant and cannot be created. $($location.notCreatable)"
+        $blocking.Add("'$($location.displayName)' is missing - do not deploy the templates that refer to it")
+        $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $null; Status = 'missing (cannot be created)'; Danger = $location.danger })
         continue
     }
 
-    $body = $locatie.definition | ConvertTo-Json -Depth 10 | ConvertFrom-Json -AsHashtable
+    $body = $location.definition | ConvertTo-Json -Depth 10 | ConvertFrom-Json -AsHashtable
 
-    # Ook de landenlijst raadt dit script niet: een lege lijst in 1040 blokkeert elke
-    # aanmelding, en een standaardlijst past bij geen enkele klant precies.
-    if ($locatie.requiresCountries) {
+    # This script does not guess the country list either: an empty list in 1040 blocks every
+    # sign-in, and a default list fits no tenant exactly.
+    if ($location.requiresCountries) {
         if (-not $AllowedCountry) {
-            Write-Warning "'$($locatie.displayName)' overgeslagen: geen -AllowedCountry opgegeven. $($locatie.tenantSpecific)"
-            $blokkerend.Add("'$($locatie.displayName)' ontbreekt (geen landen opgegeven) - rol 1040 niet uit")
-            $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'overgeslagen (geen landen)'; Gevaar = $locatie.danger })
+            Write-Warning "'$($location.displayName)' skipped: no -AllowedCountry given. $($location.tenantSpecific)"
+            $blocking.Add("'$($location.displayName)' is missing (no countries given) - do not deploy 1040")
+            $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $null; Status = 'skipped (no countries)'; Danger = $location.danger })
             continue
         }
         $body.countriesAndRegions = @($AllowedCountry)
     }
 
-    # De IP-locatie is het enige dat dit script weigert te raden. Een lege trusted-IP-locatie
-    # in 1060 zet de serviceaccounts vast op nul adressen; de IP van iemand anders is erger.
-    if ($locatie.requiresIpRanges) {
+    # The IP location is the one thing this script refuses to guess. An empty trusted-IP
+    # location in 1060 pins the service accounts to zero addresses; someone else's IP is worse.
+    if ($location.requiresIpRanges) {
         if (-not $ServiceAccountIpRange) {
-            Write-Warning "'$($locatie.displayName)' overgeslagen: geen -ServiceAccountIpRange opgegeven. $($locatie.tenantSpecific)"
-            $blokkerend.Add("'$($locatie.displayName)' ontbreekt (geen IP-range opgegeven) - rol 1060 niet uit")
-            $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'overgeslagen (geen IP-range)'; Gevaar = $locatie.danger })
+            Write-Warning "'$($location.displayName)' skipped: no -ServiceAccountIpRange given. $($location.tenantSpecific)"
+            $blocking.Add("'$($location.displayName)' is missing (no IP range given) - do not deploy 1060")
+            $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $null; Status = 'skipped (no IP range)'; Danger = $location.danger })
             continue
         }
         $body.ipRanges = @($ServiceAccountIpRange | ForEach-Object {
@@ -228,49 +235,49 @@ foreach ($locatie in $prereq.namedLocations) {
             })
     }
 
-    if ($PSCmdlet.ShouldProcess($locatie.displayName, 'Named location aanmaken')) {
-        $nieuw = New-MgIdentityConditionalAccessNamedLocation -BodyParameter $body
-        Write-Host "  + $($locatie.displayName) aangemaakt ($($nieuw.Id))" -ForegroundColor Green
-        $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $nieuw.Id; Status = 'aangemaakt'; Gevaar = $locatie.danger })
+    if ($PSCmdlet.ShouldProcess($location.displayName, 'Create named location')) {
+        $new = New-MgIdentityConditionalAccessNamedLocation -BodyParameter $body
+        Write-Host "  + $($location.displayName) created ($($new.Id))" -ForegroundColor Green
+        $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $new.Id; Status = 'created'; Danger = $location.danger })
     }
     else {
-        $resultaat.Add([pscustomobject]@{ Soort = 'Locatie'; Naam = $locatie.displayName; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $locatie.danger })
+        $result.Add([pscustomobject]@{ Kind = 'Location'; Name = $location.displayName; Id = $null; Status = 'skipped (WhatIf)'; Danger = $location.danger })
     }
 }
 
-# ------------------------------------------- authentication strengths ----
+# ----------------------------------------------- authentication strengths ----
 
-# Een custom authentication strength krijgt zijn id pas bij aanmaken. Het template in
-# CATemplate/ draagt daarom een nul-GUID: het is de bron voor alle tenants en kan geen id van
-# een van hen dragen. Dit script maakt de strength aan en meldt het echte id, zodat dat in de
-# CIPP-uitrol terechtkomt. Zolang dat niet gebeurd is, wijst de grant naar niets.
+# A custom authentication strength gets its id only on creation. The template in CATemplate/
+# therefore carries a zero GUID: it is the source for all tenants and cannot carry the id of
+# one of them. This script creates the strength and reports the real id, so it ends up in the
+# CIPP deployment. Until that has happened, the grant points at nothing.
 
-$bestaandeStrengths = @(Get-MgPolicyAuthenticationStrengthPolicy -All)
+$existingStrengths = @(Get-MgPolicyAuthenticationStrengthPolicy -All)
 
 foreach ($strength in $prereq.authenticationStrengths) {
-    $bestaand = @($bestaandeStrengths | Where-Object DisplayName -eq $strength.displayName)
+    $existing = @($existingStrengths | Where-Object DisplayName -eq $strength.displayName)
 
-    if ($bestaand.Count -gt 1) {
-        Write-Warning "Meerdere authentication strengths heten '$($strength.displayName)'. Welke de grant pakt is dan niet te zeggen - ruim dat eerst op."
-        $blokkerend.Add("dubbele authentication strength '$($strength.displayName)'")
+    if ($existing.Count -gt 1) {
+        Write-Warning "Several authentication strengths are named '$($strength.displayName)'. Which one the grant picks cannot be told - clean that up first."
+        $blocking.Add("duplicate authentication strength '$($strength.displayName)'")
         continue
     }
 
-    if ($bestaand.Count -eq 1) {
-        $huidig = $bestaand[0]
-        Write-Host "  = $($strength.displayName) bestaat al ($($huidig.Id))"
+    if ($existing.Count -eq 1) {
+        $current = $existing[0]
+        Write-Host "  = $($strength.displayName) already exists ($($current.Id))"
 
-        # De combinaties zijn de maatregel zelf. Een strength die dezelfde naam draagt maar
-        # andere combinaties toestaat is gevaarlijker dan geen strength: hij ziet er goed uit.
-        $verwacht = @($strength.definition.allowedCombinations | Sort-Object)
-        $gevonden = @($huidig.AllowedCombinations | Sort-Object)
-        if (Compare-Object $verwacht $gevonden) {
-            Write-Warning "'$($strength.displayName)' staat op [$($gevonden -join ', ')] maar hoort op [$($verwacht -join ', ')]."
-            $blokkerend.Add("'$($strength.displayName)' laat andere combinaties toe dan de baseline voorschrijft")
+        # The combinations are the measure itself. A strength with the same name that allows
+        # other combinations is more dangerous than no strength: it looks right.
+        $expected = @($strength.definition.allowedCombinations | Sort-Object)
+        $found = @($current.AllowedCombinations | Sort-Object)
+        if (Compare-Object $expected $found) {
+            Write-Warning "'$($strength.displayName)' is set to [$($found -join ', ')] but should be [$($expected -join ', ')]."
+            $blocking.Add("'$($strength.displayName)' allows other combinations than the baseline prescribes")
         }
 
-        Write-Host "    id voor de uitrol: $($huidig.Id)  (vervang hiermee $($strength.placeholderId) in de CIPP-uitrol)" -ForegroundColor Cyan
-        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $huidig.Id; Status = 'bestond al'; Gevaar = $strength.danger })
+        Write-Host "    id for the deployment: $($current.Id)  (replace $($strength.placeholderId) with it in the CIPP deployment)" -ForegroundColor Cyan
+        $result.Add([pscustomobject]@{ Kind = 'Strength'; Name = $strength.displayName; Id = $current.Id; Status = 'already existed'; Danger = $strength.danger })
         continue
     }
 
@@ -280,38 +287,38 @@ foreach ($strength in $prereq.authenticationStrengths) {
         allowedCombinations = @($strength.definition.allowedCombinations)
     }
 
-    if ($PSCmdlet.ShouldProcess($strength.displayName, 'Authentication strength aanmaken')) {
-        $nieuwStrength = New-MgPolicyAuthenticationStrengthPolicy -BodyParameter $body
-        Write-Host "  + $($strength.displayName) aangemaakt ($($nieuwStrength.Id))" -ForegroundColor Green
-        Write-Host "    id voor de uitrol: $($nieuwStrength.Id)  (vervang hiermee $($strength.placeholderId) in de CIPP-uitrol)" -ForegroundColor Cyan
-        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $nieuwStrength.Id; Status = 'aangemaakt'; Gevaar = $strength.danger })
+    if ($PSCmdlet.ShouldProcess($strength.displayName, 'Create authentication strength')) {
+        $newStrength = New-MgPolicyAuthenticationStrengthPolicy -BodyParameter $body
+        Write-Host "  + $($strength.displayName) created ($($newStrength.Id))" -ForegroundColor Green
+        Write-Host "    id for the deployment: $($newStrength.Id)  (replace $($strength.placeholderId) with it in the CIPP deployment)" -ForegroundColor Cyan
+        $result.Add([pscustomobject]@{ Kind = 'Strength'; Name = $strength.displayName; Id = $newStrength.Id; Status = 'created'; Danger = $strength.danger })
     }
     else {
-        $resultaat.Add([pscustomobject]@{ Soort = 'Strength'; Naam = $strength.displayName; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $strength.danger })
+        $result.Add([pscustomobject]@{ Kind = 'Strength'; Name = $strength.displayName; Id = $null; Status = 'skipped (WhatIf)'; Danger = $strength.danger })
     }
 }
 
-# -------------------------------------------- authentication contexts ----
+# ------------------------------------------------ authentication contexts ----
 
-# Vandaag leeg: geen enkel template verwijst naar een context, want een context is een
-# klantkeuze (een SharePoint-site met een label, een PIM-activatie) en geen baselinemaatregel.
-# De lus staat er zodat het aanmaken al geregeld is op het moment dat er wel een bij komt.
+# Empty today: no template refers to a context, because a context is a choice per tenant (a
+# SharePoint site with a label, a PIM activation) and not a baseline measure. The loop is here
+# so that creating one is already handled when one does come along.
 
 if ($prereq.authenticationContexts -and $prereq.authenticationContexts.Count -gt 0) {
-    $bestaandeContexts = @(Get-MgIdentityConditionalAccessAuthenticationContextClassReference -All)
+    $existingContexts = @(Get-MgIdentityConditionalAccessAuthenticationContextClassReference -All)
 
     foreach ($context in $prereq.authenticationContexts) {
-        $bestaand = @($bestaandeContexts | Where-Object Id -eq $context.id)
+        $existing = @($existingContexts | Where-Object Id -eq $context.id)
 
-        if ($bestaand.Count -eq 1) {
-            Write-Host "  = $($context.id) ($($context.displayName)) bestaat al"
-            # Niet-gepubliceerd is de stille fout: de context bestaat, de CA-policy pakt hem,
-            # maar geen app kan hem kiezen - dus hij wordt nooit aangeroepen.
-            if (-not $bestaand[0].IsAvailable) {
-                Write-Warning "'$($context.id)' staat op isAvailable false: geen enkele app kan hem kiezen, dus de policy die hem als target heeft beschermt niets."
-                $blokkerend.Add("'$($context.id)' is niet gepubliceerd naar apps")
+        if ($existing.Count -eq 1) {
+            Write-Host "  = $($context.id) ($($context.displayName)) already exists"
+            # Not published is the silent failure: the context exists, the CA policy targets
+            # it, but no app can select it - so it is never invoked.
+            if (-not $existing[0].IsAvailable) {
+                Write-Warning "'$($context.id)' has isAvailable false: no app can select it, so the policy that targets it protects nothing."
+                $blocking.Add("'$($context.id)' is not published to apps")
             }
-            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $context.id; Status = 'bestond al'; Gevaar = $context.danger })
+            $result.Add([pscustomobject]@{ Kind = 'Context'; Name = "$($context.id) $($context.displayName)"; Id = $context.id; Status = 'already existed'; Danger = $context.danger })
             continue
         }
 
@@ -322,32 +329,32 @@ if ($prereq.authenticationContexts -and $prereq.authenticationContexts.Count -gt
             isAvailable = $true
         }
 
-        if ($PSCmdlet.ShouldProcess("$($context.id) ($($context.displayName))", 'Authentication context aanmaken')) {
-            $nieuwContext = New-MgIdentityConditionalAccessAuthenticationContextClassReference -BodyParameter $body
-            Write-Host "  + $($context.id) ($($context.displayName)) aangemaakt" -ForegroundColor Green
-            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $nieuwContext.Id; Status = 'aangemaakt'; Gevaar = $context.danger })
+        if ($PSCmdlet.ShouldProcess("$($context.id) ($($context.displayName))", 'Create authentication context')) {
+            $newContext = New-MgIdentityConditionalAccessAuthenticationContextClassReference -BodyParameter $body
+            Write-Host "  + $($context.id) ($($context.displayName)) created" -ForegroundColor Green
+            $result.Add([pscustomobject]@{ Kind = 'Context'; Name = "$($context.id) $($context.displayName)"; Id = $newContext.Id; Status = 'created'; Danger = $context.danger })
         }
         else {
-            $resultaat.Add([pscustomobject]@{ Soort = 'Context'; Naam = "$($context.id) $($context.displayName)"; Id = $null; Status = 'overgeslagen (WhatIf)'; Gevaar = $context.danger })
+            $result.Add([pscustomobject]@{ Kind = 'Context'; Name = "$($context.id) $($context.displayName)"; Id = $null; Status = 'skipped (WhatIf)'; Danger = $context.danger })
         }
     }
 }
 
-# ------------------------------------------------------------- afsluiting ----
+# ---------------------------------------------------------------- summary ----
 
-$resultaat | Format-Table -AutoSize
+$result | Format-Table -AutoSize
 
-if ($blokkerend.Count -gt 0) {
+if ($blocking.Count -gt 0) {
     Write-Host ''
-    Write-Host 'NIET KLAAR VOOR UITROL:' -ForegroundColor Yellow
-    $blokkerend | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+    Write-Host 'NOT READY FOR DEPLOYMENT:' -ForegroundColor Yellow
+    $blocking | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
     Write-Host ''
-    Write-Host 'Zet de CA-baseline pas op Remediate als deze lijst leeg is. Tot die tijd: alleen Report.' -ForegroundColor Yellow
+    Write-Host 'Only set the CA baseline to Remediate once this list is empty. Until then: Report only.' -ForegroundColor Yellow
     if ($RequireSafeToDeploy) {
-        throw "Randvoorwaarden niet compleet ($($blokkerend.Count) punt(en)) - CA-baseline niet uitrollen."
+        throw "Prerequisites incomplete ($($blocking.Count) item(s)) - do not deploy the CA baseline."
     }
 }
 else {
     Write-Host ''
-    Write-Host 'Alle randvoorwaarden staan. De CA-baseline kan uitgerold worden.' -ForegroundColor Green
+    Write-Host 'All prerequisites are in place. The CA baseline can be deployed.' -ForegroundColor Green
 }

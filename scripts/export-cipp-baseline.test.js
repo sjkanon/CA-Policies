@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /**
- * Bewaakt de rem op --remediate-stage1.
+ * Guards the brake on --remediate-stage1, and the optional templates in CATemplate/_manifest.json.
  *
- * ========================== WAAROM DIT EEN TEST IS ==========================
+ * ========================== WHY THIS IS A TEST ==========================
  *
- * Stage 1 wordt afgeleid uit `state: enabled`. Een template dat vandaag wordt toegevoegd
- * valt daar dus vanzelf in, en de eerstvolgende --remediate-stage1 zou het bij elke klant
- * afdwingen — waarmee "ik heb een bestand toegevoegd" samenvalt met "dit hoort tot de kern".
- * De vergelijking met de vorige export is wat die twee uit elkaar houdt; breekt die
- * stilzwijgend, dan merk je het pas als een klanttenant iets afdwingt wat niemand koos.
+ * Stage 1 is derived from `state: enabled`. A template added today therefore lands there by
+ * itself, and the next --remediate-stage1 would enforce it in every tenant — turning "I added
+ * a file" into "this belongs to the core". The comparison with the previous export is what
+ * keeps those two apart; if it silently breaks, you only notice when a tenant enforces
+ * something nobody chose.
  *
- * Draaien: node --test scripts/export-cipp-baseline.test.js
+ * The manifest decides stage 3. A key that no longer matches a template (renamed, removed)
+ * would silently drop a licence-bound template from stage 3 into stage 1.
+ *
+ * Run: node --test scripts/export-cipp-baseline.test.js
  */
 const fs = require("fs");
 const os = require("os");
@@ -18,7 +21,8 @@ const path = require("path");
 const assert = require("node:assert");
 const { test } = require("node:test");
 
-const { vergelijkMetVorigPlan, stapSamenvatting, leesVorigPlan } = require("./export-cipp-baseline");
+const { vergelijkMetVorigPlan, stapSamenvatting, leesVorigPlan, leesOptioneel } = require("./export-cipp-baseline");
+const { readTemplates } = require("./prerequisites");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const STAGES_PATH = path.join(REPO_ROOT, "cipp", "baseline-stages.json");
@@ -92,6 +96,33 @@ test("de gecommitte export staat volledig op Report", () => {
   assert.deepStrictEqual(
     acties,
     ["Report"],
-    "cipp/baseline-stages.json hoort in de repo op Report te staan. Remediate is een beslissing per klanttenant, ná New-CaPrerequisites.ps1 — niet iets wat op main meelift."
+    "cipp/baseline-stages.json hoort in de repo op Report te staan. Remediate is een beslissing per tenant, ná New-CaPrerequisites.ps1 — niet iets wat op main meelift."
   );
+});
+
+test("elke sleutel in CATemplate/_manifest.json is een bestaand template, en elke optional heeft een reden", () => {
+  const namen = readTemplates().map((t) => t.file);
+  const optioneel = leesOptioneel(undefined, namen);
+  assert.ok(Object.keys(optioneel).length > 0, "geen enkel optioneel template — is _manifest.json leeg geraakt?");
+  for (const [naam, reden] of Object.entries(optioneel)) {
+    assert.ok(namen.includes(naam), `${naam} bestaat niet in CATemplate/`);
+    assert.ok(reden.length > 0, `${naam} heeft geen reden`);
+  }
+});
+
+test("een manifest met een onbekend template of een optional zonder reden is een fout", () => {
+  const map = fs.mkdtempSync(path.join(os.tmpdir(), "ca-manifest-test-"));
+  const pad = path.join(map, "_manifest.json");
+  try {
+    fs.writeFileSync(pad, JSON.stringify({ _comment: ["x"], GLOBAL__9999__BLOCK__Weg: { optional: true, reden: "r" } }));
+    assert.throws(() => leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), /niet in CATemplate/);
+
+    fs.writeFileSync(pad, JSON.stringify({ GLOBAL__1010__BLOCK__Legacy_Authentication: { optional: true } }));
+    assert.throws(() => leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), /zonder 'reden'/);
+
+    fs.writeFileSync(pad, JSON.stringify({ "GLOBAL__1010__BLOCK__Legacy_Authentication.json": { optional: false } }));
+    assert.deepStrictEqual(leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), {}, "optional false telt niet mee, en .json in de sleutel mag");
+  } finally {
+    fs.rmSync(map, { recursive: true, force: true });
+  }
 });

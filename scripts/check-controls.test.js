@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * Bewaakt dat controls/ca-controls.json en CATemplate/ niet uit elkaar lopen.
+ * Guards that controls/ca-controls.json and CATemplate/ do not drift apart.
  *
- * ========================== WAAROM DIT EEN TEST IS ==========================
+ * ========================== WHY THIS IS A TEST ==========================
  *
- * check-controls.js draait pas als iemand hem draait, en de gevolgen van hem níet draaien zie
- * je niet hier maar in de andere repo: een COMPLIANCE.md waarin een control wordt afgedekt door
- * een policy die niet bestaat, of waarin een policy die wél bestaat nergens meetelt. Dat komt
- * pas boven bij een audit — het verkeerde moment.
+ * check-controls.js only runs when someone runs it, and the consequences of not running it
+ * show up not here but in the other repo: a COMPLIANCE.md in which a control is covered by a
+ * policy that does not exist, or in which a policy that does exist counts nowhere. That
+ * surfaces during an audit — the wrong moment.
  *
- * Deze test faalt op het moment dat het template wordt toegevoegd of hernoemd, en dat is het
- * enige moment waarop de auteur nog weet welke controls hij bedoelde.
+ * This test fails the moment the template is added or renamed, the only moment the author
+ * still knows which controls he meant.
  *
- * Draaien: node --test scripts/check-controls.test.js
+ * Run: node --test scripts/check-controls.test.js
  */
 const assert = require("node:assert");
 const { test } = require("node:test");

@@ -1,59 +1,61 @@
 #Requires -Modules Microsoft.Graph.Identity.SignIns, Microsoft.Graph.Users, Microsoft.Graph.Groups
 <#
 .SYNOPSIS
-    Zegt vóór de uitrol of een gebruiker een passkey kán registreren, en zo niet: waarom.
-    Leest alleen; wijzigt niets.
+    Tells you before the rollout whether a user CAN register a passkey, and if not: why.
+    Read-only; changes nothing.
 
 .DESCRIPTION
-    Op 16 september 2026 kostte dit bij tejo.be dertien mislukte pogingen over tachtig minuten,
-    met in het auditlog niets anders dan "User started the registration for Passkey" zonder
-    afloop. De oorzaak stond in de documentatie maar niet in de foutmelding:
+    In one tenant this once cost thirteen failed attempts over eighty minutes, with nothing in
+    the audit log but "User started the registration for Passkey" and no outcome. The cause was
+    in the documentation but not in the error message:
 
-        Op een Entra joined of registered toestel blokkeert een BESTAANDE
-        Windows Hello for Business-credential de registratie van een passkey voor
-        datzelfde account in dezelfde Windows Hello-container.
+        On an Entra joined or registered device, an EXISTING Windows Hello for Business
+        credential blocks the registration of a passkey for that same account in the same
+        Windows Hello container.
 
-    Dit script controleert die blokkade en de vijf andere die stil falen, en geeft per punt een
-    verdict met wat je eraan doet. Dertig seconden in plaats van tachtig minuten.
+    This script checks that blocker and the five others that fail silently, and gives a verdict
+    per item with what to do about it. Thirty seconds instead of eighty minutes.
 
-    WAT HET CONTROLEERT
+    WHAT IT CHECKS
 
-      1. Staat Passkey (FIDO2) aan, en mag de gebruiker self-service registreren?
-      2. Heeft de gebruiker al een WHfB-credential? (blokkeert Entra passkey on Windows)
-      3. Heeft de gebruiker een TAP, en is die EENMALIG? (GLOBAL__2180 eist temporaryAccessPassOneTime)
-      4. Is de gebruiker een gast? (gasten kunnen helemaal geen passkey registreren)
-      5. Dwingt het beleid attestation af? (sluit synced passkeys en Windows Hello uit)
-      6. Is er een AAGUID-beperking die Windows Hello uitsluit?
+      1. Is Passkey (FIDO2) enabled, and may the user register self-service?
+      2. Does the user already have a WHfB credential? (blocks Entra passkey on Windows)
+      3. Does the user have a TAP, and is it ONE-TIME? (GLOBAL__2180 requires temporaryAccessPassOneTime)
+      4. Is the user a guest? (guests cannot register a passkey at all)
+      5. Does the policy enforce attestation? (excludes synced passkeys and Windows Hello)
+      6. Is there an AAGUID restriction that excludes Windows Hello?
 
-    WAT HET NIET KAN
+    WHAT IT CANNOT DO
 
-    De vijf-minutenregel - de gebruiker moet binnen de laatste vijf minuten MFA hebben gedaan
-    voordat hij mag registreren - is niet uit te lezen. Die staat daarom als herinnering in de
-    uitvoer, niet als check.
+    The five-minute rule - the user must have done MFA within the last five minutes before he
+    may register - cannot be read. It is therefore a reminder in the output, not a check.
 
 .PARAMETER TenantId
-    De klanttenant.
+    The tenant.
 
 .PARAMETER UserPrincipalName
-    De gebruiker(s) die je wilt controleren.
+    The user(s) you want to check.
 
 .PARAMETER Scenario
-    Waar je naartoe wilt. Bepaalt hoe een bestaande WHfB-credential beoordeeld wordt:
+    Where you want to end up. Determines how an existing WHfB credential is judged:
 
-      WindowsHelloPasskey  Een passkey in de Windows Hello-container (Entra passkey on Windows).
-                           Een bestaande WHfB-credential is dan een BLOKKADE.
-      SecurityKey          Een passkey op een losse FIDO2-sleutel of in Authenticator.
-                           Een bestaande WHfB-credential maakt dan niets uit.
-      WindowsHelloForBusiness  Aanmelden op het toestel zelf. Dan is een bestaande
-                           WHfB-credential juist wat je wílt zien.
+      WindowsHelloPasskey  A passkey in the Windows Hello container (Entra passkey on Windows).
+                           An existing WHfB credential is then a BLOCKER.
+      SecurityKey          A passkey on a separate FIDO2 key or in Authenticator.
+                           An existing WHfB credential then makes no difference.
+      WindowsHelloForBusiness  Signing in on the device itself. An existing WHfB credential
+                           is then exactly what you want to see.
 
-    Standaard SecurityKey: dat is het scenario waarin niets elkaar in de weg zit.
+    Default SecurityKey: that is the scenario in which nothing gets in each other's way.
+
+.PARAMETER MethodsPath
+    Path to authentication-methods.json. Defaults to the one in this repo.
 
 .EXAMPLE
-    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be
+    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId contoso.onmicrosoft.com -UserPrincipalName adele.vance@contoso.com
 
 .EXAMPLE
-    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId tejo.be -UserPrincipalName info.kalmthout@tejo.be -Scenario WindowsHelloPasskey
+    ./scripts/Test-EntraPasskeyReadiness.ps1 -TenantId contoso.onmicrosoft.com -UserPrincipalName adele.vance@contoso.com -Scenario WindowsHelloPasskey
 #>
 [CmdletBinding()]
 param(
@@ -71,11 +73,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$gewenst = Get-Content -Path $MethodsPath -Raw | ConvertFrom-Json
+$desired = Get-Content -Path $MethodsPath -Raw | ConvertFrom-Json
 $helloAaGuids = @(
-    $gewenst.knownAaGuids.windowsHelloHardware
-    $gewenst.knownAaGuids.windowsHelloVbsHardware
-    $gewenst.knownAaGuids.windowsHelloSoftware
+    $desired.knownAaGuids.windowsHelloHardware
+    $desired.knownAaGuids.windowsHelloVbsHardware
+    $desired.knownAaGuids.windowsHelloSoftware
 ) | Where-Object { $_ }
 
 Connect-MgGraph -TenantId $TenantId -Scopes 'Policy.Read.All', 'UserAuthenticationMethod.Read.All', 'User.Read.All' -NoWelcome
@@ -83,11 +85,11 @@ Connect-MgGraph -TenantId $TenantId -Scopes 'Policy.Read.All', 'UserAuthenticati
 Write-Host "Scenario: $Scenario" -ForegroundColor Cyan
 Write-Host ''
 
-# ------------------------------------------------------ tenantbreed ----
+# ------------------------------------------------------------ tenant-wide ----
 
-$tenantBevindingen = [System.Collections.Generic.List[object]]::new()
-$voegToe = { param($lijst, $punt, $verdict, $uitleg)
-    $lijst.Add([pscustomobject]@{ Punt = $punt; Verdict = $verdict; Wat = $uitleg })
+$tenantFindings = [System.Collections.Generic.List[object]]::new()
+$addFinding = { param($list, $item, $verdict, $explanation)
+    $list.Add([pscustomobject]@{ Item = $item; Verdict = $verdict; Detail = $explanation })
 }
 
 $fido = $null
@@ -95,153 +97,153 @@ try {
     $fido = Get-MgPolicyAuthenticationMethodPolicyAuthenticationMethodConfiguration -AuthenticationMethodConfigurationId 'Fido2'
 }
 catch {
-    & $voegToe $tenantBevindingen 'Passkey (FIDO2)' 'ONBEKEND' "Niet uit te lezen: $($_.Exception.Message)"
+    & $addFinding $tenantFindings 'Passkey (FIDO2)' 'UNKNOWN' "Cannot be read: $($_.Exception.Message)"
 }
 
 if ($fido) {
     if ($fido.State -eq 'enabled') {
-        & $voegToe $tenantBevindingen 'Passkey (FIDO2)' 'OK' 'Methode staat aan'
+        & $addFinding $tenantFindings 'Passkey (FIDO2)' 'OK' 'Method is enabled'
     }
     else {
-        & $voegToe $tenantBevindingen 'Passkey (FIDO2)' 'BLOKKEERT' "Methode staat op $($fido.State). Niemand kan registreren, en GLOBAL__2120 is dan onvervulbaar."
+        & $addFinding $tenantFindings 'Passkey (FIDO2)' 'BLOCKS' "Method is $($fido.State). Nobody can register, and GLOBAL__2120 then cannot be met."
     }
 
     $extra = $fido.AdditionalProperties
 
     if ($extra.isSelfServiceRegistrationAllowed -eq $false) {
-        & $voegToe $tenantBevindingen 'Self-service registratie' 'BLOKKEERT' 'Staat op No. Niemand kan via Security info registreren, ook niet met de methode aan.'
+        & $addFinding $tenantFindings 'Self-service registration' 'BLOCKS' 'Set to No. Nobody can register via Security info, even with the method enabled.'
     }
     else {
-        & $voegToe $tenantBevindingen 'Self-service registratie' 'OK' 'Toegestaan'
+        & $addFinding $tenantFindings 'Self-service registration' 'OK' 'Allowed'
     }
 
     if ($extra.isAttestationEnforced -eq $true) {
-        $verdict = if ($Scenario -eq 'WindowsHelloPasskey') { 'BLOKKEERT' } else { 'LET OP' }
-        & $voegToe $tenantBevindingen 'Attestation' $verdict 'Wordt afgedwongen. Sluit gesynchroniseerde passkeys uit, en Windows Hello-passkeys kunnen er helemaal niet mee.'
+        $verdict = if ($Scenario -eq 'WindowsHelloPasskey') { 'BLOCKS' } else { 'NOTE' }
+        & $addFinding $tenantFindings 'Attestation' $verdict 'Enforced. Excludes synced passkeys, and Windows Hello passkeys cannot work with it at all.'
     }
     else {
-        & $voegToe $tenantBevindingen 'Attestation' 'OK' 'Wordt niet afgedwongen'
+        & $addFinding $tenantFindings 'Attestation' 'OK' 'Not enforced'
     }
 
-    # Een allow-lijst zonder de Windows Hello-AAGUID's sluit Windows Hello uit; een block-lijst
-    # met die AAGUID's erin doet hetzelfde. Allebei stil.
-    $restricties = $extra.keyRestrictions
-    if ($restricties -and $restricties.isEnforced) {
-        $lijst = @($restricties.aaGuids)
-        $heeftHello = @($lijst | Where-Object { $helloAaGuids -contains $_ }).Count -gt 0
-        $type = $restricties.enforcementType
-        $helloToegestaan = ($type -eq 'allow' -and $heeftHello) -or ($type -eq 'block' -and -not $heeftHello)
+    # An allow list without the Windows Hello AAGUIDs excludes Windows Hello; a block list with
+    # those AAGUIDs in it does the same. Both silently.
+    $restrictions = $extra.keyRestrictions
+    if ($restrictions -and $restrictions.isEnforced) {
+        $list = @($restrictions.aaGuids)
+        $hasHello = @($list | Where-Object { $helloAaGuids -contains $_ }).Count -gt 0
+        $type = $restrictions.enforcementType
+        $helloAllowed = ($type -eq 'allow' -and $hasHello) -or ($type -eq 'block' -and -not $hasHello)
 
-        if ($Scenario -eq 'WindowsHelloPasskey' -and -not $helloToegestaan) {
-            & $voegToe $tenantBevindingen 'AAGUID-beperking' 'BLOKKEERT' "enforcementType=$type met $($lijst.Count) AAGUID('s); Windows Hello zit er niet bij. Voeg $($gewenst.knownAaGuids.windowsHelloHardware) toe."
+        if ($Scenario -eq 'WindowsHelloPasskey' -and -not $helloAllowed) {
+            & $addFinding $tenantFindings 'AAGUID restriction' 'BLOCKS' "enforcementType=$type with $($list.Count) AAGUID(s); Windows Hello is not allowed. Add $($desired.knownAaGuids.windowsHelloHardware)."
         }
         else {
-            & $voegToe $tenantBevindingen 'AAGUID-beperking' 'LET OP' "enforcementType=$type met $($lijst.Count) AAGUID('s). Controleer of de authenticator van de gebruiker erin past."
+            & $addFinding $tenantFindings 'AAGUID restriction' 'NOTE' "enforcementType=$type with $($list.Count) AAGUID(s). Check that the user's authenticator fits."
         }
     }
     else {
-        & $voegToe $tenantBevindingen 'AAGUID-beperking' 'OK' 'Geen beperking'
+        & $addFinding $tenantFindings 'AAGUID restriction' 'OK' 'No restriction'
     }
 }
 
-$tenantBevindingen | Format-Table -AutoSize
+$tenantFindings | Format-Table -AutoSize
 
-# ------------------------------------------------------ per gebruiker ----
+# --------------------------------------------------------------- per user ----
 
-$eindoordeel = [System.Collections.Generic.List[object]]::new()
+$verdicts = [System.Collections.Generic.List[object]]::new()
 
 foreach ($upn in $UserPrincipalName) {
     Write-Host "--- $upn ---" -ForegroundColor Cyan
-    $bevindingen = [System.Collections.Generic.List[object]]::new()
+    $findings = [System.Collections.Generic.List[object]]::new()
 
-    $gebruiker = $null
-    try { $gebruiker = Get-MgUser -UserId $upn -Property 'id,userPrincipalName,userType,displayName' }
+    $user = $null
+    try { $user = Get-MgUser -UserId $upn -Property 'id,userPrincipalName,userType,displayName' }
     catch {
-        Write-Warning "Gebruiker niet gevonden: $($_.Exception.Message)"
-        $eindoordeel.Add([pscustomobject]@{ Gebruiker = $upn; Oordeel = 'ONBEKEND'; Reden = 'gebruiker niet gevonden' })
+        Write-Warning "User not found: $($_.Exception.Message)"
+        $verdicts.Add([pscustomobject]@{ User = $upn; Verdict = 'UNKNOWN'; Reason = 'user not found' })
         continue
     }
 
-    # Gasten kunnen geen passkey registreren. Punt. Geen instelling die dat verandert.
-    if ($gebruiker.UserType -eq 'Guest') {
-        & $voegToe $bevindingen 'Gebruikerstype' 'BLOKKEERT' 'Gast. Registratie van passkeys wordt voor gasten niet ondersteund - ook niet met alles goed ingesteld.'
+    # Guests cannot register a passkey. Full stop. No setting changes that.
+    if ($user.UserType -eq 'Guest') {
+        & $addFinding $findings 'User type' 'BLOCKS' 'Guest. Passkey registration is not supported for guests - not even with everything configured correctly.'
     }
     else {
-        & $voegToe $bevindingen 'Gebruikerstype' 'OK' $gebruiker.UserType
+        & $addFinding $findings 'User type' 'OK' $user.UserType
     }
 
-    # DE valkuil.
+    # THE pitfall.
     $whfb = @()
-    try { $whfb = @(Get-MgUserAuthenticationWindowsHelloForBusinessMethod -UserId $gebruiker.Id) } catch { }
+    try { $whfb = @(Get-MgUserAuthenticationWindowsHelloForBusinessMethod -UserId $user.Id) } catch { }
 
     switch ($Scenario) {
         'WindowsHelloPasskey' {
             if ($whfb.Count -gt 0) {
-                $namen = ($whfb | ForEach-Object { $_.DisplayName }) -join ', '
-                & $voegToe $bevindingen 'Bestaande WHfB-credential' 'BLOKKEERT' "$($whfb.Count) gevonden ($namen). Een passkey in dezelfde Windows Hello-container kan hiernaast niet worden geregistreerd; de registratie faalt zonder bruikbare melding. Overweeg eerst of WHfB hier niet juist de bedoeling is - op een beheerd, Entra joined toestel is dat meestal zo."
+                $names = ($whfb | ForEach-Object { $_.DisplayName }) -join ', '
+                & $addFinding $findings 'Existing WHfB credential' 'BLOCKS' "$($whfb.Count) found ($names). A passkey in the same Windows Hello container cannot be registered next to it; the registration fails without a useful message. Consider first whether WHfB is not exactly what you want here - on a managed, Entra joined device it usually is."
             }
             else {
-                & $voegToe $bevindingen 'Bestaande WHfB-credential' 'OK' 'Geen - de container is vrij'
+                & $addFinding $findings 'Existing WHfB credential' 'OK' 'None - the container is free'
             }
         }
         'WindowsHelloForBusiness' {
             if ($whfb.Count -gt 0) {
-                & $voegToe $bevindingen 'WHfB-credential' 'OK' "$($whfb.Count) aanwezig - dit is wat je wilde"
+                & $addFinding $findings 'WHfB credential' 'OK' "$($whfb.Count) present - this is what you wanted"
             }
             else {
-                & $voegToe $bevindingen 'WHfB-credential' 'LET OP' 'Geen. Controleer of het toestel een TPM heeft en of de Intune-WHfB-policy is toegewezen aan deze gebruiker.'
+                & $addFinding $findings 'WHfB credential' 'NOTE' 'None. Check that the device has a TPM and that the Intune WHfB policy is assigned to this user.'
             }
         }
         default {
-            & $voegToe $bevindingen 'WHfB-credential' 'OK' "$($whfb.Count) aanwezig - niet van invloed op dit scenario"
+            & $addFinding $findings 'WHfB credential' 'OK' "$($whfb.Count) present - no effect on this scenario"
         }
     }
 
     $fido2 = @()
-    try { $fido2 = @(Get-MgUserAuthenticationFido2Method -UserId $gebruiker.Id) } catch { }
+    try { $fido2 = @(Get-MgUserAuthenticationFido2Method -UserId $user.Id) } catch { }
     if ($fido2.Count -gt 0) {
-        $regels = $fido2 | ForEach-Object { "$($_.DisplayName) [$($_.AaGuid)]" }
-        & $voegToe $bevindingen 'Al geregistreerde passkeys' 'OK' ($regels -join '; ')
+        $lines = $fido2 | ForEach-Object { "$($_.DisplayName) [$($_.AaGuid)]" }
+        & $addFinding $findings 'Passkeys already registered' 'OK' ($lines -join '; ')
     }
     else {
-        & $voegToe $bevindingen 'Al geregistreerde passkeys' 'OK' 'Geen'
+        & $addFinding $findings 'Passkeys already registered' 'OK' 'None'
     }
 
-    # De TAP is het startpunt van de hele keten, en de eenmaligheid is wat 2180 eist.
+    # The TAP is the starting point of the whole chain, and one-time use is what 2180 requires.
     $tap = @()
-    try { $tap = @(Get-MgUserAuthenticationTemporaryAccessPassMethod -UserId $gebruiker.Id) } catch { }
+    try { $tap = @(Get-MgUserAuthenticationTemporaryAccessPassMethod -UserId $user.Id) } catch { }
     if ($tap.Count -eq 0) {
-        & $voegToe $bevindingen 'Temporary Access Pass' 'LET OP' 'Geen actieve TAP. Zonder bestaande methode kan de gebruiker niet beginnen.'
+        & $addFinding $findings 'Temporary Access Pass' 'NOTE' 'No active TAP. Without an existing method the user cannot get started.'
     }
     else {
-        $meermalig = @($tap | Where-Object { -not $_.IsUsableOnce })
-        if ($meermalig.Count -gt 0) {
-            & $voegToe $bevindingen 'Temporary Access Pass' 'LET OP' "$($meermalig.Count) van $($tap.Count) is MEERMALIG bruikbaar. GLOBAL__2180 accepteert alleen temporaryAccessPassOneTime - zodra die policy afdwingt, voldoet deze TAP niet."
+        $multiUse = @($tap | Where-Object { -not $_.IsUsableOnce })
+        if ($multiUse.Count -gt 0) {
+            & $addFinding $findings 'Temporary Access Pass' 'NOTE' "$($multiUse.Count) of $($tap.Count) is usable MORE THAN ONCE. GLOBAL__2180 only accepts temporaryAccessPassOneTime - once that policy enforces, this TAP does not satisfy it."
         }
         else {
-            & $voegToe $bevindingen 'Temporary Access Pass' 'OK' "$($tap.Count) actief, eenmalig"
+            & $addFinding $findings 'Temporary Access Pass' 'OK' "$($tap.Count) active, one-time"
         }
     }
 
-    $bevindingen | Format-Table -AutoSize
+    $findings | Format-Table -AutoSize
 
-    $blokkades = @($bevindingen | Where-Object Verdict -eq 'BLOKKEERT') + @($tenantBevindingen | Where-Object Verdict -eq 'BLOKKEERT')
-    if ($blokkades.Count -gt 0) {
-        Write-Host "  GAAT FALEN - $($blokkades.Count) blokkade(s):" -ForegroundColor Red
-        $blokkades | ForEach-Object { Write-Host "    - $($_.Punt): $($_.Wat)" -ForegroundColor Red }
-        $eindoordeel.Add([pscustomobject]@{ Gebruiker = $upn; Oordeel = 'GAAT FALEN'; Reden = ($blokkades.Punt -join ', ') })
+    $blockers = @($findings | Where-Object Verdict -eq 'BLOCKS') + @($tenantFindings | Where-Object Verdict -eq 'BLOCKS')
+    if ($blockers.Count -gt 0) {
+        Write-Host "  WILL FAIL - $($blockers.Count) blocker(s):" -ForegroundColor Red
+        $blockers | ForEach-Object { Write-Host "    - $($_.Item): $($_.Detail)" -ForegroundColor Red }
+        $verdicts.Add([pscustomobject]@{ User = $upn; Verdict = 'WILL FAIL'; Reason = ($blockers.Item -join ', ') })
     }
     else {
-        Write-Host '  Niets dat de registratie blokkeert.' -ForegroundColor Green
-        $eindoordeel.Add([pscustomobject]@{ Gebruiker = $upn; Oordeel = 'KAN REGISTREREN'; Reden = '-' })
+        Write-Host '  Nothing that blocks the registration.' -ForegroundColor Green
+        $verdicts.Add([pscustomobject]@{ User = $upn; Verdict = 'CAN REGISTER'; Reason = '-' })
     }
     Write-Host ''
 }
 
-Write-Host '=== Samenvatting ===' -ForegroundColor Cyan
-$eindoordeel | Format-Table -AutoSize
+Write-Host '=== Summary ===' -ForegroundColor Cyan
+$verdicts | Format-Table -AutoSize
 
-Write-Host 'Niet te controleren, wel te onthouden:' -ForegroundColor Yellow
-Write-Host '  - De gebruiker moet binnen de laatste VIJF MINUTEN MFA hebben gedaan voordat hij een passkey mag registreren.'
-Write-Host '  - Passkey profiles vragen een eenmalige, ONOMKEERBARE opt-in in het portaal.'
-Write-Host '  - Entra passkey on Windows doet GEEN aanmelding op het Windows-scherm zelf; Windows Hello for Business wel.'
+Write-Host 'Cannot be checked, worth remembering:' -ForegroundColor Yellow
+Write-Host '  - The user must have done MFA within the last FIVE MINUTES before he may register a passkey.'
+Write-Host '  - Passkey profiles require a one-time, IRREVERSIBLE opt-in in the portal.'
+Write-Host '  - Entra passkey on Windows does NOT sign in on the Windows screen itself; Windows Hello for Business does.'

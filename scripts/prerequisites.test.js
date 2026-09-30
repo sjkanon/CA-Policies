@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 /**
- * Bewaakt de afspraak die prerequisites/ca-prerequisites.json maakt: elke groep en named
- * location waar een template naar verwijst heeft een definitie, en niets tenant-specifieks
- * lekt de export in.
+ * Guards the agreement that prerequisites/ca-prerequisites.json makes: every group and named
+ * location a template refers to has a definition, and nothing tenant-specific leaks into the
+ * export.
  *
- * ========================== WAAROM DIT EEN TEST IS ==========================
+ * ========================== WHY THIS IS A TEST ==========================
  *
- * De validatie zit al in generate-baseline.js en export-cipp-baseline.js, maar allebei die
- * scripts draaien pas als iemand ze draait. Deze test faalt in CI op het moment dat het
- * template wordt toegevoegd — en dat is het enige moment waarop de auteur nog weet welke
- * groep hij bedoelde.
+ * export-cipp-baseline.js already validates this, but only when someone runs it. This test
+ * fails in CI the moment the template is added — the only moment the author still knows
+ * which group he meant.
  *
- * Draaien: node --test scripts/prerequisites.test.js
+ * Run: node --test scripts/prerequisites.test.js
  */
 const fs = require("fs");
 const path = require("path");
@@ -28,7 +27,7 @@ test("elke groep- en locatieverwijzing in CATemplate/ heeft een definitie", () =
   assert.deepStrictEqual(
     errors,
     [],
-    `Verwijzingen zonder definitie. Een uitzonderingsgroep die bij de klant niet bestaat sluit niemand uit — de policy wordt dan strenger dan bedoeld:\n${errors.join("\n")}`
+    `Verwijzingen zonder definitie. Een uitzonderingsgroep die in de tenant niet bestaat sluit niemand uit — de policy wordt dan strenger dan bedoeld:\n${errors.join("\n")}`
   );
 });
 
@@ -88,7 +87,7 @@ test("de CIPP-export draagt geen tenant-specifieke IP-ranges", () => {
       assert.deepStrictEqual(
         li.ipRanges || [],
         [],
-        `${rij.GUID} draagt IP-ranges voor "${li.displayName}" mee. Dat is het adres van één specifieke tenant; uitrollen bij een andere klant maakt daar een trusted location van iemand anders.`
+        `${rij.GUID} draagt IP-ranges voor "${li.displayName}" mee. Dat is het adres van één specifieke tenant; uitrollen in een andere tenant maakt daar een trusted location van iemand anders.`
       );
     }
   }
@@ -103,7 +102,7 @@ test("elke custom authentication strength in een template heeft een definitie", 
   for (const naam of refs.strengths.keys()) {
     assert.ok(
       opNaam.has(naam),
-      `"${naam}" wordt door een template gebruikt maar staat niet in prerequisites — New-CaPrerequisites.ps1 maakt hem dan niet aan en de grant wijst bij de klant naar niets.`
+      `"${naam}" wordt door een template gebruikt maar staat niet in prerequisites — New-CaPrerequisites.ps1 maakt hem dan niet aan en de grant wijst in de tenant naar niets.`
     );
   }
 });
@@ -125,7 +124,7 @@ test("de combinaties in het template en in prerequisites lopen niet uit elkaar",
 
 /**
  * De placeholder moet blijven staan. Een echt id in het template betekent dat er een id uit
- * één tenant is blijven plakken, en bij elke andere klant wijst de grant dan naar niets —
+ * één tenant is blijven plakken, en in elke andere tenant wijst de grant dan naar niets —
  * dezelfde fout als het IP-adres dat in ronde 4 uit 1060 is gehaald.
  */
 test("geen enkel template draagt een echt authentication-strength-id", () => {

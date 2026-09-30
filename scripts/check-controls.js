@@ -1,27 +1,26 @@
 #!/usr/bin/env node
 /**
- * Bewaakt dat elke policy in CATemplate/ een normenmapping heeft in controls/ca-controls.json,
- * en dat die mapping geen policies noemt die niet (meer) bestaan.
+ * Guards that every policy in CATemplate/ has a standards mapping in controls/ca-controls.json,
+ * and that the mapping names no policies that do not exist (any more).
  *
- * ===================== WAAROM DIT EEN HARDE FOUT IS =====================
+ * ===================== WHY THIS IS A HARD ERROR =====================
  *
- * ca-controls.json voedt COMPLIANCE.md in de IntuneBackup-repo: de verantwoording die een CISO
- * of auditor leest. Een policy zonder mapping verdwijnt daar stilzwijgend — de policy staat in
- * de tenant, doet zijn werk, maar telt bij geen enkele control mee. Dat is de vervelende kant
- * op: het document beweert minder dekking dan er is, en niemand ziet waaróm.
+ * ca-controls.json feeds COMPLIANCE.md in the IntuneBackup repo: the accountability a CISO or
+ * auditor reads. A policy without a mapping silently disappears there — the policy is in the
+ * tenant, does its job, but counts towards no control. The document then claims less coverage
+ * than there is, and nobody sees why.
  *
- * Andersom is erger. Een regel die verwijst naar een template dat is hernoemd of verwijderd,
- * blijft in COMPLIANCE.md een control afdekken met een policy die niet bestaat. Een auditor die
- * die verwijzing volgt en niets vindt, vertrouwt de rest van het document ook niet meer — zelfde
- * redenering als waarom generate-compliance.js het document überhaupt genereert.
+ * The other way round is worse. An entry that refers to a template that was renamed or removed
+ * keeps covering a control in COMPLIANCE.md with a policy that does not exist. An auditor who
+ * follows that reference and finds nothing no longer trusts the rest of the document either.
  *
- * Wat hier NIET gecontroleerd wordt: of de labels in de vocabulaire staan. Die vocabulaire woont
- * in de andere repo (IntuneTemplate/_controls.json) en CI ziet die niet. Staat die repo er lokaal
- * wél naast, dan controleert dit script de labels alsnog; in CI blijft dat aan
- * `generate-compliance.js --strict`, die precies daarop faalt.
+ * What is NOT checked here: whether the labels are in the vocabulary. That vocabulary lives in
+ * the other repo (IntuneTemplate/_controls.json) and CI does not see it. If that repo is cloned
+ * next to this one (../IntuneBackup), this script checks the labels anyway; in CI that is left
+ * to `generate-compliance.js --strict` over there, which fails on exactly that.
  *
- * Gebruik: node scripts/check-controls.js   (rapporteert, exit 1 bij fouten)
- * Als module: readControls(), validate()
+ * Usage: node scripts/check-controls.js   (reports, exit 1 on errors)
+ * As a module: readControls(), validate()
  */
 
 const fs = require("fs");

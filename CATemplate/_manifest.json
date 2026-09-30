@@ -1,0 +1,71 @@
+{
+  "_comment": [
+    "Welke templates in CATemplate/ optioneel zijn, en waarom. Gelezen door",
+    "scripts/export-cipp-baseline.js: een template met optional true gaat naar stage 3",
+    "(tenantkeuze en licentie) en blijft daar op Report, ongeacht zijn state.",
+    "",
+    "Sleutel   de bestandsnaam uit CATemplate/ zonder .json, zoals in controls/ca-controls.json.",
+    "optional  true: licentiegebonden, of een besluit dat per tenant genomen wordt.",
+    "reden     waarom. Verplicht bij optional true; komt als optionalReason in",
+    "          cipp/baseline-stages.json, zodat wie de baseline in CIPP opbouwt het ziet.",
+    "",
+    "Een template dat hier niet staat is niet optioneel. Wat hier staat moet in CATemplate/",
+    "bestaan: export-cipp-baseline.js en zijn test falen op een sleutel zonder template, want",
+    "een hernoemd template zou anders stil uit stage 3 in stage 1 vallen.",
+    "",
+    "Is deze repo in CIPP als template-repository gekoppeld, dan leest de sync elk .json-bestand",
+    "(behalve paden met NativeImport). Dit bestand heeft geen displayName en geen PartitionKey,",
+    "dus daar komt geen Conditional Access-template uit — hooguit dezelfde naamloze rij die de",
+    "andere niet-templatebestanden (prerequisites/, controls/, authentication-methods/) ook",
+    "opleveren. Die rij doet niets en mag in CIPP weg."
+  ],
+
+  "GLOBAL__1130__BLOCK__Admins_From_Untrusted_Locations": {
+    "optional": true,
+    "reden": "beheerders vastzetten op vertrouwde locaties sluit ze buiten zodra ze thuis of onderweg werken. Alleen inschakelen na expliciete afstemming met de organisatie."
+  },
+  "GLOBAL__1140__BLOCK__Managed_Identities_At_Risk": {
+    "optional": true,
+    "reden": "risicodetectie op workload-identiteiten vereist Microsoft Entra Workload ID Premium."
+  },
+  "GLOBAL__1150__BLOCK__Risky_Agent_Identities": {
+    "optional": true,
+    "reden": "vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen."
+  },
+  "GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources": {
+    "optional": true,
+    "reden": "vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten."
+  },
+  "GLOBAL__1170__BLOCK__Risky_Agent_Users": {
+    "optional": true,
+    "reden": "vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade."
+  },
+  "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network": {
+    "optional": true,
+    "reden": "vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn."
+  },
+  "GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users": {
+    "optional": true,
+    "reden": "vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling."
+  },
+  "GLOBAL__2130__GRANT__Admins_Compliant_Device": {
+    "optional": true,
+    "reden": "eist dat élke beheerder een beheerd apparaat heeft — bij uitbesteed beheer dus ook elke engineer die in de tenant komt. Besluit per tenant."
+  },
+  "GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access": {
+    "optional": true,
+    "reden": "alleen relevant in een tenant met Windows 365 / Cloud PC."
+  },
+  "GLOBAL__2160__GRANT__Agent_Users_Compliant_Device": {
+    "optional": true,
+    "reden": "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart."
+  },
+  "GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only": {
+    "optional": true,
+    "reden": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste."
+  },
+  "GLOBAL__3060__SESSION__Defender_for_Cloud_Apps": {
+    "optional": true,
+    "reden": "sessiecontrole via Defender for Cloud Apps vereist een MDCA-licentie."
+  }
+}

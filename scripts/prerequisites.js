@@ -1,29 +1,26 @@
 #!/usr/bin/env node
 /**
- * Bewaakt dat elke groep, named location, custom authentication strength en authentication
- * context waar CATemplate/GLOBAL__*.json naar verwijst een definitie heeft in
- * prerequisites/ca-prerequisites.json — plus de groep waar een passkey profile in
- * authentication-methods/ zich op richt.
+ * Guards that every group, named location, custom authentication strength and authentication
+ * context that CATemplate/GLOBAL__*.json refers to has a definition in
+ * prerequisites/ca-prerequisites.json — plus the group a passkey profile in
+ * authentication-methods/ targets.
  *
- * ===================== WAAROM DIT EEN HARDE FOUT IS =====================
+ * ===================== WHY THIS IS A HARD ERROR =====================
  *
- * Een uitzonderingsgroep die bij de klant niet bestaat sluit niemand uit. De policy wordt
- * daarmee stréngter dan bedoeld, en dat is precies de kant op waar niets alarm slaat: de
- * uitrol slaagt, de check slaagt, en pas de gebruiker die buitengesloten wordt merkt het.
- * Bij `Excluded from Conditional Access` (32 van de 33 templates) is dat de break-glass-
- * uitsluiting; bij `Licensed Users` blokkeert 1110 dan élke gebruiker in de tenant.
+ * An exclusion group that does not exist in the tenant excludes nobody. The policy becomes
+ * stricter than intended, and that is exactly the direction in which nothing raises an alarm:
+ * the deployment succeeds, and only the user who gets locked out notices. For
+ * `Excluded from Conditional Access` that is the break-glass exclusion; for `Licensed Users`,
+ * 1110 then blocks every user in the tenant. export-cipp-baseline.js turns these templates
+ * into a deployment, so it fails hard on this instead of warning.
  *
- * Zolang deze repo alleen een CHECK-baseline voedde was dat een meetfout. Sinds
- * export-cipp-baseline.js er ook een UITROL uit genereert, is het een lock-out. Vandaar dat
- * generate-baseline.js hier hard op faalt in plaats van te waarschuwen.
+ * A custom authentication strength fails in its own way: Entra assigns its id only on
+ * creation, so the template carries a zero GUID. If that survives into the deployment, the
+ * grant points at an id that does not exist in that tenant — not "stricter than intended" but
+ * unpredictable.
  *
- * Een custom authentication strength faalt op een eigen manier: Entra kent zijn id pas toe
- * bij aanmaken, dus het template draagt een nul-GUID. Blijft die staan bij de uitrol, dan
- * wijst de grant naar een id dat in die tenant niet bestaat — en dat is geen 'strenger dan
- * bedoeld' maar onvoorspelbaar.
- *
- * Gebruik: node scripts/prerequisites.js   (rapporteert, exit 1 bij fouten)
- * Als module: readPrerequisites(), readMethodTargets(), collectReferences(), validate()
+ * Usage: node scripts/prerequisites.js   (reports, exit 1 on errors)
+ * As a module: readPrerequisites(), readMethodTargets(), collectReferences(), validate()
  */
 
 const fs = require("fs");
@@ -97,8 +94,9 @@ function collectReferences(templates = readTemplates()) {
       }
     }
     // LocationInfo draagt de volledige definitie van de named locations die het template
-    // gebruikt — landcodes of IP-ranges. De platform-engine vergelijkt die inhoud, dus een
-    // afwijking tussen template en prerequisites is een echte drift, geen cosmetiek.
+    // gebruikt — landcodes of IP-ranges. CIPP maakt een ontbrekende named location aan uit
+    // LocationInfo, New-CaPrerequisites.ps1 uit prerequisites: wijken die twee af, dan hangt de
+    // inhoud ervan af welke van de twee als eerste draaide.
     for (const li of policy.LocationInfo || []) {
       if (li?.displayName) locationDefinitions.set(li.displayName, { file, definition: li });
     }
@@ -172,7 +170,7 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
     if (!groepsnamen.has(naam)) {
       errors.push(
         `Groep "${naam}" wordt gebruikt door ${gebruik.map((g) => `${g.file} (${g.veld})`).join(", ")} maar staat niet in prerequisites/ca-prerequisites.json. ` +
-          `Voeg hem daar toe, met purpose en danger — anders rolt de baseline een policy uit met een uitzondering die bij de klant niet bestaat.`
+          `Voeg hem daar toe, met purpose en danger — anders rolt de baseline een policy uit met een uitzondering die in de tenant niet bestaat.`
       );
     }
   }
@@ -202,11 +200,11 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
     if (prereqLocatie.tenantSpecific) {
       warnings.push(
         `${regel}. Verwacht: dit is een tenant-specifieke locatie (${prereqLocatie.tenantSpecific}). ` +
-          `De waarde uit het template wordt NIET uitgerold; New-CaPrerequisites.ps1 eist hem per klant als parameter.`
+          `De waarde uit het template wordt NIET uitgerold; New-CaPrerequisites.ps1 eist hem per tenant als parameter.`
       );
     } else {
       errors.push(
-        `${regel}. De platform-engine vergelijkt named locations op volledige inhoud, dus deze twee moeten gelijk zijn — ` +
+        `${regel}. CIPP maakt de locatie aan uit het template, New-CaPrerequisites.ps1 uit prerequisites, dus deze twee moeten gelijk zijn — ` +
           `pas het template aan, of prerequisites, maar niet één van de twee alleen.`
       );
     }
@@ -221,7 +219,7 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
     if (!uitPrereq) {
       errors.push(
         `Custom authentication strength "${naam}" wordt gebruikt door ${file} maar staat niet in prerequisites/ca-prerequisites.json. ` +
-          `Zonder definitie maakt New-CaPrerequisites.ps1 hem niet aan, en verwijst de grant bij de klant naar een id dat daar niet bestaat.`
+          `Zonder definitie maakt New-CaPrerequisites.ps1 hem niet aan, en verwijst de grant in de tenant naar een id dat daar niet bestaat.`
       );
       continue;
     }
@@ -239,7 +237,7 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
     if (uitPrereq.placeholderId && definition.id && definition.id !== uitPrereq.placeholderId) {
       errors.push(
         `Custom authentication strength "${naam}" draagt in ${file} het id ${definition.id} in plaats van de placeholder ${uitPrereq.placeholderId}. ` +
-          `Dat is het id uit één tenant; bij elke andere klant wijst de grant daarmee naar niets. Zet de placeholder terug.`
+          `Dat is het id uit één tenant; in elke andere tenant wijst de grant daarmee naar niets. Zet de placeholder terug.`
       );
     }
   }

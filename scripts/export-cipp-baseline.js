@@ -1,39 +1,34 @@
 #!/usr/bin/env node
 /**
- * Genereert uit CATemplate/GLOBAL__*.json de twee bestanden die nodig zijn om deze set als
- * CIPP-baseline uit te rollen:
+ * Generates, from CATemplate/GLOBAL__*.json, the two files needed to deploy this set as a
+ * CIPP baseline:
  *
- *   cipp/ca-templates-import.json   de templates in CIPP's CATemplate-tabelvorm, klaar om te
- *                                   importeren. Eén rij per template, GUID ongewijzigd.
- *   cipp/baseline-stages.json       welk template in welke stage hoort, met welke state en
- *                                   welke actie, plus wat die uitrol blokkeert.
+ *   cipp/ca-templates-import.json   the templates in CIPP's CATemplate table shape, ready to
+ *                                   import. One row per template, GUID unchanged.
+ *   cipp/baseline-stages.json       which template belongs in which stage, with which state and
+ *                                   which action, plus what blocks that deployment.
  *
- * ===================== HOE DIT ZICH VERHOUDT TOT generate-baseline.js =====================
+ * The stage split follows metadata the repo already has: `state` in the template, and
+ * `optional` in CATemplate/_manifest.json. See STAGE_PLAN below.
  *
- * Dezelfde 40 bestanden voeden nu twee dingen die het tegenovergestelde doen:
+ * A deployment that misses its prerequisites locks a tenant out: an exclusion group that does
+ * not exist excludes nobody. That is why this script calls scripts/prerequisites.js and stops
+ * hard on an error, and why every template that refers to a tenant-specific or non-creatable
+ * prerequisite is pinned to `action: "Report"` here — also with --remediate-stage1.
  *
- *   generate-baseline.js   -> baseline/conditional-access/baseline-v1.0.json   TOETST
- *   export-cipp-baseline.js -> cipp/*.json                                     ROLT UIT
+ * ===================== WHAT IS NOT IN IT, AND WHY =====================
  *
- * Dat verschil is niet cosmetisch. Een toetsing die de randvoorwaarden mist geeft een
- * verkeerde uitslag; een uitrol die ze mist sluit een tenant buiten. Vandaar dat dit script
- * scripts/prerequisites.js aanroept en hard stopt bij een fout, en vandaar dat elk template
- * dat naar een tenant-specifieke of niet-aanmaakbare randvoorwaarde verwijst hier op
- * `action: "Report"` wordt vastgezet — ook met --remediate-stage1.
+ * Not the payload that CIPP's Baselines screen stores itself. Staged baselines with graduation
+ * conditions are a recent CIPP feature and the exact schema depends on the CIPP version;
+ * hardcoding it here would produce a file that silently stops fitting.
+ * cipp/baseline-stages.json is therefore OUR format: the split and the reasoning behind it, one
+ * entry per standard you add in that screen. Once the CIPP schema is settled, the translation
+ * is one function below — see STAGE_PLAN.
  *
- * ===================== WAT ER NIET IN ZIT, EN WAAROM =====================
+ * Usage: node scripts/export-cipp-baseline.js [--remediate-stage1 [--accept-new]]
  *
- * Niet de payload die CIPP's Baselines-scherm zelf opslaat. De staged baselines met
- * graduatievoorwaarden zijn een recente CIPP-feature en het exacte schema hangt aan de
- * CIPP-versie; dat hier hardcoderen levert een bestand op dat stilzwijgend niet meer past.
- * cipp/baseline-stages.json is daarom ONS formaat: de indeling en de argumenten erachter,
- * één regel per standard die je in dat scherm toevoegt. Zodra het CIPP-schema vaststaat is
- * de vertaalslag één functie hieronder — zie STAGE_PLAN.
- *
- * Gebruik: node scripts/export-cipp-baseline.js [--remediate-stage1 [--accept-new]]
- *
- * --remediate-stage1  zet stage 1 op Remediate. Weigert zolang er templates nieuw in stage 1
- *                     staan ten opzichte van de vorige export; --accept-new bevestigt die.
+ *   --remediate-stage1  set stage 1 to Remediate. Refuses as long as templates are new in
+ *                       stage 1 compared with the previous export; --accept-new confirms them.
  */
 
 const fs = require("fs");
@@ -42,7 +37,7 @@ const { readPrerequisites, readTemplates, collectReferences, validate } = requir
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const OUTPUT_DIR = path.join(REPO_ROOT, "cipp");
-const GENERATOR_PATH = path.join(__dirname, "generate-baseline.js");
+const MANIFEST_PATH = path.join(REPO_ROOT, "CATemplate", "_manifest.json");
 
 /**
  * De stage-indeling. De criteria staan hier één keer, zodat de vraag "waarom zit dit
@@ -63,42 +58,47 @@ const STAGE_PLAN = [
     criterium: "state 'disabled' of report-only in het template, en niet optioneel",
     deployState: "enabledForReportingButNotEnforced",
     toelichting:
-      "Deze staan niet voor niets uit (ANALYSE.md: twaalf templates die per definitie geel opleveren). Ze worden report-only uitgerold — de stap naar 'enabled' is een beslissing per klant, na het lezen van de report-only-resultaten, en geen graduatie die vanzelf gebeurt.",
+      "Deze staan niet voor niets uit (docs/ANALYSE.md, 'Wat er stuk is aan de set zelf', punt 2). Ze worden report-only uitgerold — de stap naar 'enabled' is een beslissing per tenant, na het lezen van de report-only-resultaten, en geen graduatie die vanzelf gebeurt.",
   },
   {
     stage: 3,
-    name: "Klantkeuze en licentie",
-    criterium: "staat in OPTIONAL_TEMPLATES van generate-baseline.js",
+    name: "Tenantkeuze en licentie",
+    criterium: "optional: true in CATemplate/_manifest.json",
     deployState: "enabledForReportingButNotEnforced",
     toelichting:
-      "Licentiegebonden of een expliciet klantbesluit. Hoort niet automatisch te graduaten: 2130 eist een beheerd apparaat van élke beheerder, bij een MSP dus ook van elke engineer. Actie blijft Report tot iemand er ja op zegt.",
+      "Licentiegebonden of een expliciet besluit per tenant. Hoort niet automatisch te graduaten: 2130 eist een beheerd apparaat van élke beheerder, bij uitbesteed beheer dus ook van elke engineer. Actie blijft Report tot iemand er ja op zegt.",
   },
 ];
 
 /**
- * CHECK_ID_BY_TEMPLATE en OPTIONAL_TEMPLATES uit de broncode lezen in plaats van de module te
- * importeren — generate-baseline.js draait main() bij import en zou dan het baselinebestand
- * herschrijven. Zelfde truc, zelfde reden als leesPins() in generate-baseline.test.js.
+ * De optionele templates uit CATemplate/_manifest.json: { <bestandsnaam zonder .json>: reden }.
+ * Faalt op een sleutel zonder template en op optional zonder reden — een hernoemd template zou
+ * anders stil uit stage 3 in stage 1 vallen, en een reden is wat iemand in CIPP leest.
  */
-function leesGeneratorConstanten() {
-  const bron = fs.readFileSync(GENERATOR_PATH, "utf8");
-
-  const pinBlok = bron.match(/const CHECK_ID_BY_TEMPLATE = \{([\s\S]*?)\n\};/);
-  if (!pinBlok) throw new Error("CHECK_ID_BY_TEMPLATE niet gevonden in generate-baseline.js");
-  const pins = {};
-  for (const m of pinBlok[1].matchAll(/^\s{2}(GLOBAL__[A-Za-z0-9_]+):\s*"(\d{3})",/gm)) pins[m[1]] = m[2];
-
-  const optioneelBlok = bron.match(/const OPTIONAL_TEMPLATES = \{([\s\S]*?)\n\};/);
-  if (!optioneelBlok) throw new Error("OPTIONAL_TEMPLATES niet gevonden in generate-baseline.js");
-  const optioneel = {};
-  for (const m of optioneelBlok[1].matchAll(/^\s{2}(GLOBAL__[A-Za-z0-9_]+):\s*\n?\s*"((?:[^"\\]|\\.)*)",/gm)) {
-    optioneel[m[1]] = m[2].replace(/\\"/g, '"');
+function leesOptioneel(manifestPad = MANIFEST_PATH, templateNamen = null) {
+  if (!fs.existsSync(manifestPad)) throw new Error(`${manifestPad} ontbreekt.`);
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(manifestPad, "utf8"));
+  } catch (fout) {
+    throw new Error(`${manifestPad} is niet te lezen als JSON (${fout.message}).`);
   }
-
-  return { pins, optioneel };
+  const bestaand = templateNamen ? new Set(templateNamen) : null;
+  const optioneel = {};
+  const fouten = [];
+  for (const [sleutel, waarde] of Object.entries(manifest)) {
+    if (sleutel.startsWith("_")) continue;
+    const naam = sleutel.replace(/\.json$/, "");
+    if (bestaand && !bestaand.has(naam)) fouten.push(`${naam} staat in _manifest.json maar niet in CATemplate/ — hernoemd of verwijderd?`);
+    if (!waarde || typeof waarde.optional !== "boolean") fouten.push(`${naam}: 'optional' moet true of false zijn.`);
+    else if (waarde.optional && !(typeof waarde.reden === "string" && waarde.reden.trim())) fouten.push(`${naam}: optional zonder 'reden'.`);
+    else if (waarde.optional) optioneel[naam] = waarde.reden.trim();
+  }
+  if (fouten.length > 0) throw new Error(`CATemplate/_manifest.json klopt niet:\n  ${fouten.join("\n  ")}`);
+  return optioneel;
 }
 
-/** Welke randvoorwaarden van dit template kan geen enkel script voor de klant invullen. */
+/** Welke randvoorwaarden van dit template kan geen enkel script voor de tenant invullen. */
 function blokkerendeRandvoorwaarden(policy, prereq) {
   const perNaam = new Map(prereq.namedLocations.map((l) => [l.displayName, l]));
   const blokkades = [];
@@ -109,16 +109,16 @@ function blokkerendeRandvoorwaarden(policy, prereq) {
       const locatie = perNaam.get(naam);
       if (!locatie) continue;
       if (locatie.notCreatable) blokkades.push(`"${naam}" is niet aan te maken: ${locatie.notCreatable}`);
-      else if (locatie.requiresIpRanges) blokkades.push(`"${naam}" vereist de IP-ranges van deze klant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)`);
-      else if (locatie.requiresCountries) blokkades.push(`"${naam}" vereist de landenlijst van deze klant (-AllowedCountry in New-CaPrerequisites.ps1)`);
+      else if (locatie.requiresIpRanges) blokkades.push(`"${naam}" vereist de IP-ranges van deze tenant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)`);
+      else if (locatie.requiresCountries) blokkades.push(`"${naam}" vereist de landenlijst van deze tenant (-AllowedCountry in New-CaPrerequisites.ps1)`);
     }
   }
   return blokkades;
 }
 
 /**
- * Haalt tenant-specifieke waarden uit LocationInfo. Zonder dit rolt elke klant de
- * trusted-IP van één specifieke tenant uit — en een trusted location van iemand anders is
+ * Haalt tenant-specifieke waarden uit LocationInfo. Zonder dit krijgt elke tenant de
+ * trusted-IP van één specifieke tenant — en een trusted location van iemand anders is
  * erger dan geen trusted location.
  */
 function schoonLocationInfo(policy, prereq) {
@@ -202,19 +202,13 @@ function main() {
     process.exit(1);
   }
 
-  const { pins, optioneel } = leesGeneratorConstanten();
+  const optioneel = leesOptioneel(MANIFEST_PATH, templates.map((t) => t.file));
 
   const importRijen = [];
   const stages = STAGE_PLAN.map((s) => ({ ...s, standards: [] }));
   const verwijderdeWaarden = [];
 
   for (const { file, row, policy } of templates) {
-    const checkNummer = pins[file];
-    if (!checkNummer) {
-      console.error(`FOUT: ${file} heeft geen nummer in CHECK_ID_BY_TEMPLATE. Draai eerst generate-baseline.js — die noemt het eerstvolgende vrije nummer.`);
-      process.exit(1);
-    }
-
     const isOptioneel = Boolean(optioneel[file]);
     const stageNummer = isOptioneel ? 3 : policy.state === "enabled" ? 1 : 2;
     const stage = stages.find((s) => s.stage === stageNummer);
@@ -242,7 +236,6 @@ function main() {
       // indeling hieronder — anders zou een template dat vandaag is toegevoegd meteen
       // afgedwongen worden, zonder dat iemand die beslissing genomen heeft.
       action: "Report",
-      checkId: `CA-BASE-${checkNummer}`,
       ...(isOptioneel ? { optional: true, optionalReason: optioneel[file] } : {}),
       ...(blokkades.length > 0 ? { blockedUntil: blokkades } : {}),
     });
@@ -254,7 +247,7 @@ function main() {
   //
   // Stage 1 wordt afgeleid uit `state: enabled`, en dat betekent dat een nieuw template met
   // die state er vanzelf in valt. Zonder deze rem zou de eerstvolgende --remediate-stage1
-  // dat template afdwingen bij elke klant, zonder dat iemand die stap heeft gezet: de
+  // dat template afdwingen in elke tenant, zonder dat iemand die stap heeft gezet: de
   // beslissing "dit hoort tot de kern" zou samenvallen met "ik heb een bestand toegevoegd".
   const stagesPad = path.join(OUTPUT_DIR, "baseline-stages.json");
   const wijzigingen = vergelijkMetVorigPlan(leesVorigPlan(stagesPad), stages);
@@ -273,7 +266,7 @@ function main() {
       "\nStage 1 wordt afgedwongen. Deze zijn er sinds de vorige export bij gekomen omdat hun\n" +
         "template op 'enabled' staat, niet omdat iemand besloten heeft dat ze tot de kern horen.\n" +
         "Kijk ernaar, en bevestig dan met --remediate-stage1 --accept-new. Hoort er iets niet in\n" +
-        "stage 1, zet het template op 'disabled' (stage 2) of in OPTIONAL_TEMPLATES (stage 3)."
+        "stage 1, zet het template op 'disabled' (stage 2) of op optional in CATemplate/_manifest.json (stage 3)."
     );
     process.exit(1);
   }
@@ -311,7 +304,7 @@ function main() {
       groups: prereq.groups.map((g) => ({ displayName: g.displayName, danger: g.danger, requiresMembers: Boolean(g.requiresMembers) })),
       namedLocations: prereq.namedLocations.map((l) => ({ displayName: l.displayName, danger: l.danger, tenantSpecific: Boolean(l.tenantSpecific), notCreatable: Boolean(l.notCreatable) })),
     },
-    blockedStandards: geblokkeerd.map((r) => ({ templateFile: r.templateFile, checkId: r.checkId, blockedUntil: r.blockedUntil })),
+    blockedStandards: geblokkeerd.map((r) => ({ templateFile: r.templateFile, blockedUntil: r.blockedUntil })),
     sanitized: verwijderdeWaarden,
     stages,
   };
@@ -332,7 +325,7 @@ function main() {
     console.log(`Stage ${stage.stage} — ${stage.name}: ${stage.standards.length} standards (${stage.deployState})`);
     for (const r of stage.standards) {
       const merk = r.blockedUntil ? " [GEBLOKKEERD]" : r.optional ? " [optional]" : "";
-      console.log(`  ${r.action.padEnd(9)} ${r.checkId}  ${r.templateFile}${merk}`);
+      console.log(`  ${r.action.padEnd(9)} ${r.templateFile}${merk}`);
     }
   }
 
@@ -356,4 +349,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { STAGE_PLAN, leesGeneratorConstanten, leesVorigPlan, vergelijkMetVorigPlan, stapSamenvatting };
+module.exports = { STAGE_PLAN, leesOptioneel, leesVorigPlan, vergelijkMetVorigPlan, stapSamenvatting };
