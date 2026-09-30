@@ -51,11 +51,11 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 
 | Map | Wat erin staat | Gemaakt door | Opgepikt door |
 |---|---|---|---|
-| `CATemplate/` | De policies, één `CXNM__STANDARD__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
-| `cipp/` | Importbestand en stage-indeling voor een CIPP-baseline | `export-cipp-baseline.js` | CIPP (handmatige import) |
-| [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
+| [`CATemplate/`](../CATemplate/README.md) | De policies, één `CXNM__STANDARD__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
+| [`cipp/`](../cipp/README.md) | Importbestand en stage-indeling voor een CIPP-baseline | `export-cipp-baseline.js` | CIPP (handmatige import) |
+| [`prerequisites/`](../prerequisites/README.md) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.md) | Gewenste stand van het authentication methods policy, met passkey-profielen | hand | `authentication-methods.js`, de twee Entra-scripts |
-| [`controls/`](../controls/ca-controls.json) | Normenmapping per template (ISO 27001, NIS2, CIS, NIST CSF) | hand | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
+| [`controls/`](../controls/README.md) | Normenmapping per template (ISO 27001, NIS2, CIS, NIST CSF) | hand | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
 | `docs/` | Documentatie: deze structuur en de analyse | hand | lezers |
 | [`scripts/`](../scripts/README.md) | Validatie, export, tenantscripts, spiegel | hand | GitHub-workflow |
 | `local/` | Werkkopieën met tenant-specifieke waarden | hand | **niet in git** (`.gitignore`) |
@@ -94,24 +94,25 @@ Drie templates staan vast op Report tot hun randvoorwaarde in de tenant staat: `
 | Stap | Script | Leest | Schrijft |
 |---:|---|---|---|
 | 1 | `prerequisites.js` | `CATemplate/`, `prerequisites/`, `authentication-methods/` | niets — faalt bij fouten |
-| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/IntuneTemplate/_controls.json` als die er is | niets — faalt bij fouten |
+| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/` (of `../CIPP-Templates-Intune/`) `IntuneTemplate/_controls.json` als die er is | niets — faalt bij fouten |
 | 3 | `authentication-methods.js` | `authentication-methods/`, `CATemplate/` | niets — faalt bij fouten |
 | 4 | `export-cipp-baseline.js` | `CATemplate/`, `_manifest.json`, `prerequisites/`, de vorige `cipp/baseline-stages.json` | `cipp/` |
-| 5 | `node --test scripts/*.test.js` | alles hierboven, plus `cipp/` | niets — faalt bij fouten |
+| 5 | `generate-docs.js` | `CATemplate/`, `_manifest.json`, `cipp/baseline-stages.json` | `CATemplate/README*.md` |
+| 6 | `node --test scripts/*.test.js` | alles hierboven, plus `cipp/` | niets — faalt bij fouten |
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groepen, locaties en strengths in de tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | het authentication methods policy in de tenant (met `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | niets — alleen een rapport |
 | – | `sync-mirror.js` | `git ls-files` | een tweede clone |
 
-Stap 1 t/m 5 draait [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
+Stap 1 t/m 6 draait [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
 na elke wijziging. Details: [scripts/README.md](../scripts/README.md).
 
 ## Externe koppelingen
 
 | Systeem | Richting | Hoe | Let op |
 |---|---|---|---|
-| IntuneBackup-repo (`../IntuneBackup`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` daar | Git bevat daar de `--no-ca`-versie; CI ziet deze repo niet |
-| IntuneBackup-repo (`../IntuneBackup`) | Intune → CA | `check-controls.js` leest `IntuneTemplate/_controls.json` | Alleen lokaal; in CI slaat hij de labelcontrole over |
+| IntuneBackup-repo (`../IntuneBackup`, spiegel `../CIPP-Templates-Intune`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` daar | Git bevat daar de `--no-ca`-versie; CI ziet deze repo niet |
+| IntuneBackup-repo (`../IntuneBackup`, spiegel `../CIPP-Templates-Intune`) | Intune → CA | `check-controls.js` leest `IntuneTemplate/_controls.json` | Alleen lokaal; in CI slaat hij de labelcontrole over |
 | CIPP | repo → CIPP | `cipp/ca-templates-import.json` importeren, de baseline opbouwen volgens `cipp/baseline-stages.json` | De baseline in CIPP is een kopie die met de hand wordt bijgewerkt |
 | Microsoft Graph | repo → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | eerst `-WhatIf`; het id van een custom strength met de hand in de CIPP-uitrol |
 | GitHub Actions | repo → repo | `generate-cipp.yml` opent een PR | de enige workflow |
@@ -148,4 +149,8 @@ na elke wijziging. Details: [scripts/README.md](../scripts/README.md).
 | [README.md](../README.md) | Volledige uitleg: toevoegen, uitrollen, randvoorwaarden, normen |
 | [ANALYSE.md](ANALYSE.md) | Waarom wat wel en niet in de set zit |
 | [scripts/README.md](../scripts/README.md) | Elk script, en de volgorde |
+| [CATemplate/README.md](../CATemplate/README.md) | Elke policy: voor wie, wat, state en stage (gegenereerd) |
+| [prerequisites/README.md](../prerequisites/README.md) | Groepen, locaties en strengths die een tenant nodig heeft |
+| [controls/README.md](../controls/README.md) | De normenmapping en waar hij naartoe gaat |
+| [cipp/README.md](../cipp/README.md) | De uitrolbestanden en de stages |
 | [authentication-methods/README.md](../authentication-methods/README.md) | Aanmeldmethodes en passkeys |

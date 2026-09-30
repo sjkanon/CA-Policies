@@ -20,6 +20,7 @@ on:
       - "scripts/export-cipp-baseline.js"
       - "scripts/check-controls.js"
       - "scripts/authentication-methods.js"
+      - "scripts/generate-docs.js"
       - "scripts/*.test.js"
       - ".github/workflows/generate-cipp.yml"
   # Also on a PR, and that is the more important of the two: a template that refers to an
@@ -35,6 +36,7 @@ on:
       - "scripts/export-cipp-baseline.js"
       - "scripts/check-controls.js"
       - "scripts/authentication-methods.js"
+      - "scripts/generate-docs.js"
       - "scripts/*.test.js"
       - ".github/workflows/generate-cipp.yml"
   workflow_dispatch:
@@ -76,6 +78,11 @@ jobs:
       - name: Generate cipp/ (template import and stage split)
         run: node scripts/export-cipp-baseline.js
 
+      # The policy overview in CATemplate/README*.md. After the export, because the stage comes
+      # from cipp/baseline-stages.json. Generated so it cannot drift from the templates.
+      - name: Generate CATemplate/README
+        run: node scripts/generate-docs.js
+
       # After generating, because some tests look at the result. If this step fails, no PR is
       # opened.
       - name: Run the tests
@@ -101,3 +108,6 @@ jobs:
           add-paths: |
             cipp/ca-templates-import.json
             cipp/baseline-stages.json
+            CATemplate/README.md
+            CATemplate/README.en.md
+            CATemplate/README.fr.md

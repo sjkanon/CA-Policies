@@ -16,7 +16,7 @@
  *
  * What is NOT checked here: whether the labels are in the vocabulary. That vocabulary lives in
  * the other repo (IntuneTemplate/_controls.json) and CI does not see it. If that repo is cloned
- * next to this one (../IntuneBackup), this script checks the labels anyway; in CI that is left
+ * next to this one (../IntuneBackup, or ../CIPP-Templates-Intune for the mirror), this script checks the labels anyway; in CI that is left
  * to `generate-compliance.js --strict` over there, which fails on exactly that.
  *
  * Usage: node scripts/check-controls.js   (reports, exit 1 on errors)
@@ -30,8 +30,14 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
 const CONTROLS_PATH = path.join(REPO_ROOT, "controls", "ca-controls.json");
 
-/** De vocabulaire hoort bij de Intune-repo; naast deze repo is hij er meestal, in CI nooit. */
-const VOCABULARY_PATH = path.resolve(REPO_ROOT, "..", "IntuneBackup", "IntuneTemplate", "_controls.json");
+/**
+ * De vocabulaire hoort bij de Intune-repo; naast deze repo is hij er meestal, in CI nooit. De
+ * bron heet IntuneBackup, de spiegel CIPP-Templates-Intune — de eerste die bestaat telt.
+ */
+const VOCABULARY_CANDIDATES = ["IntuneBackup", "CIPP-Templates-Intune"].map((repo) =>
+  path.resolve(REPO_ROOT, "..", repo, "IntuneTemplate", "_controls.json")
+);
+const VOCABULARY_PATH = VOCABULARY_CANDIDATES.find((p) => fs.existsSync(p)) || VOCABULARY_CANDIDATES[0];
 
 const FRAMEWORKS = ["iso", "nis2", "cis", "nistcsf"];
 

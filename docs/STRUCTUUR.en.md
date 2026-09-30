@@ -51,11 +51,11 @@ Solid arrows write; dotted lines only read.
 
 | Folder | What it holds | Made by | Picked up by |
 |---|---|---|---|
-| `CATemplate/` | The policies, one `CXNM__STANDARD__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
-| `cipp/` | Import file and stage layout for a CIPP baseline | `export-cipp-baseline.js` | CIPP (manual import) |
-| [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
+| [`CATemplate/`](../CATemplate/README.en.md) | The policies, one `CXNM__STANDARD__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
+| [`cipp/`](../cipp/README.en.md) | Import file and stage layout for a CIPP baseline | `export-cipp-baseline.js` | CIPP (manual import) |
+| [`prerequisites/`](../prerequisites/README.en.md) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.en.md) | Desired state of the authentication methods policy, with passkey profiles | hand | `authentication-methods.js`, the two Entra scripts |
-| [`controls/`](../controls/ca-controls.json) | Standards mapping per template (ISO 27001, NIS2, CIS, NIST CSF) | hand | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
+| [`controls/`](../controls/README.en.md) | Standards mapping per template (ISO 27001, NIS2, CIS, NIST CSF) | hand | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
 | `docs/` | Documentation: this structure and the analysis | hand | readers |
 | [`scripts/`](../scripts/README.en.md) | Validation, export, tenant scripts, mirror | hand | GitHub workflow |
 | `local/` | Working copies with tenant-specific values | hand | **not in git** (`.gitignore`) |
@@ -94,24 +94,25 @@ Three templates are fixed on Report until their prerequisite is in the tenant: `
 | Step | Script | Reads | Writes |
 |---:|---|---|---|
 | 1 | `prerequisites.js` | `CATemplate/`, `prerequisites/`, `authentication-methods/` | nothing — fails on errors |
-| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/IntuneTemplate/_controls.json` if present | nothing — fails on errors |
+| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/` (or `../CIPP-Templates-Intune/`) `IntuneTemplate/_controls.json` if present | nothing — fails on errors |
 | 3 | `authentication-methods.js` | `authentication-methods/`, `CATemplate/` | nothing — fails on errors |
 | 4 | `export-cipp-baseline.js` | `CATemplate/`, `_manifest.json`, `prerequisites/`, the previous `cipp/baseline-stages.json` | `cipp/` |
-| 5 | `node --test scripts/*.test.js` | everything above, plus `cipp/` | nothing — fails on errors |
+| 5 | `generate-docs.js` | `CATemplate/`, `_manifest.json`, `cipp/baseline-stages.json` | `CATemplate/README*.md` |
+| 6 | `node --test scripts/*.test.js` | everything above, plus `cipp/` | nothing — fails on errors |
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groups, locations and strengths in the tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | the authentication methods policy in the tenant (with `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | nothing — only a report |
 | – | `sync-mirror.js` | `git ls-files` | a second clone |
 
-Steps 1 to 5 are run by [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
+Steps 1 to 6 are run by [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
 after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 
 ## External connections
 
 | System | Direction | How | Watch out |
 |---|---|---|---|
-| IntuneBackup repo (`../IntuneBackup`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` there | Git there holds the `--no-ca` version; CI does not see this repo |
-| IntuneBackup repo (`../IntuneBackup`) | Intune → CA | `check-controls.js` reads `IntuneTemplate/_controls.json` | Local only; in CI it skips the label check |
+| IntuneBackup repo (`../IntuneBackup`, mirror `../CIPP-Templates-Intune`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` there | Git there holds the `--no-ca` version; CI does not see this repo |
+| IntuneBackup repo (`../IntuneBackup`, mirror `../CIPP-Templates-Intune`) | Intune → CA | `check-controls.js` reads `IntuneTemplate/_controls.json` | Local only; in CI it skips the label check |
 | CIPP | repo → CIPP | import `cipp/ca-templates-import.json`, build the baseline according to `cipp/baseline-stages.json` | The baseline in CIPP is a copy that is updated by hand |
 | Microsoft Graph | repo → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | `-WhatIf` first; the id of a custom strength goes into the CIPP deployment by hand |
 | GitHub Actions | repo → repo | `generate-cipp.yml` opens a PR | the only workflow |
@@ -148,4 +149,8 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 | [README.en.md](../README.en.md) | Full explanation: adding, deploying, prerequisites, standards |
 | [ANALYSE.en.md](ANALYSE.en.md) | Why things are or are not in the set |
 | [scripts/README.en.md](../scripts/README.en.md) | Every script, and the order |
+| [CATemplate/README.en.md](../CATemplate/README.en.md) | Every policy: who, what, state and stage (generated) |
+| [prerequisites/README.en.md](../prerequisites/README.en.md) | Groups, locations and strengths a tenant needs |
+| [controls/README.en.md](../controls/README.en.md) | The standards mapping and where it goes |
+| [cipp/README.en.md](../cipp/README.en.md) | The deployment files and the stages |
 | [authentication-methods/README.en.md](../authentication-methods/README.en.md) | Sign-in methods and passkeys |

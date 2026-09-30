@@ -34,6 +34,7 @@ flowchart TD
 | [`check-controls.js`](check-controls.js) | check | Every template has a standards mapping in `controls/ca-controls.json`, and no mapping names a template that does not exist. If the IntuneBackup repo is next to this one (`../IntuneBackup`), it also checks the labels against `IntuneTemplate/_controls.json`. Blocking in CI. |
 | [`authentication-methods.js`](authentication-methods.js) | check | `authentication-methods/authentication-methods.json` does not contradict itself, and `2120` and `2180` do not demand a method that is disabled. Blocking in CI. |
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **out of** the source | Writes `cipp/ca-templates-import.json` (the templates, without tenant-specific values) and `cipp/baseline-stages.json` (stage, state and action per template). Reads `CATemplate/_manifest.json` for the optional templates. Everything on Report; `--remediate-stage1` sets stage 1 to Remediate, and refuses as long as there are templates new in stage 1 compared to the previous export — `--accept-new` confirms them. |
+| [`generate-docs.js`](generate-docs.js) | **from** the source | Writes `CATemplate/README.md` (and `.en`, `.fr`): every policy with who, what, state and stage. Runs after the export, because the stage comes from `cipp/baseline-stages.json`. `--check` writes nothing and fails if a README is out of date; a test does the same. |
 | [`sync-mirror.js`](sync-mirror.js) | mirror | Brings a second clone in line with what is in git here — see [below](#mirroring-to-a-second-clone). |
 
 Every check script has a `*.test.js` next to it; `node --test scripts/*.test.js` runs them
@@ -59,6 +60,7 @@ node scripts/prerequisites.js            # first: does every template refer to s
 node scripts/check-controls.js           # does every template have a standards mapping?
 node scripts/authentication-methods.js   # do the sign-in methods not contradict the templates?
 node scripts/export-cipp-baseline.js     # then: regenerate cipp/
+node scripts/generate-docs.js            # CATemplate/README from the templates and cipp/
 node --test scripts/*.test.js            # last, because part of it looks at cipp/
 ```
 

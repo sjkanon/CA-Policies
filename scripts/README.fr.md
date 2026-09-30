@@ -34,6 +34,7 @@ flowchart TD
 | [`check-controls.js`](check-controls.js) | contrôle | Chaque template a un mapping de normes dans `controls/ca-controls.json`, et aucun mapping ne cite un template qui n'existe pas. Si le dépôt IntuneBackup est à côté (`../IntuneBackup`), il vérifie aussi les libellés par rapport à `IntuneTemplate/_controls.json`. Bloquant en CI. |
 | [`authentication-methods.js`](authentication-methods.js) | contrôle | `authentication-methods/authentication-methods.json` ne se contredit pas, et `2120` et `2180` n'exigent aucune méthode désactivée. Bloquant en CI. |
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **depuis** la source | Écrit `cipp/ca-templates-import.json` (les templates, sans valeurs propres au tenant) et `cipp/baseline-stages.json` (stage, state et action par template). Lit `CATemplate/_manifest.json` pour les templates optionnels. Tout sur Report ; `--remediate-stage1` met le stage 1 sur Remediate, et refuse tant que des templates sont nouveaux au stage 1 par rapport à l'export précédent — `--accept-new` les confirme. |
+| [`generate-docs.js`](generate-docs.js) | **depuis** la source | Écrit `CATemplate/README.md` (et `.en`, `.fr`) : chaque stratégie avec pour qui, quoi, state et stage. S'exécute après l'export, car le stage vient de `cipp/baseline-stages.json`. `--check` n'écrit rien et échoue si un README est périmé ; un test fait de même. |
 | [`sync-mirror.js`](sync-mirror.js) | miroir | Aligne un second clone sur ce qui est dans git ici — voir [ci-dessous](#mise-en-miroir-vers-un-second-clone). |
 
 Chaque script de contrôle a un `*.test.js` à côté de lui ; `node --test scripts/*.test.js` les exécute
@@ -59,6 +60,7 @@ node scripts/prerequisites.js            # d'abord : chaque template fait-il ré
 node scripts/check-controls.js           # chaque template a-t-il un mapping de normes ?
 node scripts/authentication-methods.js   # les méthodes d'authentification ne contredisent-elles pas les templates ?
 node scripts/export-cipp-baseline.js     # puis : régénérer cipp/
+node scripts/generate-docs.js            # CATemplate/README à partir des templates et de cipp/
 node --test scripts/*.test.js            # en dernier, car une partie examine cipp/
 ```
 

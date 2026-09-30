@@ -6,12 +6,12 @@
     baseline is deployed.
 
 .DESCRIPTION
-    The templates refer to eight groups and four named locations that no tenant has out of the
+    The templates refer to eleven groups, four named locations and three custom authentication strengths that no tenant has out of the
     box. If they are missing, that fails in the wrong direction: an exclusion group that does
     not exist excludes nobody, so the policy becomes stricter than intended. Two cases are not
     "stricter" but "closed":
 
-      Excluded from Conditional Access  both are in 35 of the 44 templates and are one
+      Excluded from Conditional Access  both are in 38 of the 44 templates and are one
       SG-U-CA-Exclude-Breakglass        mechanism under two names. Both empty = no account
                                         falls outside the baseline = no break-glass. One of
                                         the two empty is more treacherous: the exclusion

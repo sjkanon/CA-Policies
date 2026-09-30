@@ -33,7 +33,7 @@
       "displayName": "Excluded from Conditional Access",
       "mailNickname": "excluded-from-conditional-access",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 35 van de 44 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 35 ernaast.",
+      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 38 van de 44 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 38 ernaast.",
       "description": "Break-glass exclusion for the Conditional Access baseline. Emergency access accounts only; must not be empty.",
       "danger": "critical",
       "dangerReason": "Deze groep leeg laten betekent: tientallen policies actief en geen enkel account dat er buiten valt — geen break-glass. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",

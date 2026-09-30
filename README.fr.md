@@ -35,8 +35,9 @@ lit et écrit quoi, et comment ce dépôt est relié au dépôt IntuneBackup.
 confrontés (MCSB, CIS, les propres templates de Microsoft, j0eyv) et — plus important — ce qui n'y
 figure volontairement *pas*, et pourquoi.
 
-Chaque dossier a un README avec les détails : [`scripts/`](scripts/README.fr.md) et
-[`authentication-methods/`](authentication-methods/README.fr.md).
+Chaque dossier a un README avec les détails : [`CATemplate/`](CATemplate/README.fr.md) (chaque stratégie, généré),
+[`prerequisites/`](prerequisites/README.fr.md), [`controls/`](controls/README.fr.md), [`cipp/`](cipp/README.fr.md),
+[`authentication-methods/`](authentication-methods/README.fr.md) et [`scripts/`](scripts/README.fr.md).
 
 ## Ce qui se trouve à côté des stratégies CA
 
@@ -45,9 +46,9 @@ besoin sans en faire elle-même partie :
 
 | Dossier | Contenu | Surveillé par |
 |---|---|---|
-| [`prerequisites/`](prerequisites/ca-prerequisites.json) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | `scripts/prerequisites.js`, bloquant en CI |
+| [`prerequisites/`](prerequisites/README.fr.md) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | `scripts/prerequisites.js`, bloquant en CI |
 | [`authentication-methods/`](authentication-methods/README.fr.md) | Quelles méthodes d'authentification sont activées, et les profils passkey | `scripts/authentication-methods.js`, bloquant en CI |
-| [`controls/`](controls/ca-controls.json) | Par template, quels contrôles ISO 27001, NIS2, CIS et NIST CSF il couvre | `scripts/check-controls.js`, bloquant en CI |
+| [`controls/`](controls/README.fr.md) | Par template, quels contrôles ISO 27001, NIS2, CIS et NIST CSF il couvre | `scripts/check-controls.js`, bloquant en CI |
 
 Deux dépendances vont de `authentication-methods/` vers ici, et échouent toutes deux en silence —
 `2120` exige une méthode résistante au phishing qui n'existe pas, ou `2180` exige un Temporary Access
@@ -102,16 +103,17 @@ La répartition en stages suit les métadonnées que le dépôt possède déjà 
 |---|---|---|
 | 1 — Socle | `state: enabled`, non optionnel (17) | `enabled` |
 | 2 — Renforcement | `disabled` ou report-only dans le template (12) | report-only |
-| 3 — Choix du tenant et licence | `optional: true` dans `_manifest.json` (12) | report-only, reste sur Report |
+| 3 — Choix du tenant et licence | `optional: true` dans `_manifest.json` (15) | report-only, reste sur Report |
 
 ### D'abord les prérequis, ensuite seulement Remediate
 
-Les templates font référence à huit groupes et quatre named locations qu'aucun tenant ne possède
+Les templates font référence à onze groupes, quatre named locations et trois custom
+authentication strengths qu'aucun tenant ne possède
 d'office. S'ils manquent, l'échec se produit dans le mauvais sens : **un groupe d'exclusion qui
 n'existe pas n'exclut personne**, donc la stratégie devient plus stricte que prévu et rien ne donne
 l'alerte. Deux cas ne sont pas alors « plus stricts » mais « fermés » :
 
-- `Excluded from Conditional Access` et `SG-U-CA-Exclude-Breakglass` figurent tous deux dans 35 des
+- `Excluded from Conditional Access` et `SG-U-CA-Exclude-Breakglass` figurent tous deux dans 38 des
   44 templates — une seule exclusion break-glass sous deux noms, pour qu'un tenant n'ait rien à
   renommer pour suivre la convention qu'il applique déjà. Les six qui ne les ont pas visent des
   identités de workload et d'agent (`includeUsers: "None"`), donc ils n'y touchent rien.

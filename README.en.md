@@ -34,8 +34,9 @@ and writes what, and how this repo is tied to the IntuneBackup repo.
 checked against (MCSB, CIS, Microsoft's own templates, j0eyv) and — more importantly — what is
 deliberately *not* in them and why.
 
-Each folder has a README with the details: [`scripts/`](scripts/README.en.md) and
-[`authentication-methods/`](authentication-methods/README.en.md).
+Each folder has a README with the details: [`CATemplate/`](CATemplate/README.en.md) (every policy, generated),
+[`prerequisites/`](prerequisites/README.en.md), [`controls/`](controls/README.en.md), [`cipp/`](cipp/README.en.md),
+[`authentication-methods/`](authentication-methods/README.en.md) and [`scripts/`](scripts/README.en.md).
 
 ## What sits next to the CA policies
 
@@ -44,9 +45,9 @@ but is not itself:
 
 | Folder | What it holds | Guarded by |
 |---|---|---|
-| [`prerequisites/`](prerequisites/ca-prerequisites.json) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | `scripts/prerequisites.js`, blocking in CI |
+| [`prerequisites/`](prerequisites/README.en.md) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | `scripts/prerequisites.js`, blocking in CI |
 | [`authentication-methods/`](authentication-methods/README.en.md) | Which sign-in methods are enabled, and the passkey profiles | `scripts/authentication-methods.js`, blocking in CI |
-| [`controls/`](controls/ca-controls.json) | Per template, which ISO 27001, NIS2, CIS and NIST CSF controls it fulfils | `scripts/check-controls.js`, blocking in CI |
+| [`controls/`](controls/README.en.md) | Per template, which ISO 27001, NIS2, CIS and NIST CSF controls it fulfils | `scripts/check-controls.js`, blocking in CI |
 
 Two dependencies run from `authentication-methods/` to here, and both fail silently —
 `2120` demands a phishing-resistant method that is not there, or `2180` demands a Temporary Access
@@ -100,16 +101,17 @@ The stage layout follows the metadata the repo already has:
 |---|---|---|
 | 1 — Core | `state: enabled`, not optional (17) | `enabled` |
 | 2 — Tightening | `disabled` or report-only in the template (12) | report-only |
-| 3 — Tenant choice and licence | `optional: true` in `_manifest.json` (12) | report-only, stays on Report |
+| 3 — Tenant choice and licence | `optional: true` in `_manifest.json` (15) | report-only, stays on Report |
 
 ### Prerequisites first, only then Remediate
 
-The templates refer to eight groups and four named locations that no tenant has
+The templates refer to eleven groups, four named locations and three custom authentication
+strengths that no tenant has
 by default. If they are missing, that fails in the wrong direction: **an exclusion group
 that does not exist excludes nobody**, so the policy becomes stricter than intended and nothing raises
 an alarm. Two cases are not "stricter" but "locked out":
 
-- `Excluded from Conditional Access` and `SG-U-CA-Exclude-Breakglass` both appear in 35 of
+- `Excluded from Conditional Access` and `SG-U-CA-Exclude-Breakglass` both appear in 38 of
   the 44 templates — one break-glass exclusion under two names, so that a tenant does not have
   to rename anything to follow the convention it already uses. The six without it target
   workload and agent identities (`includeUsers: "None"`), so they affect nothing there.

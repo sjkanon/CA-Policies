@@ -34,8 +34,9 @@ en schrijft, en hoe deze repo aan de IntuneBackup-repo vastzit.
 gelegd (MCSB, CIS, Microsofts eigen templates, j0eyv) en — belangrijker — wat er bewust *niet* in
 zit en waarom.
 
-Per map staat er een README met de details: [`scripts/`](scripts/README.md) en
-[`authentication-methods/`](authentication-methods/README.md).
+Per map staat er een README met de details: [`CATemplate/`](CATemplate/README.md) (elke policy, gegenereerd),
+[`prerequisites/`](prerequisites/README.md), [`controls/`](controls/README.md), [`cipp/`](cipp/README.md),
+[`authentication-methods/`](authentication-methods/README.md) en [`scripts/`](scripts/README.md).
 
 ## Wat er naast de CA-policies staat
 
@@ -44,9 +45,9 @@ maar zelf niet is:
 
 | Map | Wat erin staat | Bewaakt door |
 |---|---|---|
-| [`prerequisites/`](prerequisites/ca-prerequisites.json) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | `scripts/prerequisites.js`, blokkerend in CI |
+| [`prerequisites/`](prerequisites/README.md) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | `scripts/prerequisites.js`, blokkerend in CI |
 | [`authentication-methods/`](authentication-methods/README.md) | Welke aanmeldmethodes aan staan, en de passkey-profielen | `scripts/authentication-methods.js`, blokkerend in CI |
-| [`controls/`](controls/ca-controls.json) | Per template welke ISO 27001-, NIS2-, CIS- en NIST CSF-controls hij invult | `scripts/check-controls.js`, blokkerend in CI |
+| [`controls/`](controls/README.md) | Per template welke ISO 27001-, NIS2-, CIS- en NIST CSF-controls hij invult | `scripts/check-controls.js`, blokkerend in CI |
 
 Twee afhankelijkheden lopen van `authentication-methods/` naar hier en falen allebei stil —
 `2120` eist een phishing-bestendige methode die er niet is, of `2180` eist een Temporary Access
@@ -100,16 +101,16 @@ De stage-indeling volgt de metadata die de repo al heeft:
 |---|---|---|
 | 1 — Kern | `state: enabled`, niet optioneel (17) | `enabled` |
 | 2 — Aanscherping | `disabled` of report-only in het template (12) | report-only |
-| 3 — Tenantkeuze en licentie | `optional: true` in `_manifest.json` (12) | report-only, blijft op Report |
+| 3 — Tenantkeuze en licentie | `optional: true` in `_manifest.json` (15) | report-only, blijft op Report |
 
 ### Eerst de randvoorwaarden, dan pas Remediate
 
-De templates verwijzen naar acht groepen en vier named locations die geen enkele tenant
-vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: **een uitzonderingsgroep
+De templates verwijzen naar elf groepen, vier named locations en drie custom authentication
+strengths die geen enkele tenant vanzelf heeft. Ontbreken ze, dan faalt dat de verkeerde kant op: **een uitzonderingsgroep
 die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld en niets slaat
 alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
 
-- `Excluded from Conditional Access` en `SG-U-CA-Exclude-Breakglass` staan allebei in 35 van
+- `Excluded from Conditional Access` en `SG-U-CA-Exclude-Breakglass` staan allebei in 38 van
   de 44 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
   te hernoemen om de conventie te volgen die hij al voert. De zes zonder richten zich op
   workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raken ze niets.

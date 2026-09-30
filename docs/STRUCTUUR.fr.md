@@ -51,11 +51,11 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 
 | Dossier | Contenu | Créé par | Repris par |
 |---|---|---|---|
-| `CATemplate/` | Les stratégies, un `CXNM__STANDARD__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
-| `cipp/` | Fichier d'import et répartition en stages pour une baseline CIPP | `export-cipp-baseline.js` | CIPP (import manuel) |
-| [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | main | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
+| [`CATemplate/`](../CATemplate/README.fr.md) | Les stratégies, un `CXNM__STANDARD__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
+| [`cipp/`](../cipp/README.fr.md) | Fichier d'import et répartition en stages pour une baseline CIPP | `export-cipp-baseline.js` | CIPP (import manuel) |
+| [`prerequisites/`](../prerequisites/README.fr.md) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | main | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.fr.md) | État souhaité de l'authentication methods policy, avec les profils passkey | main | `authentication-methods.js`, les deux scripts Entra |
-| [`controls/`](../controls/ca-controls.json) | Mapping de normes par template (ISO 27001, NIS2, CIS, NIST CSF) | main | `check-controls.js`, `generate-compliance.js` d'IntuneBackup |
+| [`controls/`](../controls/README.fr.md) | Mapping de normes par template (ISO 27001, NIS2, CIS, NIST CSF) | main | `check-controls.js`, `generate-compliance.js` d'IntuneBackup |
 | `docs/` | Documentation : cette structure et l'analyse | main | lecteurs |
 | [`scripts/`](../scripts/README.fr.md) | Validation, export, scripts de tenant, miroir | main | workflow GitHub |
 | `local/` | Copies de travail avec valeurs propres au tenant | main | **pas dans git** (`.gitignore`) |
@@ -94,24 +94,25 @@ tenant : `1040` (pays), `1060` (plages IP) et `1180` (Global Secure Access).
 | Étape | Script | Lit | Écrit |
 |---:|---|---|---|
 | 1 | `prerequisites.js` | `CATemplate/`, `prerequisites/`, `authentication-methods/` | rien — échoue en cas d'erreur |
-| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/IntuneTemplate/_controls.json` s'il existe | rien — échoue en cas d'erreur |
+| 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/` (ou `../CIPP-Templates-Intune/`) `IntuneTemplate/_controls.json` s'il existe | rien — échoue en cas d'erreur |
 | 3 | `authentication-methods.js` | `authentication-methods/`, `CATemplate/` | rien — échoue en cas d'erreur |
 | 4 | `export-cipp-baseline.js` | `CATemplate/`, `_manifest.json`, `prerequisites/`, le `cipp/baseline-stages.json` précédent | `cipp/` |
-| 5 | `node --test scripts/*.test.js` | tout ce qui précède, plus `cipp/` | rien — échoue en cas d'erreur |
+| 5 | `generate-docs.js` | `CATemplate/`, `_manifest.json`, `cipp/baseline-stages.json` | `CATemplate/README*.md` |
+| 6 | `node --test scripts/*.test.js` | tout ce qui précède, plus `cipp/` | rien — échoue en cas d'erreur |
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groupes, emplacements et strengths dans le tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | l'authentication methods policy dans le tenant (avec `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | rien — un rapport uniquement |
 | – | `sync-mirror.js` | `git ls-files` | un second clone |
 
-Les étapes 1 à 5 sont exécutées par [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
+Les étapes 1 à 6 sont exécutées par [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
 après chaque modification. Détails : [scripts/README.fr.md](../scripts/README.fr.md).
 
 ## Liaisons externes
 
 | Système | Sens | Comment | Attention |
 |---|---|---|---|
-| Dépôt IntuneBackup (`../IntuneBackup`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` là-bas | Git y contient la version `--no-ca` ; la CI ne voit pas ce dépôt |
-| Dépôt IntuneBackup (`../IntuneBackup`) | Intune → CA | `check-controls.js` lit `IntuneTemplate/_controls.json` | Uniquement en local ; en CI, il saute le contrôle des libellés |
+| Dépôt IntuneBackup (`../IntuneBackup`, miroir `../CIPP-Templates-Intune`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` là-bas | Git y contient la version `--no-ca` ; la CI ne voit pas ce dépôt |
+| Dépôt IntuneBackup (`../IntuneBackup`, miroir `../CIPP-Templates-Intune`) | Intune → CA | `check-controls.js` lit `IntuneTemplate/_controls.json` | Uniquement en local ; en CI, il saute le contrôle des libellés |
 | CIPP | dépôt → CIPP | importer `cipp/ca-templates-import.json`, construire la baseline selon `cipp/baseline-stages.json` | La baseline dans CIPP est une copie mise à jour à la main |
 | Microsoft Graph | dépôt → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | d'abord `-WhatIf` ; l'id d'une custom strength à reporter à la main dans le déploiement CIPP |
 | GitHub Actions | dépôt → dépôt | `generate-cipp.yml` ouvre une PR | le seul workflow |
@@ -148,4 +149,8 @@ après chaque modification. Détails : [scripts/README.fr.md](../scripts/README.
 | [README.fr.md](../README.fr.md) | Explication complète : ajout, déploiement, prérequis, normes |
 | [ANALYSE.fr.md](ANALYSE.fr.md) | Pourquoi certaines choses sont ou ne sont pas dans l'ensemble |
 | [scripts/README.fr.md](../scripts/README.fr.md) | Chaque script, et l'ordre d'exécution |
+| [CATemplate/README.fr.md](../CATemplate/README.fr.md) | Chaque stratégie : pour qui, quoi, state et stage (généré) |
+| [prerequisites/README.fr.md](../prerequisites/README.fr.md) | Groupes, emplacements et strengths dont un tenant a besoin |
+| [controls/README.fr.md](../controls/README.fr.md) | Le mapping de normes et sa destination |
+| [cipp/README.fr.md](../cipp/README.fr.md) | Les fichiers de déploiement et les stages |
 | [authentication-methods/README.fr.md](../authentication-methods/README.fr.md) | Méthodes d'authentification et passkeys |
