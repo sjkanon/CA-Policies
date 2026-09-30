@@ -141,7 +141,7 @@ if (total === 0) {
 
 const head = git(REPO_ROOT, ["rev-parse", "--short", "HEAD"]).trim();
 const subject = git(REPO_ROOT, ["log", "-1", "--format=%s"]).trim();
-const message = opts.message || `Spiegel van IntuneBackup ${head}\n\n${subject}`;
+const message = opts.message || `Spiegel van ${path.basename(REPO_ROOT)} ${head}\n\n${subject}`;
 
 git(targetRoot, ["add", "-A"]);
 if (!git(targetRoot, ["status", "--porcelain"]).trim()) {
