@@ -8,12 +8,11 @@ const path = require("path");
 const assert = require("node:assert");
 const { test } = require("node:test");
 
-const { build } = require("./generate-docs");
+const { build, isBij } = require("./generate-docs");
 
 test("de README's in CATemplate/ zijn bij (anders: node scripts/generate-docs.js)", () => {
   for (const [pad, verwacht] of Object.entries(build())) {
-    assert.ok(fs.existsSync(pad), `${path.basename(pad)} ontbreekt`);
-    assert.strictEqual(fs.readFileSync(pad, "utf8"), verwacht, `${path.basename(pad)} is verouderd`);
+    assert.ok(isBij(pad, verwacht), `${path.basename(pad)} ontbreekt of is verouderd`);
   }
 });
 

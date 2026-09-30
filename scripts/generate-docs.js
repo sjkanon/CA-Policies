@@ -260,10 +260,19 @@ function build() {
   return Object.fromEntries(LANGS.map((lang) => [path.join(TEMPLATE_DIR, FILE[lang]), render(lang, templates, stages, manifest)]));
 }
 
+/**
+ * Of een README op schijf gelijk is aan wat de generator maakt. Regeleinden tellen niet mee: met
+ * core.autocrlf op Windows staat een ingecheckte LF-README als CRLF op schijf, en dat is geen
+ * verouderde README.
+ */
+function isBij(pad, verwacht) {
+  return fs.existsSync(pad) && fs.readFileSync(pad, "utf8").replace(/\r\n/g, "\n") === verwacht;
+}
+
 function main() {
   const check = process.argv.includes("--check");
   const files = build();
-  const stale = Object.entries(files).filter(([p, s]) => !fs.existsSync(p) || fs.readFileSync(p, "utf8") !== s);
+  const stale = Object.entries(files).filter(([p, s]) => !isBij(p, s));
   if (check) {
     if (stale.length) {
       for (const [p] of stale) console.error(`verouderd: ${path.relative(REPO_ROOT, p)}`);
@@ -277,6 +286,6 @@ function main() {
   console.log(`Geschreven: ${stale.length} van ${Object.keys(files).length} README's in CATemplate/.`);
 }
 
-module.exports = { build };
+module.exports = { build, isBij };
 
 if (require.main === module) main();
