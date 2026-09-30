@@ -7,7 +7,7 @@
     "",
     "Waarom dit een eigen map is en geen CATemplate: dit is geen Conditional Access. Een",
     "CA-policy zegt wanneer je iets mag; dit zegt waarmee je je überhaupt kunt aanmelden.",
-    "De twee grijpen wel in elkaar — GLOBAL__2120 eist een phishing-bestendige methode, en",
+    "De twee grijpen wel in elkaar — CXNM__STANDARD__2120 eist een phishing-bestendige methode, en",
     "die eis is onvervulbaar zolang hier geen passkey aan staat.",
     "",
     "Er is geen automatische toetsing tegen een tenant: Set-EntraAuthenticationMethods.ps1 is",
@@ -31,7 +31,7 @@
         "maximumLifetimeInMinutes": 480,
         "isUsableOnce": true
       },
-      "note": "isUsableOnce true: een TAP die meerdere keren werkt is een wachtwoord met een houdbaarheidsdatum. Dit sluit aan op GLOBAL__2180, dat registratie van beveiligingsinformatie alleen achter een eenmalige TAP toestaat.",
+      "note": "isUsableOnce true: een TAP die meerdere keren werkt is een wachtwoord met een houdbaarheidsdatum. Dit sluit aan op CXNM__STANDARD__2180, dat registratie van beveiligingsinformatie alleen achter een eenmalige TAP toestaat.",
       "danger": "high",
       "dangerReason": "Een TAP is een volwaardige inloggegeven die de helpdesk uitgeeft. Zonder proces voor identiteitscontrole vóór uitgifte is dit de makkelijkste weg naar een accountovername in de hele tenant."
     },
@@ -40,7 +40,7 @@
       "id": "Fido2",
       "displayName": "Passkey (FIDO2)",
       "state": "enabled",
-      "doel": "Passkeys op een beveiligingssleutel, in Microsoft Authenticator, of gesynchroniseerd via een cloudprovider. Dit is de methode die GLOBAL__2120 afdwingt.",
+      "doel": "Passkeys op een beveiligingssleutel, in Microsoft Authenticator, of gesynchroniseerd via een cloudprovider. Dit is de methode die CXNM__STANDARD__2120 afdwingt.",
       "configuration": {
         "isSelfServiceRegistrationAllowed": true,
         "isAttestationEnforced": false
@@ -83,7 +83,7 @@
       ],
       "tenantSpecific": "Passkey profiles vragen een eenmalige, ONOMKEERBARE opt-in in het Entra-portaal (Security → Authentication methods → Passkey (FIDO2) → banner). De bestaande globale instellingen verhuizen dan naar een Default passkey profile. Er passen er maximaal drie, dat profiel meegerekend.",
       "danger": "high",
-      "dangerReason": "Dit is de methode waar de phishing-bestendige CA-policies op steunen. Staat hij uit, dan kan niemand aan GLOBAL__2120 voldoen en is de tenant dicht voor iedereen die geen andere phishing-bestendige methode heeft.",
+      "dangerReason": "Dit is de methode waar de phishing-bestendige CA-policies op steunen. Staat hij uit, dan kan niemand aan CXNM__STANDARD__2120 voldoen en is de tenant dicht voor iedereen die geen andere phishing-bestendige methode heeft.",
       "windowsHelloPasskeys": {
         "_comment": [
           "Entra passkey on Windows: een passkey in de lokale Windows Hello-container, los van de",
@@ -138,7 +138,7 @@
       "id": "Sms",
       "displayName": "SMS",
       "state": "disabled",
-      "doel": "Uitzetten. SMS is phishbaar en kwetsbaar voor SIM-swapping, en voldoet niet aan GLOBAL__2120.",
+      "doel": "Uitzetten. SMS is phishbaar en kwetsbaar voor SIM-swapping, en voldoet niet aan CXNM__STANDARD__2120.",
       "note": "Zet dit pas uit nadat iedereen een passkey of Authenticator heeft. Uitzetten terwijl gebruikers alleen SMS hebben sluit ze buiten — controleer eerst de registratierapportage in Entra.",
       "danger": "high",
       "dangerReason": "Dit is de enige regel in dit bestand die iets wégneemt. Volgorde is hier alles: eerst registreren, dan pas uitzetten."

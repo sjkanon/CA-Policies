@@ -8,7 +8,7 @@ Hand-written. This records where the
 all over again.
 
 Date: 3 September 2026. At that point the set had 33 templates. After the later rounds (below) there
-are 41; the numbers in the rest of this document are those of the round they appear in and have
+are 44; the numbers in the rest of this document are those of the round they appear in and have
 deliberately not been rewritten.
 
 ## The question
@@ -40,7 +40,8 @@ with three persona- or number-based frameworks:
 It also recorded the origin, and that is still the most important piece of context in this
 repo: **our numbering *is* Chronlund's baseline.** The range `1010`–`3040`, the split into
 BLOCK/GRANT/SESSION and the naming pattern `GLOBAL - nnnn - ACTIE - Omschrijving` come straight
-from his design. That explains why everything is called `GLOBAL__` while the other two
+from his design. That explains why everything carries one prefix — since 30 September 2026
+`CXNM - STANDARD` instead of Chronlund's `GLOBAL` — while the other two
 frameworks are persona-based — see *Why there are no personas* below.
 
 **That report is stale.** It describes 20 templates; there are 33. And that is not a
@@ -239,7 +240,7 @@ substantive change in `CATemplate/`. That is this document.
 
 ## Why there are no personas
 
-Every template is called `GLOBAL__`, whereas van Surksum and Verlinden split by persona — Admins,
+Every template carries the same prefix, whereas van Surksum and Verlinden split by persona — Admins,
 Internals, Externals, Guests, ServiceAccounts, Agents. That is not an omission and does not need
 to be weighed again.
 
@@ -254,10 +255,11 @@ out differently for two groups. That is exactly what the 13 August report explic
 rejects — *"één regel per maatregel, niet per policy"* (one rule per measure, not per policy) —
 because it produces two policies for one question.
 
-**What does need to happen:** the `GLOBAL__` prefix suggests a second dimension that does not exist and
-is not coming. If a second persona is ever added, that is a redesign and not an addition.
-Until then the prefix is a remnant of the origin — keep it, because the numbering depends
-on it, but explain in the README that it is not a promise.
+**The prefix.** Until 30 September 2026 everything was called `GLOBAL`, after Chronlund. That
+suggested a second dimension that does not exist and is not coming. It is now `CXNM - STANDARD`
+in the tenant and `CXNM__STANDARD__` as the file name: it says whose set this is and that it is
+the standard, not who it is for. The numbering is unchanged. If a second persona is ever added,
+that is a redesign and not an addition.
 
 ## What we deliberately do not do
 
@@ -485,7 +487,7 @@ real work had been in the tenant for years, but in no document an auditor reads.
 
 ## What was added
 
-**`controls/ca-controls.json`** — all 41 templates mapped to ISO/IEC 27001:2022 Annex A, NIS2
+**`controls/ca-controls.json`** — all 44 templates mapped to ISO/IEC 27001:2022 Annex A, NIS2
 art. 21(2), CIS Controls v8.1 and NIST CSF 2.0, in exactly the same vocabulary as
 `IntuneTemplate/_controls.json` in the other repo. The phase does not come from a manifest but from
 `state` in the template itself: `enabled` counts as enforced, report-only as prepared,
@@ -517,3 +519,49 @@ lives in the other repo, so in CI `generate-compliance.js --strict` does that.
 - **Six policies are set to report-only** and therefore do not count as covered. That is correct — they do
   nothing — but it does mean the matrix improves as soon as someone turns those six on, without a
   single policy being added.
+
+# Round 6 — three templates from a tenant, and the CXNM - STANDARD prefix (30 September 2026)
+
+## The occasion
+
+Three templates came straight from a CIPP export of a customer tenant into `CATemplate/`:
+`CACUSTOMWHfBPasskeys`, `GRANT__MFA_PHISHING_RESISTENT__Benelux_` and
+`MFA__Phishing_Resistent__Rollout`. Together they are a passkey rollout per group. But the
+scripts only read `GLOBAL__*.json`, so they fell outside every check and outside the CIPP
+export — and they carried what the set deliberately keeps out: real strength ids, IP ranges of two
+AVD locations, and a customer name in the displayName.
+
+At the same time the prefix changed: `GLOBAL` becomes `CXNM - STANDARD` in the tenant and
+`CXNM__STANDARD__` as the file name. See *Why there are no personas*.
+
+## What was changed
+
+| Was | Becomes | What changed |
+|---|---|---|
+| `GRANT \| MFA PHISHING RESISTENT \| Benelux` | `2125 GRANT` Phishing Resistant MFA for Rollout Groups | AVD exclusions removed (tenant-specific IPs; the IP-leak test failed on them). Persistent browser `always` removed: a session control does not belong in a grant, and `always` on every device contradicts `3020`. Break-glass and service accounts excluded. |
+| `MFA \| Phishing Resistent \| Rollout` | `2185 GRANT` Register Security Info Passkey Rollout | Strength id replaced by the zero GUID; SMS and voice removed from the strength, because `authentication-methods/` turns them off. Break-glass and service accounts excluded. |
+| `CA-CUSTOM-WHfB-Passkeys` | `2190 GRANT` Windows Hello Passkeys | Targeted `includeApplications: None` and so enforced nothing — a carrier to get the strength into the tenant via CIPP. `New-CaPrerequisites.ps1` does that here, so it is now a real policy on all apps, in report-only. |
+
+All three are optional (stage 3). Their four groups and two strengths are in `prerequisites/`.
+
+**The AAGUID restriction was not guarded.** The strength of `2190` is FIDO2 restricted to the
+Windows Hello AAGUIDs — that restriction lives in `combinationConfigurations`, and nothing looked
+at it: `prerequisites.js` only compared `allowedCombinations`, and `New-CaPrerequisites.ps1`
+created the strength without the restriction. Then any passkey satisfies. Both handle it now.
+
+## What is still open
+
+- **`2190` does not count WHfB.** A Windows Hello for Business credential is the combination
+  `windowsHelloForBusiness`, not `fido2`. Someone on a joined device with WHfB does not
+  satisfy it — and often cannot register a Windows Hello passkey there either (see
+  `authentication-methods/`, `windowsHelloPasskeys`). If WHfB should count,
+  `windowsHelloForBusiness` belongs in the strength. That is a choice for whoever designed the policy.
+- **The software AAGUID.** The strength allows `6028b017…` (Windows Hello software);
+  `authentication-methods/` restricts the profile to hardware and VBS. Registering with the
+  software variant therefore fails anyway, but the two lists contradict each other.
+- **`2185` next to `2180`.** If both are enabled, the only combination that satisfies both is a
+  one-time TAP. The rollout group then loses the convenience `2185` exists for.
+- **The groups carry the names from the source tenant** (`CA-…`, `U-WHfB-Passkeys`), not the
+  SG-U convention. Renaming breaks the link with that tenant.
+- **The IntuneBackup side** reads the keys from `controls/ca-controls.json`; its `COMPLIANCE.md`
+  shows the old `GLOBAL__` names until it is regenerated.

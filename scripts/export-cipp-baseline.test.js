@@ -114,14 +114,14 @@ test("een manifest met een onbekend template of een optional zonder reden is een
   const map = fs.mkdtempSync(path.join(os.tmpdir(), "ca-manifest-test-"));
   const pad = path.join(map, "_manifest.json");
   try {
-    fs.writeFileSync(pad, JSON.stringify({ _comment: ["x"], GLOBAL__9999__BLOCK__Weg: { optional: true, reden: "r" } }));
-    assert.throws(() => leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), /niet in CATemplate/);
+    fs.writeFileSync(pad, JSON.stringify({ _comment: ["x"], CXNM__STANDARD__9999__BLOCK__Weg: { optional: true, reden: "r" } }));
+    assert.throws(() => leesOptioneel(pad, ["CXNM__STANDARD__1010__BLOCK__Legacy_Authentication"]), /niet in CATemplate/);
 
-    fs.writeFileSync(pad, JSON.stringify({ GLOBAL__1010__BLOCK__Legacy_Authentication: { optional: true } }));
-    assert.throws(() => leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), /zonder 'reden'/);
+    fs.writeFileSync(pad, JSON.stringify({ CXNM__STANDARD__1010__BLOCK__Legacy_Authentication: { optional: true } }));
+    assert.throws(() => leesOptioneel(pad, ["CXNM__STANDARD__1010__BLOCK__Legacy_Authentication"]), /zonder 'reden'/);
 
-    fs.writeFileSync(pad, JSON.stringify({ "GLOBAL__1010__BLOCK__Legacy_Authentication.json": { optional: false } }));
-    assert.deepStrictEqual(leesOptioneel(pad, ["GLOBAL__1010__BLOCK__Legacy_Authentication"]), {}, "optional false telt niet mee, en .json in de sleutel mag");
+    fs.writeFileSync(pad, JSON.stringify({ "CXNM__STANDARD__1010__BLOCK__Legacy_Authentication.json": { optional: false } }));
+    assert.deepStrictEqual(leesOptioneel(pad, ["CXNM__STANDARD__1010__BLOCK__Legacy_Authentication"]), {}, "optional false telt niet mee, en .json in de sleutel mag");
   } finally {
     fs.rmSync(map, { recursive: true, force: true });
   }

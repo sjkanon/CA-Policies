@@ -11,9 +11,9 @@
  *
  * Two dependencies run from here to the CA side, and both fail silently:
  *
- *   GLOBAL__2120 requires a phishing-resistant method. If Passkey (FIDO2) is off here, nobody
+ *   CXNM__STANDARD__2120 requires a phishing-resistant method. If Passkey (FIDO2) is off here, nobody
  *                can meet that requirement and the tenant is closed.
- *   GLOBAL__2180 requires a one-time Temporary Access Pass to register security info. If TAP
+ *   CXNM__STANDARD__2180 requires a one-time Temporary Access Pass to register security info. If TAP
  *                is off here, a new employee cannot register anything — and so can never
  *                meet 2120.
  *
@@ -127,24 +127,24 @@ function validate(gewenst = readMethods()) {
   const opId = new Map(methodes.map((m) => [m.id, m]));
 
   const fido = opId.get("Fido2");
-  const state2120 = templateState("GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users");
+  const state2120 = templateState("CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users");
   if (state2120 === "enabled" && fido?.state !== "enabled") {
     errors.push(
-      "GLOBAL__2120 eist een phishing-bestendige methode en staat op enabled, maar Passkey (FIDO2) staat hier niet op enabled. " +
+      "CXNM__STANDARD__2120 eist een phishing-bestendige methode en staat op enabled, maar Passkey (FIDO2) staat hier niet op enabled. " +
         "Niemand kan dan aan die grant voldoen."
     );
   }
 
   const tap = opId.get("TemporaryAccessPass");
-  const state2180 = templateState("GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only");
+  const state2180 = templateState("CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only");
   if (state2180 && state2180 !== "disabled" && tap?.state !== "enabled") {
     errors.push(
-      "GLOBAL__2180 eist een Temporary Access Pass bij het registreren van beveiligingsinformatie, maar TAP staat hier niet op enabled. " +
+      "CXNM__STANDARD__2180 eist een Temporary Access Pass bij het registreren van beveiligingsinformatie, maar TAP staat hier niet op enabled. " +
         "Een nieuwe medewerker kan dan niets registreren."
     );
   }
   if (tap?.state === "enabled" && tap.configuration?.isUsableOnce !== true) {
-    warnings.push("Temporary Access Pass staat op meermalig bruikbaar. GLOBAL__2180 accepteert alleen temporaryAccessPassOneTime, dus die grant faalt dan.");
+    warnings.push("Temporary Access Pass staat op meermalig bruikbaar. CXNM__STANDARD__2180 accepteert alleen temporaryAccessPassOneTime, dus die grant faalt dan.");
   }
 
   // Een methode uitzetten kan alleen veilig als er iets anders aan staat.

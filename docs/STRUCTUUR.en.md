@@ -8,7 +8,7 @@ template: [ANALYSE.en.md](ANALYSE.en.md).
 
 ## In short
 
-- **One source:** `CATemplate/` — 41 Conditional Access policies in CIPP template format:
+- **One source:** `CATemplate/` — 44 Conditional Access policies in CIPP template format:
   18 BLOCK, 16 GRANT, 7 SESSION.
 - **One derivative:** `cipp/` — the templates as an import file and the layout in three stages for
   a CIPP baseline.
@@ -26,7 +26,7 @@ template: [ANALYSE.en.md](ANALYSE.en.md).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates · _manifest.json"]
+  T["<b>CATemplate/</b><br/>44 templates · _manifest.json"]
   P["prerequisites/<br/>ca-prerequisites.json"]
   A["authentication-methods/<br/>authentication-methods.json"]
   C["controls/<br/>ca-controls.json"]
@@ -51,7 +51,7 @@ Solid arrows write; dotted lines only read.
 
 | Folder | What it holds | Made by | Picked up by |
 |---|---|---|---|
-| `CATemplate/` | The policies, one `GLOBAL__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
+| `CATemplate/` | The policies, one `CXNM__STANDARD__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
 | `cipp/` | Import file and stage layout for a CIPP baseline | `export-cipp-baseline.js` | CIPP (manual import) |
 | [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.en.md) | Desired state of the authentication methods policy, with passkey profiles | hand | `authentication-methods.js`, the two Entra scripts |
@@ -72,7 +72,7 @@ Solid arrows write; dotted lines only read.
 
 `_manifest.json` sits in `CATemplate/` like the `_` files in IntuneBackup's
 `IntuneTemplate/`: next to the templates it describes. The scripts only read
-`GLOBAL__*.json` as a template, and to CIPP it is a `.json` without `displayName` — no
+`CXNM__STANDARD__*.json` as a template, and to CIPP it is a `.json` without `displayName` — no
 policy comes out of it (see [below](#what-cipp-does-with-this-repo)).
 
 ## Stages
@@ -129,8 +129,8 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 
 ## Conventions
 
-- **Naming:** `GLOBAL - <number> - <BLOCK|GRANT|SESSION> - <Description>` in the tenant,
-  `GLOBAL__<number>__<TYPE>__<Name>.json` as a file. The keys in `_manifest.json` and
+- **Naming:** `CXNM - STANDARD - <number> - <BLOCK|GRANT|SESSION> - <Description>` in the tenant,
+  `CXNM__STANDARD__<number>__<TYPE>__<Name>.json` as a file. The keys in `_manifest.json` and
   `ca-controls.json` are that file name without `.json`.
 - **GUIDs stay the same**: the GUID identifies the CIPP template row; a new GUID results in
   a second template with the same name.

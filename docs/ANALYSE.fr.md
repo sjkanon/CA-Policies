@@ -7,7 +7,7 @@ Rédigé à la main. Ce document consigne d'où viennent les
 **pas** et pourquoi. Sans ce dernier point, la prochaine itération réévalue les mêmes stratégies.
 
 Date : 3 septembre 2026. L'ensemble comptait alors 33 modèles. Après les itérations suivantes (en bas),
-il y en a 41 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
+il y en a 44 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
 n'ont délibérément pas été réécrits.
 
 ## La question
@@ -39,7 +39,8 @@ Un rapport d'écarts du 13 août 2026, généré en dehors de ce dépôt. Ce rap
 Il consignait aussi l'origine, et c'est toujours l'élément de contexte le plus important de ce
 dépôt : **notre numérotation *est* la baseline de Chronlund.** La série `1010`–`3040`, la répartition
 BLOCK/GRANT/SESSION et la forme de nom `GLOBAL - nnnn - ACTIE - Omschrijving` viennent telles quelles
-de sa conception. Cela explique pourquoi tout s'appelle `GLOBAL__` alors que les deux autres
+de sa conception. Cela explique pourquoi tout porte un seul préfixe — depuis le 30 septembre 2026
+`CXNM - STANDARD` au lieu du `GLOBAL` de Chronlund — alors que les deux autres
 frameworks sont basés sur des personas — voir *Pourquoi il n'y a pas de personas* ci-dessous.
 
 **Ce rapport est périmé.** Il décrit 20 modèles ; il y en a 33. Et ce n'est pas un
@@ -238,7 +239,7 @@ dans `CATemplate/` ajoute une itération. C'est ce document.
 
 ## Pourquoi il n'y a pas de personas
 
-Chaque modèle s'appelle `GLOBAL__`, alors que van Surksum et Verlinden répartissent par persona — Admins,
+Chaque modèle porte le même préfixe, alors que van Surksum et Verlinden répartissent par persona — Admins,
 Internals, Externals, Guests, ServiceAccounts, Agents. Ce n'est pas une omission et cela n'a pas à être
 réévalué.
 
@@ -253,10 +254,11 @@ différemment pour deux groupes. C'est précisément ce que le rapport du 13 ao�
 explicitement — *« één regel per maatregel, niet per policy »* — parce que cela produit
 deux stratégies pour une seule question.
 
-**Ce qui doit être fait :** le préfixe `GLOBAL__` suggère une deuxième dimension qui n'existe pas et ne
-viendra pas. Si une deuxième persona s'ajoute un jour, ce sera une refonte et non un ajout.
-D'ici là, le préfixe est un vestige de l'origine — conservez-le, car la numérotation en
-dépend, mais expliquez dans le README qu'il n'est pas une promesse.
+**Le préfixe.** Jusqu'au 30 septembre 2026, tout s'appelait `GLOBAL`, d'après Chronlund. Cela
+suggérait une deuxième dimension qui n'existe pas et ne viendra pas. C'est désormais
+`CXNM - STANDARD` dans le tenant et `CXNM__STANDARD__` comme nom de fichier : il dit à qui
+appartient l'ensemble et que c'est le standard, pas à qui il s'adresse. La numérotation est
+inchangée. Si une deuxième persona s'ajoute un jour, ce sera une refonte et non un ajout.
 
 ## Ce que nous ne faisons délibérément pas
 
@@ -516,3 +518,51 @@ réside dans l'autre dépôt, donc en CI c'est `generate-compliance.js --strict`
 - **Six stratégies sont sur report-only** et ne comptent donc pas comme couvertes. C'est juste — elles ne font
   rien — mais cela signifie que la matrice s'améliore dès que quelqu'un active ces six, sans qu'une
   seule stratégie ne s'ajoute.
+
+# Itération 6 — trois templates issus d'un tenant, et le préfixe CXNM - STANDARD (30 septembre 2026)
+
+## Le déclencheur
+
+Trois templates sont arrivés directement d'un export CIPP d'un tenant client dans `CATemplate/` :
+`CACUSTOMWHfBPasskeys`, `GRANT__MFA_PHISHING_RESISTENT__Benelux_` et
+`MFA__Phishing_Resistent__Rollout`. Ensemble, ils forment un déploiement de passkeys par groupe.
+Mais les scripts ne lisaient que `GLOBAL__*.json` : ils échappaient donc à tout contrôle et à
+l'export CIPP — et ils portaient ce que l'ensemble exclut délibérément : de vrais ids de strength,
+les plages IP de deux emplacements AVD, et un nom de client dans le displayName.
+
+En même temps, le préfixe a changé : `GLOBAL` devient `CXNM - STANDARD` dans le tenant et
+`CXNM__STANDARD__` comme nom de fichier. Voir *Pourquoi il n'y a pas de personas*.
+
+## Ce qui a été modifié
+
+| Avant | Devient | Ce qui a changé |
+|---|---|---|
+| `GRANT \| MFA PHISHING RESISTENT \| Benelux` | `2125 GRANT` Phishing Resistant MFA for Rollout Groups | Exclusions AVD retirées (IP spécifiques au tenant ; le test sur les fuites d'IP échouait). Persistent browser `always` retiré : un contrôle de session n'a pas sa place dans un grant, et `always` sur tout appareil contredit `3020`. Break-glass et comptes de service exclus. |
+| `MFA \| Phishing Resistent \| Rollout` | `2185 GRANT` Register Security Info Passkey Rollout | Id de strength remplacé par le GUID nul ; SMS et voix retirés de la strength, car `authentication-methods/` les désactive. Break-glass et comptes de service exclus. |
+| `CA-CUSTOM-WHfB-Passkeys` | `2190 GRANT` Windows Hello Passkeys | Ciblait `includeApplications: None` et n'imposait donc rien — un support pour amener la strength dans le tenant via CIPP. Ici, c'est `New-CaPrerequisites.ps1` qui s'en charge : c'est désormais une vraie stratégie sur toutes les apps, en report-only. |
+
+Les trois sont optionnels (stage 3). Leurs quatre groupes et deux strengths sont dans `prerequisites/`.
+
+**La restriction AAGUID n'était pas surveillée.** La strength de `2190` est FIDO2 restreint aux
+AAGUID Windows Hello — cette restriction se trouve dans `combinationConfigurations`, que personne
+ne regardait : `prerequisites.js` ne comparait que `allowedCombinations`, et
+`New-CaPrerequisites.ps1` créait la strength sans restriction. N'importe quelle passkey suffit
+alors. Les deux la gèrent désormais.
+
+## Ce qui reste ouvert
+
+- **`2190` ne compte pas WHfB.** Une credential Windows Hello for Business est la combinaison
+  `windowsHelloForBusiness`, pas `fido2`. Un utilisateur sur un appareil joint avec WHfB n'y
+  satisfait pas — et ne peut souvent pas y enregistrer de passkey Windows Hello (voir
+  `authentication-methods/`, `windowsHelloPasskeys`). Si WHfB doit compter,
+  `windowsHelloForBusiness` a sa place dans la strength. C'est un choix pour qui a conçu la stratégie.
+- **L'AAGUID logiciel.** La strength autorise `6028b017…` (Windows Hello logiciel) ;
+  `authentication-methods/` limite le profil au matériel et au VBS. L'enregistrement avec la
+  variante logicielle échoue donc de toute façon, mais les deux listes se contredisent.
+- **`2185` à côté de `2180`.** Si les deux sont activées, la seule combinaison qui satisfait les
+  deux est un TAP à usage unique. Le groupe de déploiement perd alors l'avantage pour lequel
+  `2185` existe.
+- **Les groupes portent les noms du tenant source** (`CA-…`, `U-WHfB-Passkeys`), pas la
+  convention SG-U. Les renommer rompt le lien avec ce tenant.
+- **Le côté IntuneBackup** lit les clés de `controls/ca-controls.json` ; son `COMPLIANCE.md`
+  affiche les anciens noms `GLOBAL__` jusqu'à sa régénération.

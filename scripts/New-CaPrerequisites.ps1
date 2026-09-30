@@ -11,7 +11,7 @@
     not exist excludes nobody, so the policy becomes stricter than intended. Two cases are not
     "stricter" but "closed":
 
-      Excluded from Conditional Access  both are in 35 of the 41 templates and are one
+      Excluded from Conditional Access  both are in 35 of the 44 templates and are one
       SG-U-CA-Exclude-Breakglass        mechanism under two names. Both empty = no account
                                         falls outside the baseline = no break-glass. One of
                                         the two empty is more treacherous: the exclusion
@@ -276,6 +276,19 @@ foreach ($strength in $prereq.authenticationStrengths) {
             $blocking.Add("'$($strength.displayName)' allows other combinations than the baseline prescribes")
         }
 
+        # An AAGUID restriction is just as much the measure: without it, any passkey satisfies.
+        $currentConfigs = @(Get-MgPolicyAuthenticationStrengthPolicyCombinationConfiguration -AuthenticationStrengthPolicyId $current.Id -All)
+        foreach ($config in @($strength.definition.combinationConfigurations)) {
+            if (-not $config) { continue }
+            $match = $currentConfigs | Where-Object { -not (Compare-Object @($_.AppliesToCombinations) @($config.appliesToCombinations)) } | Select-Object -First 1
+            $foundGuids = @($match.AdditionalProperties.allowedAAGUIDs | Sort-Object)
+            $expectedGuids = @($config.allowedAAGUIDs | Sort-Object)
+            if (-not $match -or (Compare-Object $expectedGuids $foundGuids)) {
+                Write-Warning "'$($strength.displayName)' restricts $($config.appliesToCombinations -join ',') to [$($foundGuids -join ', ')] but should be [$($expectedGuids -join ', ')]."
+                $blocking.Add("'$($strength.displayName)' has another AAGUID restriction than the baseline prescribes")
+            }
+        }
+
         Write-Host "    id for the deployment: $($current.Id)  (replace $($strength.placeholderId) with it in the CIPP deployment)" -ForegroundColor Cyan
         $result.Add([pscustomobject]@{ Kind = 'Strength'; Name = $strength.displayName; Id = $current.Id; Status = 'already existed'; Danger = $strength.danger })
         continue
@@ -290,6 +303,19 @@ foreach ($strength in $prereq.authenticationStrengths) {
     if ($PSCmdlet.ShouldProcess($strength.displayName, 'Create authentication strength')) {
         $newStrength = New-MgPolicyAuthenticationStrengthPolicy -BodyParameter $body
         Write-Host "  + $($strength.displayName) created ($($newStrength.Id))" -ForegroundColor Green
+
+        # Combination configurations (e.g. an AAGUID restriction) cannot be sent with the
+        # creation; they are a separate object under the strength.
+        foreach ($config in @($strength.definition.combinationConfigurations)) {
+            if (-not $config) { continue }
+            $configBody = @{
+                '@odata.type'         = $config.'@odata.type'
+                appliesToCombinations = @($config.appliesToCombinations)
+                allowedAAGUIDs        = @($config.allowedAAGUIDs)
+            }
+            New-MgPolicyAuthenticationStrengthPolicyCombinationConfiguration -AuthenticationStrengthPolicyId $newStrength.Id -BodyParameter $configBody | Out-Null
+            Write-Host "    restricted $($config.appliesToCombinations -join ',') to $(@($config.allowedAAGUIDs).Count) AAGUID(s)" -ForegroundColor Green
+        }
         Write-Host "    id for the deployment: $($newStrength.Id)  (replace $($strength.placeholderId) with it in the CIPP deployment)" -ForegroundColor Cyan
         $result.Add([pscustomobject]@{ Kind = 'Strength'; Name = $strength.displayName; Id = $newStrength.Id; Status = 'created'; Danger = $strength.danger })
     }

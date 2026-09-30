@@ -2,7 +2,7 @@
   "version": "cipp-baseline-v1.0",
   "generatedAt": "2026-09-30",
   "generatedBy": "scripts/export-cipp-baseline.js",
-  "baselineName": "GLOBAL CA Baseline v1.0",
+  "baselineName": "CXNM - STANDARD CA Baseline v1.0",
   "_comment": [
     "ONS formaat, niet dat van CIPP — zie de kop van export-cipp-baseline.js. Elke regel in",
     "'standards' is één keer de standard 'Conditional Access Template' toevoegen in het",
@@ -11,7 +11,7 @@
     "Vóór stage 1 op Remediate gaat: scripts/New-CaPrerequisites.ps1 -RequireSafeToDeploy moet",
     "groen afsluiten in de doeltenant. De groepen 'Excluded from Conditional Access',",
     "'SG-U-CA-Exclude-Breakglass' en 'Licensed Users' moeten leden hebben; zonder de eerste",
-    "twee — één break-glass-uitsluiting onder twee namen, allebei in dezelfde 35 templates —",
+    "twee — één break-glass-uitsluiting onder twee namen, allebei in dezelfde 38 templates —",
     "is er geen break-glass, zonder de derde blokkeert 1110 elke gebruiker."
   ],
   "prerequisites": {
@@ -54,6 +54,26 @@
         "requiresMembers": true
       },
       {
+        "displayName": "CA-Rollout-Phishing-MFA",
+        "danger": "low",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "CA-Registered-Phishing-MFA",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "CA-Exception-Authenticator-Phishing-MFA",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "U-WHfB-Passkeys",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
         "displayName": "SEC-Passkey-Profile-Admins",
         "danger": "medium",
         "requiresMembers": false
@@ -88,19 +108,19 @@
   },
   "blockedStandards": [
     {
-      "templateFile": "GLOBAL__1040__BLOCK__Countries_not_Allowed",
+      "templateFile": "CXNM__STANDARD__1040__BLOCK__Countries_not_Allowed",
       "blockedUntil": [
         "\"Allowed Countries\" vereist de landenlijst van deze tenant (-AllowedCountry in New-CaPrerequisites.ps1)"
       ]
     },
     {
-      "templateFile": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
+      "templateFile": "CXNM__STANDARD__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
       "blockedUntil": [
         "\"Service Accounts Trusted IPs\" vereist de IP-ranges van deze tenant (-ServiceAccountIpRange in New-CaPrerequisites.ps1)"
       ]
     },
     {
-      "templateFile": "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
+      "templateFile": "CXNM__STANDARD__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
       "blockedUntil": [
         "\"All Compliant Network locations\" is niet aan te maken: Entra levert deze named location zelf zodra Global Secure Access in de tenant is ingericht — je maakt hem niet aan. Zonder GSA bestaat hij niet en verwijst 1180 naar een locatie die er niet is; dan is de excludeLocations leeg en blokkeert de policy álle agent-gebruikers."
       ]
@@ -118,8 +138,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "58e8f95e-12d1-4def-9f8c-4159fa826cc9",
-          "templateFile": "GLOBAL__1010__BLOCK__Legacy_Authentication",
-          "displayName": "GLOBAL - 1010 - BLOCK - Legacy Authentication",
+          "templateFile": "CXNM__STANDARD__1010__BLOCK__Legacy_Authentication",
+          "displayName": "CXNM - STANDARD - 1010 - BLOCK - Legacy Authentication",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -127,8 +147,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "7c4de0ec-9dcf-4d80-a513-b1b3822b1ecb",
-          "templateFile": "GLOBAL__1050__BLOCK__HighRisk_Countries",
-          "displayName": "GLOBAL - 1050 - BLOCK - High-Risk Countries",
+          "templateFile": "CXNM__STANDARD__1050__BLOCK__HighRisk_Countries",
+          "displayName": "CXNM - STANDARD - 1050 - BLOCK - High-Risk Countries",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -136,8 +156,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "3368b030-a84a-4f82-8efc-8e5de9d4fcf1",
-          "templateFile": "GLOBAL__1090__BLOCK__HighRisk_SignIns",
-          "displayName": "GLOBAL - 1090 - BLOCK - High-Risk Sign-Ins",
+          "templateFile": "CXNM__STANDARD__1090__BLOCK__HighRisk_SignIns",
+          "displayName": "CXNM - STANDARD - 1090 - BLOCK - High-Risk Sign-Ins",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -145,8 +165,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "3f1c8a20-6b74-4a1e-9c53-1d8f0a2b4e61",
-          "templateFile": "GLOBAL__1110__BLOCK__Unlicensed_Users",
-          "displayName": "GLOBAL - 1110 - BLOCK - Unlicensed Users",
+          "templateFile": "CXNM__STANDARD__1110__BLOCK__Unlicensed_Users",
+          "displayName": "CXNM - STANDARD - 1110 - BLOCK - Unlicensed Users",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -154,8 +174,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "7d2e91b8-4c05-4f6a-b3e7-2a91c58d0f43",
-          "templateFile": "GLOBAL__1120__BLOCK__Guest_Access_Outside_Approved_Apps",
-          "displayName": "GLOBAL - 1120 - BLOCK - Guest Access Outside Approved Apps",
+          "templateFile": "CXNM__STANDARD__1120__BLOCK__Guest_Access_Outside_Approved_Apps",
+          "displayName": "CXNM - STANDARD - 1120 - BLOCK - Guest Access Outside Approved Apps",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -163,8 +183,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "ccf1e270-fedc-44fe-a192-4e7a6fecd501",
-          "templateFile": "GLOBAL__2010__GRANT__MediumRisk_Signins",
-          "displayName": "GLOBAL - 2010 - GRANT - Medium-Risk Sign-ins",
+          "templateFile": "CXNM__STANDARD__2010__GRANT__MediumRisk_Signins",
+          "displayName": "CXNM - STANDARD - 2010 - GRANT - Medium-Risk Sign-ins",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -172,8 +192,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "2ee477a8-bbde-491d-b7da-41acd3357214",
-          "templateFile": "GLOBAL__2020__GRANT__MediumRisk_Users",
-          "displayName": "GLOBAL - 2020 - GRANT - Medium-Risk Users",
+          "templateFile": "CXNM__STANDARD__2020__GRANT__MediumRisk_Users",
+          "displayName": "CXNM - STANDARD - 2020 - GRANT - Medium-Risk Users",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -181,8 +201,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "55d06371-14a9-4bd6-861b-8d282b1cf8ce",
-          "templateFile": "GLOBAL__2050__GRANT__MFA_for_All_Users",
-          "displayName": "GLOBAL - 2050 - GRANT - MFA for All Users",
+          "templateFile": "CXNM__STANDARD__2050__GRANT__MFA_for_All_Users",
+          "displayName": "CXNM - STANDARD - 2050 - GRANT - MFA for All Users",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -190,8 +210,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "c85a1d90-7e63-4f28-b0d4-93f6a2c17e5b",
-          "templateFile": "GLOBAL__2080__GRANT__MFA_For_Device_Registration",
-          "displayName": "GLOBAL - 2080 - GRANT - MFA for Device Registration",
+          "templateFile": "CXNM__STANDARD__2080__GRANT__MFA_For_Device_Registration",
+          "displayName": "CXNM - STANDARD - 2080 - GRANT - MFA for Device Registration",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -199,8 +219,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "9a4c72e1-3b08-4d56-8f92-1e07b5a3c68d",
-          "templateFile": "GLOBAL__2090__GRANT__Browser_Access_On_Unmanaged_Devices",
-          "displayName": "GLOBAL - 2090 - GRANT - Browser Access On Unmanaged Devices",
+          "templateFile": "CXNM__STANDARD__2090__GRANT__Browser_Access_On_Unmanaged_Devices",
+          "displayName": "CXNM - STANDARD - 2090 - GRANT - Browser Access On Unmanaged Devices",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -208,8 +228,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "2b5e08c4-6d17-4a93-85f0-c9a13e7b402f",
-          "templateFile": "GLOBAL__2100__GRANT__MFA_For_Admin_Portals",
-          "displayName": "GLOBAL - 2100 - GRANT - MFA for Admin Portals",
+          "templateFile": "CXNM__STANDARD__2100__GRANT__MFA_For_Admin_Portals",
+          "displayName": "CXNM - STANDARD - 2100 - GRANT - MFA for Admin Portals",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -217,8 +237,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "84f3c197-5b20-46de-a8c1-703e9b5f2a68",
-          "templateFile": "GLOBAL__2110__GRANT__Token_Protection",
-          "displayName": "GLOBAL - 2110 - GRANT - Token Protection",
+          "templateFile": "CXNM__STANDARD__2110__GRANT__Token_Protection",
+          "displayName": "CXNM - STANDARD - 2110 - GRANT - Token Protection",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -226,8 +246,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "f2470ba8-6d13-4c9e-85b7-3a0e19cd82f5",
-          "templateFile": "GLOBAL__2170__GRANT__MFA_For_Intune_Enrollment",
-          "displayName": "GLOBAL - 2170 - GRANT - MFA for Intune Enrollment",
+          "templateFile": "CXNM__STANDARD__2170__GRANT__MFA_For_Intune_Enrollment",
+          "displayName": "CXNM - STANDARD - 2170 - GRANT - MFA for Intune Enrollment",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -235,8 +255,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "2e47ab19-0c43-4929-9bb0-eb514934da15",
-          "templateFile": "GLOBAL__3010__SESSION__Admin_Persistence",
-          "displayName": "GLOBAL - 3010 - SESSION - Admin Persistence",
+          "templateFile": "CXNM__STANDARD__3010__SESSION__Admin_Persistence",
+          "displayName": "CXNM - STANDARD - 3010 - SESSION - Admin Persistence",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -244,8 +264,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "5b2ae664-37e4-454b-814a-325e13e8f329",
-          "templateFile": "GLOBAL__3030__SESSION__Register_Security_Info_Requirements",
-          "displayName": "GLOBAL - 3030 - SESSION - Register Security Info Requirements",
+          "templateFile": "CXNM__STANDARD__3030__SESSION__Register_Security_Info_Requirements",
+          "displayName": "CXNM - STANDARD - 3030 - SESSION - Register Security Info Requirements",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -253,8 +273,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "d1f80b26-495e-4c73-a0b8-6f37e91c25a4",
-          "templateFile": "GLOBAL__3050__SESSION__Continuous_Access_Evaluation",
-          "displayName": "GLOBAL - 3050 - SESSION - Continuous Access Evaluation",
+          "templateFile": "CXNM__STANDARD__3050__SESSION__Continuous_Access_Evaluation",
+          "displayName": "CXNM - STANDARD - 3050 - SESSION - Continuous Access Evaluation",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -262,8 +282,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "7c1e4f08-2b6d-4a51-9f3c-08d5b7a4e612",
-          "templateFile": "GLOBAL__3070__SESSION__Session_Limits_All_Users",
-          "displayName": "GLOBAL - 3070 - SESSION - Session Limits All Users",
+          "templateFile": "CXNM__STANDARD__3070__SESSION__Session_Limits_All_Users",
+          "displayName": "CXNM - STANDARD - 3070 - SESSION - Session Limits All Users",
           "templateState": "enabled",
           "deployState": "enabled",
           "action": "Report"
@@ -280,8 +300,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "03c20c3f-8aa6-4dc2-a98f-9911a322aec0",
-          "templateFile": "GLOBAL__1020__BLOCK__Device_Code_Auth_Flow",
-          "displayName": "GLOBAL - 1020 - BLOCK - Device Code Auth Flow",
+          "templateFile": "CXNM__STANDARD__1020__BLOCK__Device_Code_Auth_Flow",
+          "displayName": "CXNM - STANDARD - 1020 - BLOCK - Device Code Auth Flow",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -289,8 +309,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "726e37fa-456c-4c97-8fa0-c93ad574f958",
-          "templateFile": "GLOBAL__1030__BLOCK__Unsupported_Device_Platforms",
-          "displayName": "GLOBAL - 1030 - BLOCK - Unsupported Device Platforms",
+          "templateFile": "CXNM__STANDARD__1030__BLOCK__Unsupported_Device_Platforms",
+          "displayName": "CXNM - STANDARD - 1030 - BLOCK - Unsupported Device Platforms",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -298,8 +318,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "adea0bb6-c502-4fe6-9d9c-b4b355ca8d9d",
-          "templateFile": "GLOBAL__1040__BLOCK__Countries_not_Allowed",
-          "displayName": "GLOBAL - 1040 - BLOCK - Countries not Allowed",
+          "templateFile": "CXNM__STANDARD__1040__BLOCK__Countries_not_Allowed",
+          "displayName": "CXNM - STANDARD - 1040 - BLOCK - Countries not Allowed",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -310,8 +330,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "09ee07db-ecc9-44dc-ae3b-84d4e963f078",
-          "templateFile": "GLOBAL__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
-          "displayName": "GLOBAL - 1060 - BLOCK - Service Accounts (Trusted Locations Excluded)",
+          "templateFile": "CXNM__STANDARD__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded",
+          "displayName": "CXNM - STANDARD - 1060 - BLOCK - Service Accounts (Trusted Locations Excluded)",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -322,8 +342,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "abd6d282-0fbf-4fc0-802b-58c8d4ee3948",
-          "templateFile": "GLOBAL__1070__BLOCK__Explicitly_Blocked_Cloud_Apps",
-          "displayName": "GLOBAL - 1070 - BLOCK - Explicitly Blocked Cloud Apps",
+          "templateFile": "CXNM__STANDARD__1070__BLOCK__Explicitly_Blocked_Cloud_Apps",
+          "displayName": "CXNM - STANDARD - 1070 - BLOCK - Explicitly Blocked Cloud Apps",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -331,8 +351,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "37065607-c255-4766-a085-75f7b9e2f53b",
-          "templateFile": "GLOBAL__1080__BLOCK__Guest_Access_to_Sensitive_Apps",
-          "displayName": "GLOBAL - 1080 - BLOCK - Guest Access to Sensitive Apps",
+          "templateFile": "CXNM__STANDARD__1080__BLOCK__Guest_Access_to_Sensitive_Apps",
+          "displayName": "CXNM - STANDARD - 1080 - BLOCK - Guest Access to Sensitive Apps",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -340,8 +360,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "b372c5f9-5a1c-4d66-96ec-ed80c0f13603",
-          "templateFile": "GLOBAL__1100__BLOCK__HighRisk_Users",
-          "displayName": "GLOBAL - 1100 - BLOCK - High-Risk Users",
+          "templateFile": "CXNM__STANDARD__1100__BLOCK__HighRisk_Users",
+          "displayName": "CXNM - STANDARD - 1100 - BLOCK - High-Risk Users",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -349,8 +369,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "7a19d853-861b-4fb5-9099-53debb76719d",
-          "templateFile": "GLOBAL__2055__GRANT__Phishing_Resistant_MFA_for_Admins",
-          "displayName": "GLOBAL - 2055 - GRANT - Phishing Resistant MFA for Admins",
+          "templateFile": "CXNM__STANDARD__2055__GRANT__Phishing_Resistant_MFA_for_Admins",
+          "displayName": "CXNM - STANDARD - 2055 - GRANT - Phishing Resistant MFA for Admins",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -358,8 +378,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "9bf2ff3d-c1c8-4e8f-b3b2-6ffbeea31fab",
-          "templateFile": "GLOBAL__2060__GRANT__Mobile_Apps_and_Desktop_Clients",
-          "displayName": "GLOBAL - 2060 - GRANT - Mobile Apps and Desktop Clients",
+          "templateFile": "CXNM__STANDARD__2060__GRANT__Mobile_Apps_and_Desktop_Clients",
+          "displayName": "CXNM - STANDARD - 2060 - GRANT - Mobile Apps and Desktop Clients",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -367,8 +387,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "1c1eb60f-4365-44f8-864f-f5f1e0d15c8c",
-          "templateFile": "GLOBAL__2070__GRANT__Mobile_Device_Access_Requirements",
-          "displayName": "GLOBAL - 2070 - GRANT - Mobile Device Access Requirements",
+          "templateFile": "CXNM__STANDARD__2070__GRANT__Mobile_Device_Access_Requirements",
+          "displayName": "CXNM - STANDARD - 2070 - GRANT - Mobile Device Access Requirements",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -376,8 +396,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "c4342bb4-aa9e-4b45-8223-7de0e01f92f4",
-          "templateFile": "GLOBAL__3020__SESSION__BYOD_Persistence",
-          "displayName": "GLOBAL - 3020 - SESSION - BYOD Persistence",
+          "templateFile": "CXNM__STANDARD__3020__SESSION__BYOD_Persistence",
+          "displayName": "CXNM - STANDARD - 3020 - SESSION - BYOD Persistence",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -385,8 +405,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "fdab1e7a-755a-407c-a421-3dfb347b1d5f",
-          "templateFile": "GLOBAL__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices",
-          "displayName": "GLOBAL - 3040 - SESSION - Block File Downloads On Unmanaged Devices",
+          "templateFile": "CXNM__STANDARD__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices",
+          "displayName": "CXNM - STANDARD - 3040 - SESSION - Block File Downloads On Unmanaged Devices",
           "templateState": "disabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report"
@@ -403,8 +423,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "e4b06f57-8a19-4d23-91c6-5b7e0a2f8c34",
-          "templateFile": "GLOBAL__1130__BLOCK__Admins_From_Untrusted_Locations",
-          "displayName": "GLOBAL - 1130 - BLOCK - Admins From Untrusted Locations",
+          "templateFile": "CXNM__STANDARD__1130__BLOCK__Admins_From_Untrusted_Locations",
+          "displayName": "CXNM - STANDARD - 1130 - BLOCK - Admins From Untrusted Locations",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -414,8 +434,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "b7401e8c-93a5-4f26-8d10-c6e2f5079b34",
-          "templateFile": "GLOBAL__1140__BLOCK__Managed_Identities_At_Risk",
-          "displayName": "GLOBAL - 1140 - BLOCK - Managed Identities At Risk",
+          "templateFile": "CXNM__STANDARD__1140__BLOCK__Managed_Identities_At_Risk",
+          "displayName": "CXNM - STANDARD - 1140 - BLOCK - Managed Identities At Risk",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -425,8 +445,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "a4d6b920-83c7-4e15-8ad0-1f27c9b6e534",
-          "templateFile": "GLOBAL__1150__BLOCK__Risky_Agent_Identities",
-          "displayName": "GLOBAL - 1150 - BLOCK - Risky Agent Identities",
+          "templateFile": "CXNM__STANDARD__1150__BLOCK__Risky_Agent_Identities",
+          "displayName": "CXNM - STANDARD - 1150 - BLOCK - Risky Agent Identities",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -436,8 +456,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "c72f18ab-45d9-4b03-9e6a-8d41b0c7f295",
-          "templateFile": "GLOBAL__1160__BLOCK__Agent_Identities_To_Agent_Resources",
-          "displayName": "GLOBAL - 1160 - BLOCK - Agent Identities To Agent Resources",
+          "templateFile": "CXNM__STANDARD__1160__BLOCK__Agent_Identities_To_Agent_Resources",
+          "displayName": "CXNM - STANDARD - 1160 - BLOCK - Agent Identities To Agent Resources",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -447,8 +467,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "b8134e7f-2a05-49dc-86b1-c4e70d9a5f38",
-          "templateFile": "GLOBAL__1170__BLOCK__Risky_Agent_Users",
-          "displayName": "GLOBAL - 1170 - BLOCK - Risky Agent Users",
+          "templateFile": "CXNM__STANDARD__1170__BLOCK__Risky_Agent_Users",
+          "displayName": "CXNM - STANDARD - 1170 - BLOCK - Risky Agent Users",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -458,8 +478,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "d391f6c0-7b28-4e54-93af-25c8b1e0a746",
-          "templateFile": "GLOBAL__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
-          "displayName": "GLOBAL - 1180 - BLOCK - Agent Users Outside Compliant Network",
+          "templateFile": "CXNM__STANDARD__1180__BLOCK__Agent_Users_Outside_Compliant_Network",
+          "displayName": "CXNM - STANDARD - 1180 - BLOCK - Agent Users Outside Compliant Network",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -472,8 +492,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "af62d013-7e49-4b85-92c7-140b8e5a37fd",
-          "templateFile": "GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users",
-          "displayName": "GLOBAL - 2120 - GRANT - Phishing Resistant MFA for All Users",
+          "templateFile": "CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users",
+          "displayName": "CXNM - STANDARD - 2120 - GRANT - Phishing Resistant MFA for All Users",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -482,9 +502,20 @@
         },
         {
           "standard": "ConditionalAccessTemplate",
+          "templateGuid": "8273114d-8212-4e3e-aeb2-16c660fe1242",
+          "templateFile": "CXNM__STANDARD__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups",
+          "displayName": "CXNM - STANDARD - 2125 - GRANT - Phishing Resistant MFA for Rollout Groups",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'CA-Registered-Phishing-MFA' of 'CA-Exception-Authenticator-Phishing-MFA' staat die nog geen phishing-bestendige methode heeft."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
           "templateGuid": "56e0a8f3-24b7-41cd-90e6-b8f172a4c093",
-          "templateFile": "GLOBAL__2130__GRANT__Admins_Compliant_Device",
-          "displayName": "GLOBAL - 2130 - GRANT - Admins Compliant Device",
+          "templateFile": "CXNM__STANDARD__2130__GRANT__Admins_Compliant_Device",
+          "displayName": "CXNM - STANDARD - 2130 - GRANT - Admins Compliant Device",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -494,8 +525,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "0c9b47e5-8102-4fa6-b73d-25e6c8109af4",
-          "templateFile": "GLOBAL__2150__GRANT__Cloud_PC_Mobile_Access",
-          "displayName": "GLOBAL - 2150 - GRANT - Cloud PC Mobile Access",
+          "templateFile": "CXNM__STANDARD__2150__GRANT__Cloud_PC_Mobile_Access",
+          "displayName": "CXNM - STANDARD - 2150 - GRANT - Cloud PC Mobile Access",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -505,8 +536,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "e05a3c6d-91f4-42b8-bc27-6a0d5e83b491",
-          "templateFile": "GLOBAL__2160__GRANT__Agent_Users_Compliant_Device",
-          "displayName": "GLOBAL - 2160 - GRANT - Agent Users Compliant Device",
+          "templateFile": "CXNM__STANDARD__2160__GRANT__Agent_Users_Compliant_Device",
+          "displayName": "CXNM - STANDARD - 2160 - GRANT - Agent Users Compliant Device",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -516,8 +547,8 @@
         {
           "standard": "ConditionalAccessTemplate",
           "templateGuid": "c8e21a47-9d3b-4f60-bb15-7ae0d2c9351f",
-          "templateFile": "GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only",
-          "displayName": "GLOBAL - 2180 - GRANT - Register Security Info TAP Only",
+          "templateFile": "CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only",
+          "displayName": "CXNM - STANDARD - 2180 - GRANT - Register Security Info TAP Only",
           "templateState": "enabledForReportingButNotEnforced",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
@@ -526,9 +557,31 @@
         },
         {
           "standard": "ConditionalAccessTemplate",
+          "templateGuid": "bf45ede4-ce93-4af2-a9b8-80dd150d28c1",
+          "templateFile": "CXNM__STANDARD__2185__GRANT__Register_Security_Info_Passkey_Rollout",
+          "displayName": "CXNM - STANDARD - 2185 - GRANT - Register Security Info Passkey Rollout",
+          "templateState": "enabled",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. Naast 2180 op enabled wint de strengste: registreren kan dan alleen met een eenmalige TAP."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "a46a3f83-9c96-4694-91c2-006bbd121471",
+          "templateFile": "CXNM__STANDARD__2190__GRANT__Windows_Hello_Passkeys",
+          "displayName": "CXNM - STANDARD - 2190 - GRANT - Windows Hello Passkeys",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "vraagt de custom authentication strength 'CA-WHfB-Passkeys' met AAGUID-beperking, per tenant aangemaakt. Staat op report-only: hij laat op álle apps alleen een Windows Hello-passkey toe, dus geen WHfB-credential, geen telefoon en geen beveiligingssleutel. Eerst de report-only-uitslag lezen."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
           "templateGuid": "6a37c904-b25f-48e1-93d0-7fa4e28b510c",
-          "templateFile": "GLOBAL__3060__SESSION__Defender_for_Cloud_Apps",
-          "displayName": "GLOBAL - 3060 - SESSION - Defender for Cloud Apps",
+          "templateFile": "CXNM__STANDARD__3060__SESSION__Defender_for_Cloud_Apps",
+          "displayName": "CXNM - STANDARD - 3060 - SESSION - Defender for Cloud Apps",
           "templateState": "enabled",
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",

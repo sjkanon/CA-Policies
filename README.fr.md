@@ -3,14 +3,14 @@
 # CA-Policies
 
 `CATemplate/` est la source : les stratégies Conditional Access convenues au format de template CIPP
-(ligne Table Storage avec une chaîne `JSON` imbriquée), numérotées `GLOBAL__1xxx` BLOCK, `2xxx` GRANT
-et `3xxx` SESSION. 41 templates. La numérotation et l'organisation viennent de la conception CA de
-Daniel Chronlund ; pourquoi tout s'appelle `GLOBAL__` et pourquoi il n'y a pas de personas est
+(ligne Table Storage avec une chaîne `JSON` imbriquée), numérotées `CXNM__STANDARD__1xxx` BLOCK, `2xxx` GRANT
+et `3xxx` SESSION. 44 templates. La numérotation et l'organisation viennent de la conception CA de
+Daniel Chronlund ; pourquoi tout s'appelle `CXNM - STANDARD` et pourquoi il n'y a pas de personas est
 expliqué dans [`ANALYSE.fr.md`](docs/ANALYSE.fr.md#pourquoi-il-ny-a-pas-de-personas).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates<br/><i>la source</i>"]
+  T["<b>CATemplate/</b><br/>44 templates<br/><i>la source</i>"]
   P["prerequisites/<br/>groupes · emplacements · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -56,7 +56,7 @@ ces templates.
 
 ## Ajouter une stratégie
 
-1. Placez le template dans `CATemplate/` sous `GLOBAL__<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json`.
+1. Placez le template dans `CATemplate/` sous `CXNM__STANDARD__<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json`.
 2. La stratégie exige-t-elle une licence ou est-elle une décision par tenant ? Ajoutez-la alors dans
    [`CATemplate/_manifest.json`](CATemplate/_manifest.json) avec `optional: true` et une `reden`.
    Elle passe alors au stage 3 et y reste sur Report.
@@ -78,7 +78,7 @@ s'exécute sur la PR elle-même (*sans* ouvrir de PR) : un prérequis ou un mapp
 | `optional` dans `_manifest.json` | un template soumis à licence que vous y oubliez atterrit en silence au stage 1 ou 2 — rien n'y échoue |
 | La baseline *dans* CIPP | `cipp/baseline-stages.json` est un fichier ; la baseline dans CIPP est une copie distincte que quelqu'un met à jour |
 | Les tenants | un template qui introduit un nouveau groupe ou emplacement demande `New-CaPrerequisites.ps1`, par tenant |
-| L'id d'une custom authentication strength | Entra le détermine à la création, donc le template porte un placeholder (GUID nul). `New-CaPrerequisites.ps1` crée la strength et indique l'id réel ; celui-ci doit être reporté à la main dans le déploiement CIPP. Aujourd'hui uniquement `2180` |
+| L'id d'une custom authentication strength | Entra le détermine à la création, donc le template porte un placeholder (GUID nul). `New-CaPrerequisites.ps1` crée la strength et indique l'id réel ; celui-ci doit être reporté à la main dans le déploiement CIPP. Aujourd'hui `2180`, `2185` et `2190` |
 | Passkey profiles | l'opt-in est irréversible et la gestion passe par le portail. `Set-EntraAuthenticationMethods.ps1` signale l'écart, mais ne les définit pas — voir [`authentication-methods/`](authentication-methods/README.fr.md) |
 
 ## Déployer via CIPP
@@ -112,7 +112,7 @@ n'existe pas n'exclut personne**, donc la stratégie devient plus stricte que pr
 l'alerte. Deux cas ne sont pas alors « plus stricts » mais « fermés » :
 
 - `Excluded from Conditional Access` et `SG-U-CA-Exclude-Breakglass` figurent tous deux dans 35 des
-  41 templates — une seule exclusion break-glass sous deux noms, pour qu'un tenant n'ait rien à
+  44 templates — une seule exclusion break-glass sous deux noms, pour qu'un tenant n'ait rien à
   renommer pour suivre la convention qu'il applique déjà. Les six qui ne les ont pas visent des
   identités de workload et d'agent (`includeUsers: "None"`), donc ils n'y touchent rien.
   Les deux vides = pas de break-glass ; l'un des deux vide est plus insidieux, car l'exclusion

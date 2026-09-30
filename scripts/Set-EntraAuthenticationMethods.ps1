@@ -14,7 +14,7 @@
       1. Temporary Access Pass    without a TAP a new employee has nothing to register his
                                   first passkey with, and no fallback if he loses his
                                   device.
-      2. Passkey (FIDO2)          the method GLOBAL__2120 relies on.
+      2. Passkey (FIDO2)          the method CXNM__STANDARD__2120 relies on.
       3. Microsoft Authenticator  stays on next to passkeys.
       4/5. SMS and voice          go OFF - and only once 2 and 3 are in place.
 

@@ -8,7 +8,7 @@ quels systèmes le lisent et comment il arrive dans un tenant. Pour le *pourquoi
 
 ## En bref
 
-- **Une seule source :** `CATemplate/` — 41 stratégies Conditional Access au format de template
+- **Une seule source :** `CATemplate/` — 44 stratégies Conditional Access au format de template
   CIPP : 18 BLOCK, 16 GRANT, 7 SESSION.
 - **Un seul dérivé :** `cipp/` — les templates sous forme de fichier d'import et la répartition en
   trois stages pour une baseline CIPP.
@@ -26,7 +26,7 @@ quels systèmes le lisent et comment il arrive dans un tenant. Pour le *pourquoi
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates · _manifest.json"]
+  T["<b>CATemplate/</b><br/>44 templates · _manifest.json"]
   P["prerequisites/<br/>ca-prerequisites.json"]
   A["authentication-methods/<br/>authentication-methods.json"]
   C["controls/<br/>ca-controls.json"]
@@ -51,7 +51,7 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 
 | Dossier | Contenu | Créé par | Repris par |
 |---|---|---|---|
-| `CATemplate/` | Les stratégies, un `GLOBAL__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
+| `CATemplate/` | Les stratégies, un `CXNM__STANDARD__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
 | `cipp/` | Fichier d'import et répartition en stages pour une baseline CIPP | `export-cipp-baseline.js` | CIPP (import manuel) |
 | [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | main | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.fr.md) | État souhaité de l'authentication methods policy, avec les profils passkey | main | `authentication-methods.js`, les deux scripts Entra |
@@ -71,7 +71,7 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 | `authentication-methods/authentication-methods.json` | Quelles méthodes d'authentification sont activées ou désactivées, dans quel ordre, et les profils passkey | `authentication-methods.js`, `Set-EntraAuthenticationMethods.ps1`, `Test-EntraPasskeyReadiness.ps1` |
 
 `_manifest.json` se trouve dans `CATemplate/` comme les fichiers `_` dans `IntuneTemplate/`
-d'IntuneBackup : à côté des templates qu'il décrit. Les scripts ne lisent que `GLOBAL__*.json` comme
+d'IntuneBackup : à côté des templates qu'il décrit. Les scripts ne lisent que `CXNM__STANDARD__*.json` comme
 template, et pour CIPP c'est un `.json` sans `displayName` — aucune stratégie n'en sort (voir
 [ci-dessous](#ce-que-cipp-fait-de-ce-dépôt)).
 
@@ -129,8 +129,8 @@ après chaque modification. Détails : [scripts/README.fr.md](../scripts/README.
 
 ## Conventions
 
-- **Nommage :** `GLOBAL - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` dans le tenant,
-  `GLOBAL__<nummer>__<TYPE>__<Naam>.json` comme fichier. Les clés dans `_manifest.json` et
+- **Nommage :** `CXNM - STANDARD - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` dans le tenant,
+  `CXNM__STANDARD__<nummer>__<TYPE>__<Naam>.json` comme fichier. Les clés dans `_manifest.json` et
   `ca-controls.json` sont ce nom de fichier sans `.json`.
 - **Les GUID restent identiques** : le GUID identifie la ligne de template CIPP ; un nouveau GUID
   produit un second template portant le même nom.

@@ -12,8 +12,8 @@ wrong if you look at one in isolation:
 
 | If this is disabled here | Then this happens on the CA side |
 |---|---|
-| Passkey (FIDO2) | `GLOBAL__2120` demands a phishing-resistant method that nobody has — the tenant is locked |
-| Temporary Access Pass | `GLOBAL__2180` only allows registration behind a TAP; a new employee then cannot register anything |
+| Passkey (FIDO2) | `CXNM__STANDARD__2120` demands a phishing-resistant method that nobody has — the tenant is locked |
+| Temporary Access Pass | `CXNM__STANDARD__2180` only allows registration behind a TAP; a new employee then cannot register anything |
 
 `scripts/authentication-methods.js` checks those two links against the actual `state`
 of those templates, and fails hard. That is not schema validation but the only place where this

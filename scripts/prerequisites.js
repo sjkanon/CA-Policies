@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Guards that every group, named location, custom authentication strength and authentication
- * context that CATemplate/GLOBAL__*.json refers to has a definition in
+ * context that CATemplate/CXNM__STANDARD__*.json refers to has a definition in
  * prerequisites/ca-prerequisites.json — plus the group a passkey profile in
  * authentication-methods/ targets.
  *
@@ -54,11 +54,11 @@ function readPrerequisites() {
   return JSON.parse(fs.readFileSync(PREREQ_PATH, "utf8"));
 }
 
-/** Alle GLOBAL__*.json, geparsed: { file, row, policy }. */
+/** Alle CXNM__STANDARD__*.json, geparsed: { file, row, policy }. */
 function readTemplates() {
   return fs
     .readdirSync(TEMPLATE_DIR)
-    .filter((f) => f.startsWith("GLOBAL__") && f.endsWith(".json"))
+    .filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".json"))
     .sort()
     .map((f) => {
       const row = JSON.parse(fs.readFileSync(path.join(TEMPLATE_DIR, f), "utf8"));
@@ -128,6 +128,15 @@ function strengthVerschil(uitTemplate, uitPrereq) {
   const genormaliseerd = (d) => ({
     requirementsSatisfied: d.requirementsSatisfied ?? null,
     allowedCombinations: [...(d.allowedCombinations || [])].sort(),
+    // Een AAGUID-beperking is net zo goed de maatregel als de combinaties: zonder die voldoet
+    // elke passkey. Het id van een combinationConfiguration is tenant-specifiek en telt niet mee.
+    combinationConfigurations: (d.combinationConfigurations || [])
+      .map((c) => ({
+        type: c["@odata.type"],
+        appliesToCombinations: [...(c.appliesToCombinations || [])].sort(),
+        allowedAAGUIDs: [...(c.allowedAAGUIDs || [])].sort(),
+      }))
+      .sort((x, y) => JSON.stringify(x).localeCompare(JSON.stringify(y))),
   });
   const a = genormaliseerd(uitTemplate);
   const b = genormaliseerd(uitPrereq);

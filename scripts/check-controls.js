@@ -43,7 +43,7 @@ function readControls() {
 function readTemplateNames() {
   return fs
     .readdirSync(TEMPLATE_DIR)
-    .filter((f) => f.startsWith("GLOBAL__") && f.endsWith(".json"))
+    .filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".json"))
     .map((f) => f.replace(/\.json$/, ""))
     .sort();
 }

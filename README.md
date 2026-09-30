@@ -3,13 +3,13 @@
 # CA-Policies
 
 `CATemplate/` is de bron: de afgesproken Conditional Access-policies in CIPP-templateformaat
-(Table Storage-rij met een genestelde `JSON`-string), genummerd `GLOBAL__1xxx` BLOCK, `2xxx` GRANT
-en `3xxx` SESSION. 41 templates. De nummering en de indeling komen uit Daniel Chronlunds CA-ontwerp;
-waarom alles `GLOBAL__` heet en er geen persona's zijn staat in [`ANALYSE.md`](docs/ANALYSE.md#waarom-er-geen-personas-zijn).
+(Table Storage-rij met een genestelde `JSON`-string), genummerd `CXNM__STANDARD__1xxx` BLOCK, `2xxx` GRANT
+en `3xxx` SESSION. 44 templates. De nummering en de indeling komen uit Daniel Chronlunds CA-ontwerp;
+waarom alles `CXNM - STANDARD` heet en er geen persona's zijn staat in [`ANALYSE.md`](docs/ANALYSE.md#waarom-er-geen-personas-zijn).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates<br/><i>de bron</i>"]
+  T["<b>CATemplate/</b><br/>44 templates<br/><i>de bron</i>"]
   P["prerequisites/<br/>groepen · locaties · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -55,7 +55,7 @@ templates.
 
 ## Een policy toevoegen
 
-1. Zet het template in `CATemplate/` als `GLOBAL__<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json`.
+1. Zet het template in `CATemplate/` als `CXNM__STANDARD__<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json`.
 2. Vraagt de policy een licentie of is hij een besluit per tenant? Zet hem dan in
    [`CATemplate/_manifest.json`](CATemplate/_manifest.json) met `optional: true` en een `reden`.
    Hij gaat dan naar stage 3 en blijft daar op Report.
@@ -77,7 +77,7 @@ daar stuk, terwijl je nog weet wat je bedoelde.
 | `optional` in `_manifest.json` | een licentiegebonden template dat je daar vergeet belandt stil in stage 1 of 2 — daar faalt niets op |
 | De baseline ín CIPP | `cipp/baseline-stages.json` is een bestand; de baseline in CIPP is een aparte kopie die iemand bijwerkt |
 | De tenants | een template dat een nieuwe groep of locatie introduceert vraagt `New-CaPrerequisites.ps1`, per tenant |
-| Het id van een custom authentication strength | Entra bepaalt het bij aanmaken, dus het template draagt een placeholder (nul-GUID). `New-CaPrerequisites.ps1` maakt de strength aan en meldt het echte id; dat moet met de hand in de CIPP-uitrol. Vandaag alleen `2180` |
+| Het id van een custom authentication strength | Entra bepaalt het bij aanmaken, dus het template draagt een placeholder (nul-GUID). `New-CaPrerequisites.ps1` maakt de strength aan en meldt het echte id; dat moet met de hand in de CIPP-uitrol. Vandaag `2180`, `2185` en `2190` |
 | Passkey profiles | de opt-in is onomkeerbaar en het beheer loopt via het portaal. `Set-EntraAuthenticationMethods.ps1` meldt het verschil, maar zet ze niet — zie [`authentication-methods/`](authentication-methods/README.md) |
 
 ## Uitrollen via CIPP
@@ -110,7 +110,7 @@ die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld e
 alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
 
 - `Excluded from Conditional Access` en `SG-U-CA-Exclude-Breakglass` staan allebei in 35 van
-  de 41 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
+  de 44 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
   te hernoemen om de conventie te volgen die hij al voert. De zes zonder richten zich op
   workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raken ze niets.
   Allebei leeg = geen break-glass; één van de twee leeg is verraderlijker, want dan líjkt de

@@ -3,13 +3,13 @@
 # CA-Policies
 
 `CATemplate/` is the source: the agreed Conditional Access policies in CIPP template format
-(a Table Storage row with a nested `JSON` string), numbered `GLOBAL__1xxx` BLOCK, `2xxx` GRANT
-and `3xxx` SESSION. 41 templates. The numbering and the layout come from Daniel Chronlund's CA design;
-why everything is called `GLOBAL__` and there are no personas is explained in [`ANALYSE.en.md`](docs/ANALYSE.en.md#why-there-are-no-personas).
+(a Table Storage row with a nested `JSON` string), numbered `CXNM__STANDARD__1xxx` BLOCK, `2xxx` GRANT
+and `3xxx` SESSION. 44 templates. The numbering and the layout come from Daniel Chronlund's CA design;
+why everything is called `CXNM - STANDARD` and there are no personas is explained in [`ANALYSE.en.md`](docs/ANALYSE.en.md#why-there-are-no-personas).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates<br/><i>the source</i>"]
+  T["<b>CATemplate/</b><br/>44 templates<br/><i>the source</i>"]
   P["prerequisites/<br/>groups · locations · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -55,7 +55,7 @@ templates.
 
 ## Adding a policy
 
-1. Put the template in `CATemplate/` as `GLOBAL__<number>__<BLOCK|GRANT|SESSION>__<Name>.json`.
+1. Put the template in `CATemplate/` as `CXNM__STANDARD__<number>__<BLOCK|GRANT|SESSION>__<Name>.json`.
 2. Does the policy require a licence, or is it a per-tenant decision? Then put it in
    [`CATemplate/_manifest.json`](CATemplate/_manifest.json) with `optional: true` and a `reden`.
    It then goes to stage 3 and stays on Report there.
@@ -77,7 +77,7 @@ there, while you still remember what you meant.
 | `optional` in `_manifest.json` | a licence-bound template you forget there silently lands in stage 1 or 2 — nothing fails on it |
 | The baseline *in* CIPP | `cipp/baseline-stages.json` is a file; the baseline in CIPP is a separate copy that someone updates |
 | The tenants | a template that introduces a new group or location requires `New-CaPrerequisites.ps1`, per tenant |
-| The id of a custom authentication strength | Entra determines it on creation, so the template carries a placeholder (zero GUID). `New-CaPrerequisites.ps1` creates the strength and reports the real id; that has to go into the CIPP deployment by hand. Currently only `2180` |
+| The id of a custom authentication strength | Entra determines it on creation, so the template carries a placeholder (zero GUID). `New-CaPrerequisites.ps1` creates the strength and reports the real id; that has to go into the CIPP deployment by hand. Currently `2180`, `2185` and `2190` |
 | Passkey profiles | the opt-in is irreversible and management goes through the portal. `Set-EntraAuthenticationMethods.ps1` reports the difference but does not set them — see [`authentication-methods/`](authentication-methods/README.en.md) |
 
 ## Deploying via CIPP
@@ -110,7 +110,7 @@ that does not exist excludes nobody**, so the policy becomes stricter than inten
 an alarm. Two cases are not "stricter" but "locked out":
 
 - `Excluded from Conditional Access` and `SG-U-CA-Exclude-Breakglass` both appear in 35 of
-  the 41 templates — one break-glass exclusion under two names, so that a tenant does not have
+  the 44 templates — one break-glass exclusion under two names, so that a tenant does not have
   to rename anything to follow the convention it already uses. The six without it target
   workload and agent identities (`includeUsers: "None"`), so they affect nothing there.
   Both empty = no break-glass; one of the two empty is more treacherous, because then the

@@ -47,14 +47,14 @@ test("wat uitgezet wordt, staat achteraan", () => {
  * De twee koppelingen die stil falen. Ze staan ook in validate(), maar hier apart zodat de
  * testnaam zegt wélke CA-policy stukgaat als iemand dit omzet.
  */
-test("Passkey (FIDO2) staat aan zolang GLOBAL__2120 phishing-bestendige MFA eist", () => {
-  if (templateState("GLOBAL__2120__GRANT__Phishing_Resistant_MFA_for_All_Users") !== "enabled") return;
+test("Passkey (FIDO2) staat aan zolang CXNM__STANDARD__2120 phishing-bestendige MFA eist", () => {
+  if (templateState("CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users") !== "enabled") return;
   const fido = readMethods().methods.find((m) => m.id === "Fido2");
   assert.strictEqual(fido?.state, "enabled", "2120 staat aan en eist een phishing-bestendige methode; zonder passkeys kan niemand daaraan voldoen.");
 });
 
-test("Temporary Access Pass is eenmalig zolang GLOBAL__2180 dat eist", () => {
-  const state = templateState("GLOBAL__2180__GRANT__Register_Security_Info_TAP_Only");
+test("Temporary Access Pass is eenmalig zolang CXNM__STANDARD__2180 dat eist", () => {
+  const state = templateState("CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only");
   if (!state || state === "disabled") return;
   const tap = readMethods().methods.find((m) => m.id === "TemporaryAccessPass");
   assert.strictEqual(

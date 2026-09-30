@@ -20,7 +20,7 @@
 
       1. Is Passkey (FIDO2) enabled, and may the user register self-service?
       2. Does the user already have a WHfB credential? (blocks Entra passkey on Windows)
-      3. Does the user have a TAP, and is it ONE-TIME? (GLOBAL__2180 requires temporaryAccessPassOneTime)
+      3. Does the user have a TAP, and is it ONE-TIME? (CXNM__STANDARD__2180 requires temporaryAccessPassOneTime)
       4. Is the user a guest? (guests cannot register a passkey at all)
       5. Does the policy enforce attestation? (excludes synced passkeys and Windows Hello)
       6. Is there an AAGUID restriction that excludes Windows Hello?
@@ -105,7 +105,7 @@ if ($fido) {
         & $addFinding $tenantFindings 'Passkey (FIDO2)' 'OK' 'Method is enabled'
     }
     else {
-        & $addFinding $tenantFindings 'Passkey (FIDO2)' 'BLOCKS' "Method is $($fido.State). Nobody can register, and GLOBAL__2120 then cannot be met."
+        & $addFinding $tenantFindings 'Passkey (FIDO2)' 'BLOCKS' "Method is $($fido.State). Nobody can register, and CXNM__STANDARD__2120 then cannot be met."
     }
 
     $extra = $fido.AdditionalProperties
@@ -218,7 +218,7 @@ foreach ($upn in $UserPrincipalName) {
     else {
         $multiUse = @($tap | Where-Object { -not $_.IsUsableOnce })
         if ($multiUse.Count -gt 0) {
-            & $addFinding $findings 'Temporary Access Pass' 'NOTE' "$($multiUse.Count) of $($tap.Count) is usable MORE THAN ONCE. GLOBAL__2180 only accepts temporaryAccessPassOneTime - once that policy enforces, this TAP does not satisfy it."
+            & $addFinding $findings 'Temporary Access Pass' 'NOTE' "$($multiUse.Count) of $($tap.Count) is usable MORE THAN ONCE. CXNM__STANDARD__2180 only accepts temporaryAccessPassOneTime - once that policy enforces, this TAP does not satisfy it."
         }
         else {
             & $addFinding $findings 'Temporary Access Pass' 'OK' "$($tap.Count) active, one-time"

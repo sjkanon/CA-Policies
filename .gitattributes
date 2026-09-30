@@ -6,4 +6,4 @@
 
 # The templates in CATemplate/ are single-line JSON exported from CIPP, without a trailing
 # newline. Leave them byte for byte as CIPP wrote them.
-CATemplate/GLOBAL__*.json -text
+CATemplate/CXNM__STANDARD__*.json -text

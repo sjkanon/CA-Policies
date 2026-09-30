@@ -8,7 +8,7 @@ template: [ANALYSE.md](ANALYSE.md).
 
 ## In het kort
 
-- **Eén bron:** `CATemplate/` — 41 Conditional Access-policies in CIPP-templateformaat:
+- **Eén bron:** `CATemplate/` — 44 Conditional Access-policies in CIPP-templateformaat:
   18 BLOCK, 16 GRANT, 7 SESSION.
 - **Eén afgeleide:** `cipp/` — de templates als importbestand en de indeling in drie stages voor
   een CIPP-baseline.
@@ -26,7 +26,7 @@ template: [ANALYSE.md](ANALYSE.md).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>41 templates · _manifest.json"]
+  T["<b>CATemplate/</b><br/>44 templates · _manifest.json"]
   P["prerequisites/<br/>ca-prerequisites.json"]
   A["authentication-methods/<br/>authentication-methods.json"]
   C["controls/<br/>ca-controls.json"]
@@ -51,7 +51,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 
 | Map | Wat erin staat | Gemaakt door | Opgepikt door |
 |---|---|---|---|
-| `CATemplate/` | De policies, één `GLOBAL__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
+| `CATemplate/` | De policies, één `CXNM__STANDARD__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
 | `cipp/` | Importbestand en stage-indeling voor een CIPP-baseline | `export-cipp-baseline.js` | CIPP (handmatige import) |
 | [`prerequisites/`](../prerequisites/ca-prerequisites.json) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.md) | Gewenste stand van het authentication methods policy, met passkey-profielen | hand | `authentication-methods.js`, de twee Entra-scripts |
@@ -72,7 +72,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 
 `_manifest.json` staat in `CATemplate/` zoals de `_`-bestanden in IntuneBackup's
 `IntuneTemplate/`: naast de templates die hij beschrijft. De scripts lezen alleen
-`GLOBAL__*.json` als template, en voor CIPP is het een `.json` zonder `displayName` — daar komt
+`CXNM__STANDARD__*.json` als template, en voor CIPP is het een `.json` zonder `displayName` — daar komt
 geen policy uit (zie [hieronder](#wat-cipp-met-deze-repo-doet)).
 
 ## Stages
@@ -129,8 +129,8 @@ na elke wijziging. Details: [scripts/README.md](../scripts/README.md).
 
 ## Afspraken
 
-- **Naamgeving:** `GLOBAL - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` in de tenant,
-  `GLOBAL__<nummer>__<TYPE>__<Naam>.json` als bestand. De sleutels in `_manifest.json` en
+- **Naamgeving:** `CXNM - STANDARD - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` in de tenant,
+  `CXNM__STANDARD__<nummer>__<TYPE>__<Naam>.json` als bestand. De sleutels in `_manifest.json` en
   `ca-controls.json` zijn die bestandsnaam zonder `.json`.
 - **GUID's blijven gelijk**: de GUID identificeert de CIPP-templaterij; een nieuwe GUID levert
   een tweede template met dezelfde naam op.

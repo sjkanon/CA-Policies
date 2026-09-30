@@ -1,8 +1,8 @@
 {
   "version": "ca-prerequisites-v1.0",
-  "reviewedAt": "2026-09-17",
+  "reviewedAt": "2026-09-30",
   "_comment": [
-    "De groepen en named locations waar CATemplate/GLOBAL__*.json naar verwijzen. Zonder deze",
+    "De groepen en named locations waar CATemplate/CXNM__STANDARD__*.json naar verwijzen. Zonder deze",
     "bestaat de verwijzing in de tenant niet, en dat faalt de verkeerde kant op: een",
     "uitzonderingsgroep die niet bestaat sluit niemand uit, dus de policy wordt strenger dan",
     "bedoeld in plaats van dat de uitrol stukloopt. Zie docs/ANALYSE.md, 'Wat er stuk is aan de",
@@ -33,7 +33,7 @@
       "displayName": "Excluded from Conditional Access",
       "mailNickname": "excluded-from-conditional-access",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 35 van de 41 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 35 ernaast.",
+      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 35 van de 44 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 35 ernaast.",
       "description": "Break-glass exclusion for the Conditional Access baseline. Emergency access accounts only; must not be empty.",
       "danger": "critical",
       "dangerReason": "Deze groep leeg laten betekent: tientallen policies actief en geen enkel account dat er buiten valt — geen break-glass. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
@@ -44,7 +44,7 @@
       "displayName": "SG-U-CA-Exclude-Breakglass",
       "mailNickname": "sg-u-ca-exclude-breakglass",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting onder de SG-U-naamconventie, naast 'Excluded from Conditional Access' en in exact dezelfde 35 templates. Twee namen voor één mechanisme is hier bewust: een tenant die de eerste naam al in gebruik heeft hoeft niets te hernoemen, en een tenant die alleen de SG-U-conventie kent hoeft geen prose-groep te introduceren. Beide moeten bestaan — een excludeGroup die de tenant niet heeft sluit niemand uit.",
+      "purpose": "De break-glass-uitsluiting onder de SG-U-naamconventie, naast 'Excluded from Conditional Access' en in exact dezelfde 38 templates. Twee namen voor één mechanisme is hier bewust: een tenant die de eerste naam al in gebruik heeft hoeft niets te hernoemen, en een tenant die alleen de SG-U-conventie kent hoeft geen prose-groep te introduceren. Beide moeten bestaan — een excludeGroup die de tenant niet heeft sluit niemand uit.",
       "description": "Break-glass exclusion for the Conditional Access baseline (SG-U naming). Same members as 'Excluded from Conditional Access'; must not be empty.",
       "danger": "critical",
       "dangerReason": "Leeg is hier net zo gevaarlijk als bij 'Excluded from Conditional Access', en makkelijker te missen: de andere groep hééft leden, dus de uitsluiting líjkt geregeld. New-CaPrerequisites.ps1 vult daarom beide groepen uit -BreakGlassUserId; vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
@@ -82,10 +82,10 @@
       "displayName": "Conditional Access Service Accounts",
       "mailNickname": "conditional-access-service-accounts",
       "membershipType": "assigned",
-      "purpose": "De serviceaccounts die geen interactieve MFA kunnen doen. Wordt in 1060 als includeGroups gebruikt (vastzetten op vertrouwde IP's) en in negen andere templates als excludeGroups.",
+      "purpose": "De serviceaccounts die geen interactieve MFA kunnen doen. Wordt in 1060 als includeGroups gebruikt (vastzetten op vertrouwde IP's) en in dertien andere templates als excludeGroups.",
       "description": "Non-interactive service accounts: excluded from MFA and restricted to 'Service Accounts Trusted IPs' (CA 1060). Keep small and documented.",
       "danger": "high",
-      "dangerReason": "Deze groep werkt twee kanten op: leden zijn uitgezonderd van MFA (9 templates) én vastgezet op de IP-ranges van 'Service Accounts Trusted IPs' (1060). Iemand hier per ongeluk in zetten haalt de MFA-eis bij hem weg. Houd de inhoud klein en gedocumenteerd.",
+      "dangerReason": "Deze groep werkt twee kanten op: leden zijn uitgezonderd van MFA (13 templates) én vastgezet op de IP-ranges van 'Service Accounts Trusted IPs' (1060). Iemand hier per ongeluk in zetten haalt de MFA-eis bij hem weg. Houd de inhoud klein en gedocumenteerd.",
       "requiresMembers": false
     },
     {
@@ -102,10 +102,49 @@
       "requiresEntraIdP1": true
     },
     {
+      "displayName": "CA-Rollout-Phishing-MFA",
+      "mailNickname": "ca-rollout-phishing-mfa",
+      "membershipType": "assigned",
+      "purpose": "Stap 1 van de passkey-uitrol per groep: wie hierin zit mag via 2185 zijn passkey registreren met de MFA die hij al heeft, zolang die aanmelding niet ouder is dan zeven dagen. Na de registratie gaat de gebruiker naar 'CA-Registered-Phishing-MFA'.",
+      "description": "Passkey rollout, step 1: members may register a passkey with their existing MFA (CA 2185). Move them to 'CA-Registered-Phishing-MFA' once registered.",
+      "danger": "low",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "CA-Registered-Phishing-MFA",
+      "mailNickname": "ca-registered-phishing-mfa",
+      "membershipType": "assigned",
+      "purpose": "Stap 2 van de passkey-uitrol per groep: wie hierin zit heeft een phishing-bestendige methode geregistreerd en moet die via 2125 voor elke app gebruiken. De groepsgewijze voorloper van 2120, dat hetzelfde voor iedereen eist.",
+      "description": "Passkey rollout, step 2: members have registered a phishing-resistant method and must use it for every app (CA 2125).",
+      "danger": "high",
+      "dangerReason": "Wie hier staat zonder phishing-bestendige methode komt nergens meer in: 2125 eist hem voor alle apps en de gebruiker kan hem niet meer registreren zonder TAP. Alleen toevoegen ná een geslaagde registratie — Test-EntraPasskeyReadiness.ps1 zegt of die kan.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "CA-Exception-Authenticator-Phishing-MFA",
+      "mailNickname": "ca-exception-authenticator-phishing-mfa",
+      "membershipType": "assigned",
+      "purpose": "Tweede doelgroep van 2125, naast 'CA-Registered-Phishing-MFA': gebruikers voor wie de passkey in Microsoft Authenticator de phishing-bestendige methode is, in plaats van Windows Hello of een sleutel. Voor 2125 maakt het geen verschil — beide groepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie de uitzondering op het standaardapparaat is.",
+      "description": "Passkey rollout: users whose phishing-resistant method is a passkey in Microsoft Authenticator. Same requirement as 'CA-Registered-Phishing-MFA' (CA 2125).",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'CA-Registered-Phishing-MFA': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "U-WHfB-Passkeys",
+      "mailNickname": "u-whfb-passkeys",
+      "membershipType": "assigned",
+      "purpose": "Doelgroep van 2190: gebruikers die zich uitsluitend met een passkey in de Windows Hello-container mogen aanmelden (Microsoft Entra passkey on Windows). Bedoeld voor niet-joined of gedeelde pc's; zie authentication-methods/, windowsHelloPasskeys.",
+      "description": "Users who must sign in with a passkey in the Windows Hello container (Microsoft Entra passkey on Windows) (CA 2190).",
+      "danger": "high",
+      "dangerReason": "2190 laat alleen een Windows Hello-passkey toe, op álle apps. Een lid zonder zo'n passkey — of op een telefoon, waar die container niet bestaat — komt nergens in. Een WHfB-credential telt níet: dat is de combinatie windowsHelloForBusiness, niet fido2. Daarom staat 2190 op report-only.",
+      "requiresMembers": false
+    },
+    {
       "displayName": "SEC-Passkey-Profile-Admins",
       "mailNickname": "sec-passkey-profile-admins",
       "membershipType": "assigned",
-      "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar GLOBAL__2055 en 2100 zich op richten.",
+      "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar CXNM__STANDARD__2055 en 2100 zich op richten.",
       "description": "Target of the strict passkey profile (device-bound passkeys with attestation). Mirrors the admin role holders targeted by CA 2055 and 2100.",
       "danger": "medium",
       "dangerReason": "Leeg is hier ongevaarlijk: het profiel geldt dan voor niemand en iedereen valt onder het ruimere profiel voor alle gebruikers. Vergeten te vullen betekent dus geen lock-out, maar wél dat beheerders stilzwijgend een gesynchroniseerde passkey mogen gebruiken.",
@@ -186,6 +225,63 @@
       "tenantSpecific": "Entra kent het id pas toe bij aanmaken. New-CaPrerequisites.ps1 maakt de strength aan en meldt het echte id; dat id moet in de CIPP-uitrol van 2180 terecht in plaats van de nul-GUID. Het template in CATemplate/ houdt de placeholder — het is een bron voor alle tenants, niet voor één.",
       "danger": "high",
       "dangerReason": "Een grant die naar een niet-bestaande authentication strength verwijst is niet 'strenger dan bedoeld' maar onvoorspelbaar: Entra weigert de policy bij het aanmaken, of hij landt en niemand kan zijn beveiligingsinformatie meer registreren. 2180 staat daarom op report-only tot dit id klopt."
+    },
+    {
+      "displayName": "Passkey Rollout",
+      "definition": {
+        "displayName": "Passkey Rollout",
+        "description": "Every MFA method except SMS and voice, plus a Temporary Access Pass. For users in a passkey rollout: they may register their passkey with the MFA they already have.",
+        "policyType": "custom",
+        "requirementsSatisfied": "mfa",
+        "allowedCombinations": [
+          "fido2",
+          "deviceBasedPush",
+          "temporaryAccessPassOneTime",
+          "temporaryAccessPassMultiUse",
+          "password,microsoftAuthenticatorPush",
+          "password,softwareOath",
+          "password,hardwareOath",
+          "federatedMultiFactor",
+          "microsoftAuthenticatorPush,federatedSingleFactor",
+          "softwareOath,federatedSingleFactor",
+          "hardwareOath,federatedSingleFactor"
+        ]
+      },
+      "purpose": "De grant van 2185. Elke MFA-methode behalve SMS en spraak, plus een TAP: de gebruiker in de uitrol registreert zijn passkey met wat hij al heeft.",
+      "placeholderId": "00000000-0000-0000-0000-000000000000",
+      "tenantSpecific": "Entra kent het id pas toe bij aanmaken; zie 'Temporary Access Pass only'.",
+      "danger": "medium",
+      "dangerReason": "Zonder deze strength verwijst 2185 naar niets. Staat 2180 ook op enabled, dan gelden beide: registreren kan dan alleen nog met een eenmalige TAP, want dat is de enige combinatie die in allebei zit."
+    },
+    {
+      "displayName": "CA-WHfB-Passkeys",
+      "definition": {
+        "displayName": "CA-WHfB-Passkeys",
+        "description": "Only a passkey in the Windows Hello container (Microsoft Entra passkey on Windows) satisfies this strength: FIDO2, restricted to the Windows Hello AAGUIDs.",
+        "policyType": "custom",
+        "requirementsSatisfied": "mfa",
+        "allowedCombinations": [
+          "fido2"
+        ],
+        "combinationConfigurations": [
+          {
+            "@odata.type": "#microsoft.graph.fido2CombinationConfiguration",
+            "appliesToCombinations": [
+              "fido2"
+            ],
+            "allowedAAGUIDs": [
+              "08987058-cadc-4b81-b6e1-30de50dcbe96",
+              "6028b017-b1d4-4c02-b4b3-afcdafc96bb2",
+              "9ddd1817-af5a-4672-a2b9-3e3dd95000a9"
+            ]
+          }
+        ]
+      },
+      "purpose": "De grant van 2190: FIDO2, beperkt tot de drie Windows Hello-AAGUID's uit authentication-methods/ (knownAaGuids). De beperking zit in combinationConfigurations; zonder die voldoet elke passkey.",
+      "placeholderId": "00000000-0000-0000-0000-000000000000",
+      "tenantSpecific": "Entra kent het id pas toe bij aanmaken; zie 'Temporary Access Pass only'. New-CaPrerequisites.ps1 maakt ook de AAGUID-beperking aan.",
+      "danger": "high",
+      "dangerReason": "Zonder combinationConfigurations is dit gewoon 'elke passkey' en dwingt 2190 niets af wat 2120 niet al doet. Een typfout in een AAGUID doet het omgekeerde: dan voldoet niemand."
     }
   ],
   "authenticationContexts": [],

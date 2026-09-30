@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates, from CATemplate/GLOBAL__*.json, the two files needed to deploy this set as a
+ * Generates, from CATemplate/CXNM__STANDARD__*.json, the two files needed to deploy this set as a
  * CIPP baseline:
  *
  *   cipp/ca-templates-import.json   the templates in CIPP's CATemplate table shape, ready to
@@ -286,7 +286,7 @@ function main() {
     version: "cipp-baseline-v1.0",
     generatedAt: new Date().toISOString().slice(0, 10),
     generatedBy: "scripts/export-cipp-baseline.js",
-    baselineName: "GLOBAL CA Baseline v1.0",
+    baselineName: "CXNM - STANDARD CA Baseline v1.0",
     _comment: [
       "ONS formaat, niet dat van CIPP — zie de kop van export-cipp-baseline.js. Elke regel in",
       "'standards' is één keer de standard 'Conditional Access Template' toevoegen in het",
@@ -295,7 +295,7 @@ function main() {
       "Vóór stage 1 op Remediate gaat: scripts/New-CaPrerequisites.ps1 -RequireSafeToDeploy moet",
       "groen afsluiten in de doeltenant. De groepen 'Excluded from Conditional Access',",
       "'SG-U-CA-Exclude-Breakglass' en 'Licensed Users' moeten leden hebben; zonder de eerste",
-      "twee — één break-glass-uitsluiting onder twee namen, allebei in dezelfde 35 templates —",
+      "twee — één break-glass-uitsluiting onder twee namen, allebei in dezelfde 38 templates —",
       "is er geen break-glass, zonder de derde blokkeert 1110 elke gebruiker.",
     ],
     prerequisites: {

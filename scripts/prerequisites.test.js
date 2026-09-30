@@ -122,6 +122,14 @@ test("de combinaties in het template en in prerequisites lopen niet uit elkaar",
   }
 });
 
+test("een andere AAGUID-beperking telt als verschil, het id van de configuratie niet", () => {
+  const config = (guids, id) => ({ "@odata.type": "#microsoft.graph.fido2CombinationConfiguration", id, appliesToCombinations: ["fido2"], allowedAAGUIDs: guids });
+  const basis = { requirementsSatisfied: "mfa", allowedCombinations: ["fido2"] };
+  assert.deepStrictEqual(strengthVerschil({ ...basis, combinationConfigurations: [config(["b", "a"], "x")] }, { ...basis, combinationConfigurations: [config(["a", "b"])] }), []);
+  assert.strictEqual(strengthVerschil({ ...basis, combinationConfigurations: [config(["a"])] }, { ...basis, combinationConfigurations: [config(["a", "b"])] }).length, 1);
+  assert.strictEqual(strengthVerschil(basis, { ...basis, combinationConfigurations: [config(["a"])] }).length, 1, "een weggevallen beperking is geen detail: zonder voldoet elke passkey");
+});
+
 /**
  * De placeholder moet blijven staan. Een echt id in het template betekent dat er een id uit
  * één tenant is blijven plakken, en in elke andere tenant wijst de grant dan naar niets —
