@@ -34,7 +34,7 @@ flowchart TD
 | [`check-controls.js`](check-controls.js) | controle | Elk template heeft een normenmapping in `controls/ca-controls.json`, en geen mapping noemt een template dat niet bestaat. Staat de IntuneBackup-repo ernaast (`../IntuneBackup`), dan toetst hij ook de labels tegen `IntuneTemplate/_controls.json`. Blokkerend in CI. |
 | [`authentication-methods.js`](authentication-methods.js) | controle | `authentication-methods/authentication-methods.json` spreekt zichzelf niet tegen, en `2120` en `2180` eisen geen methode die uit staat. Blokkerend in CI. |
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **uit** de bron | Schrijft `cipp/ca-templates-import.json` (de templates, zonder tenant-specifieke waarden) en `cipp/baseline-stages.json` (stage, state en actie per template). Leest `CATemplate/_manifest.json` voor de optionele templates. Alles op Report; `--remediate-stage1` zet stage 1 op Remediate, en weigert zolang er templates nieuw in stage 1 staan ten opzichte van de vorige export — `--accept-new` bevestigt die. |
-| [`generate-docs.js`](generate-docs.js) | **uit** de bron | Schrijft `CATemplate/README.md` (en `.en`, `.fr`): elke policy met voor wie, wat, state en stage. Draait ná de export, want de stage komt uit `cipp/baseline-stages.json`. `--check` schrijft niets en faalt als een README verouderd is; een test doet hetzelfde. |
+| [`generate-docs.js`](generate-docs.js) | **uit** de bron | Schrijft `CATemplate/README.md` (en `.en`, `.fr`): elke policy met voor wie, wat, state en stage, en per policy een eigen README met het doel, de voorwaarden, de valkuilen, de normen en de Intune-policies waar hij van afhangt (uit `docs/policies.json`). Met de IntuneBackup-repo ernaast toetst hij ook of die Intune-paden bestaan en of elke compliance-policy in een groep staat. Draait ná de export, want de stage komt uit `cipp/baseline-stages.json`. `--check` schrijft niets en faalt als een README verouderd is; een test doet hetzelfde. |
 | [`sync-mirror.js`](sync-mirror.js) | spiegel | Zet een tweede clone gelijk aan wat hier in git staat — zie [hieronder](#spiegelen-naar-een-tweede-clone). |
 
 Elk controlescript heeft een `*.test.js` ernaast; `node --test scripts/*.test.js` draait ze
@@ -60,7 +60,7 @@ node scripts/prerequisites.js            # eerst: verwijst elk template naar iet
 node scripts/check-controls.js           # heeft elk template een normenmapping?
 node scripts/authentication-methods.js   # spreken de aanmeldmethodes de templates niet tegen?
 node scripts/export-cipp-baseline.js     # dan: cipp/ regenereren
-node scripts/generate-docs.js            # CATemplate/README uit de templates en cipp/
+node scripts/generate-docs.js            # CATemplate/README en de README per policy
 node --test scripts/*.test.js            # laatst, want een deel kijkt naar cipp/
 ```
 

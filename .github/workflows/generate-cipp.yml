@@ -15,6 +15,7 @@ on:
       - "CATemplate/**"
       - "prerequisites/**"
       - "controls/**"
+      - "docs/policies.json"
       - "authentication-methods/**"
       - "scripts/prerequisites.js"
       - "scripts/export-cipp-baseline.js"
@@ -31,6 +32,7 @@ on:
       - "CATemplate/**"
       - "prerequisites/**"
       - "controls/**"
+      - "docs/policies.json"
       - "authentication-methods/**"
       - "scripts/prerequisites.js"
       - "scripts/export-cipp-baseline.js"
@@ -78,9 +80,10 @@ jobs:
       - name: Generate cipp/ (template import and stage split)
         run: node scripts/export-cipp-baseline.js
 
-      # The policy overview in CATemplate/README*.md. After the export, because the stage comes
-      # from cipp/baseline-stages.json. Generated so it cannot drift from the templates.
-      - name: Generate CATemplate/README
+      # The policy overview in CATemplate/README*.md and a README per policy (from
+      # docs/policies.json). After the export, because the stage comes from
+      # cipp/baseline-stages.json. Generated so it cannot drift from the templates.
+      - name: Generate CATemplate/README and the README per policy
         run: node scripts/generate-docs.js
 
       # After generating, because some tests look at the result. If this step fails, no PR is
@@ -108,6 +111,4 @@ jobs:
           add-paths: |
             cipp/ca-templates-import.json
             cipp/baseline-stages.json
-            CATemplate/README.md
-            CATemplate/README.en.md
-            CATemplate/README.fr.md
+            CATemplate/*.md

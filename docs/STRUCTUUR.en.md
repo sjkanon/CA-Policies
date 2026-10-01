@@ -17,8 +17,8 @@ template: [ANALYSE.en.md](ANALYSE.en.md).
 - **Two routes to the tenant:** CIPP deploys the policies; the prerequisites and the
   sign-in methods go through our own PowerShell scripts via Microsoft Graph.
 - **One sister repo:** the IntuneBackup repo, cloned next to this one as `../IntuneBackup`, reads
-  `controls/ca-controls.json` for its `COMPLIANCE.md`, and supplies the vocabulary of the
-  standards labels.
+  `controls/ca-controls.json` for its `COMPLIANCE.md` and `docs/policies.json` for the link back
+  at every Intune policy, and supplies the vocabulary of the standards labels.
 - **Nothing that is generated gets edited by hand.** A GitHub workflow regenerates
   `cipp/` after every change and opens a PR for it.
 
@@ -56,7 +56,7 @@ Solid arrows write; dotted lines only read.
 | [`prerequisites/`](../prerequisites/README.en.md) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.en.md) | Desired state of the authentication methods policy, with passkey profiles | hand | `authentication-methods.js`, the two Entra scripts |
 | [`controls/`](../controls/README.en.md) | Standards mapping per template (ISO 27001, NIS2, CIS, NIST CSF) | hand | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
-| `docs/` | Documentation: this structure and the analysis | hand | readers |
+| `docs/` | Documentation: this structure and the analysis, plus `policies.json` — per template the purpose, the pitfalls and the Intune dependencies | hand | readers; `policies.json` by `generate-docs.js` here and there |
 | [`scripts/`](../scripts/README.en.md) | Validation, export, tenant scripts, mirror | hand | GitHub workflow |
 | `local/` | Working copies with tenant-specific values | hand | **not in git** (`.gitignore`) |
 
@@ -67,7 +67,8 @@ Solid arrows write; dotted lines only read.
 | `state` (field in every template) | Stage 1 (`enabled`) or stage 2 (`disabled`, report-only); also the phase in COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, IntuneBackup's `generate-compliance.js` |
 | `CATemplate/_manifest.json` | Which templates are optional (stage 3), with the reason | `export-cipp-baseline.js` |
 | `prerequisites/ca-prerequisites.json` | What must exist in the tenant before deployment, and how dangerous it is if it is missing | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
-| `controls/ca-controls.json` | Which standards labels each template fulfils | `check-controls.js`, IntuneBackup's `generate-compliance.js` |
+| `controls/ca-controls.json` | Which standards labels each template fulfils | `check-controls.js`, `generate-docs.js`, IntuneBackup's `generate-compliance.js` |
+| `docs/policies.json` | What each template does, what to watch out for, and which Intune policies it depends on | `generate-docs.js`, IntuneBackup's `generate-docs.js` |
 | `authentication-methods/authentication-methods.json` | Which sign-in methods are enabled or disabled, in which order, and the passkey profiles | `authentication-methods.js`, `Set-EntraAuthenticationMethods.ps1`, `Test-EntraPasskeyReadiness.ps1` |
 
 `_manifest.json` sits in `CATemplate/` like the `_` files in IntuneBackup's
@@ -97,7 +98,7 @@ Three templates are fixed on Report until their prerequisite is in the tenant: `
 | 2 | `check-controls.js` | `CATemplate/`, `controls/`, `../IntuneBackup/` (or `../CIPP-Templates-Intune/`) `IntuneTemplate/_controls.json` if present | nothing — fails on errors |
 | 3 | `authentication-methods.js` | `authentication-methods/`, `CATemplate/` | nothing — fails on errors |
 | 4 | `export-cipp-baseline.js` | `CATemplate/`, `_manifest.json`, `prerequisites/`, the previous `cipp/baseline-stages.json` | `cipp/` |
-| 5 | `generate-docs.js` | `CATemplate/`, `_manifest.json`, `cipp/baseline-stages.json` | `CATemplate/README*.md` |
+| 5 | `generate-docs.js` | `CATemplate/`, `_manifest.json`, `cipp/baseline-stages.json`, `docs/policies.json`, `controls/ca-controls.json`; the Intune paths against `../IntuneBackup/` if present | `CATemplate/README*.md` and a README per policy |
 | 6 | `node --test scripts/*.test.js` | everything above, plus `cipp/` | nothing — fails on errors |
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groups, locations and strengths in the tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | the authentication methods policy in the tenant (with `-Apply`) |
@@ -113,6 +114,7 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 |---|---|---|---|
 | IntuneBackup repo (`../IntuneBackup`, mirror `../CIPP-Templates-Intune`) | CA → Intune | `generate-compliance.js --ca ../CA-Policies/controls/ca-controls.json` there | Git there holds the `--no-ca` version; CI does not see this repo |
 | IntuneBackup repo (`../IntuneBackup`, mirror `../CIPP-Templates-Intune`) | Intune → CA | `check-controls.js` reads `IntuneTemplate/_controls.json` | Local only; in CI it skips the label check |
+| IntuneBackup repo | CA ↔ Intune per policy | `generate-docs.js` here links to the Intune policies; `generate-docs.js` there reads `docs/policies.json` and shows at every Intune policy which CA policies rely on it | Links go to the mirror on GitHub (ConXioN-ITCE). A copy is kept there in `IntuneTemplate/_ca.json`, for CI without this repo |
 | CIPP | repo → CIPP | import `cipp/ca-templates-import.json`, build the baseline according to `cipp/baseline-stages.json` | The baseline in CIPP is a copy that is updated by hand |
 | Microsoft Graph | repo → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | `-WhatIf` first; the id of a custom strength goes into the CIPP deployment by hand |
 | GitHub Actions | repo → repo | `generate-cipp.yml` opens a PR | the only workflow |
@@ -124,7 +126,7 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
   (except paths with `NativeImport`). The templates in `CATemplate/` then become Conditional
   Access templates.
 - **Every other `.json` without `displayName`** — `_manifest.json`, `prerequisites/`, `controls/`,
-  `authentication-methods/` — becomes at most one nameless template row. It does nothing and can be
+  `authentication-methods/`, `docs/policies.json` — becomes at most one nameless template row. It does nothing and can be
   removed in CIPP; that is the same trade-off as with the `_` files in IntuneBackup's
   `IntuneTemplate/`.
 
@@ -149,7 +151,7 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 | [README.en.md](../README.en.md) | Full explanation: adding, deploying, prerequisites, standards |
 | [ANALYSE.en.md](ANALYSE.en.md) | Why things are or are not in the set |
 | [scripts/README.en.md](../scripts/README.en.md) | Every script, and the order |
-| [CATemplate/README.en.md](../CATemplate/README.en.md) | Every policy: who, what, state and stage (generated) |
+| [CATemplate/README.en.md](../CATemplate/README.en.md) | Every policy: who, what, state and stage, with a link to the README per policy (generated) |
 | [prerequisites/README.en.md](../prerequisites/README.en.md) | Groups, locations and strengths a tenant needs |
 | [controls/README.en.md](../controls/README.en.md) | The standards mapping and where it goes |
 | [cipp/README.en.md](../cipp/README.en.md) | The deployment files and the stages |

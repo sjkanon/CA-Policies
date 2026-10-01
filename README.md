@@ -34,13 +34,16 @@ en schrijft, en hoe deze repo aan de IntuneBackup-repo vastzit.
 gelegd (MCSB, CIS, Microsofts eigen templates, j0eyv) en — belangrijker — wat er bewust *niet* in
 zit en waarom.
 
+Elke policy heeft een eigen README naast zijn JSON — wat hij doet, waar je op let, de normen en welke
+Intune-policies hij raakt; de lijst staat in [`CATemplate/`](CATemplate/README.md).
+
 Per map staat er een README met de details: [`CATemplate/`](CATemplate/README.md) (elke policy, gegenereerd),
 [`prerequisites/`](prerequisites/README.md), [`controls/`](controls/README.md), [`cipp/`](cipp/README.md),
 [`authentication-methods/`](authentication-methods/README.md) en [`scripts/`](scripts/README.md).
 
 ## Wat er naast de CA-policies staat
 
-`CATemplate/` is niet het hele verhaal. Drie mappen ernaast dragen wat een CA-policy nodig heeft
+`CATemplate/` is niet het hele verhaal. Drie mappen en een databestand ernaast dragen wat een CA-policy nodig heeft
 maar zelf niet is:
 
 | Map | Wat erin staat | Bewaakt door |
@@ -48,6 +51,7 @@ maar zelf niet is:
 | [`prerequisites/`](prerequisites/README.md) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | `scripts/prerequisites.js`, blokkerend in CI |
 | [`authentication-methods/`](authentication-methods/README.md) | Welke aanmeldmethodes aan staan, en de passkey-profielen | `scripts/authentication-methods.js`, blokkerend in CI |
 | [`controls/`](controls/README.md) | Per template welke ISO 27001-, NIS2-, CIS- en NIST CSF-controls hij invult | `scripts/check-controls.js`, blokkerend in CI |
+| [`docs/policies.json`](docs/policies.json) | Per template wat hij doet, de valkuilen, en van welke Intune-policies hij afhangt — de bron van de README per policy, en van de terugkoppeling bij elke Intune-policy in de IntuneBackup-repo | `scripts/generate-docs.js`, blokkerend in CI |
 
 Twee afhankelijkheden lopen van `authentication-methods/` naar hier en falen allebei stil —
 `2120` eist een phishing-bestendige methode die er niet is, of `2180` eist een Temporary Access
@@ -64,7 +68,10 @@ templates.
    `prerequisites/ca-prerequisites.json` staat — de export weigert anders te draaien.
 4. Geef het een normenmapping in `controls/ca-controls.json` — welke ISO-, NIS2-, CIS- en
    CSF-controls deze policy invult. `scripts/check-controls.js` weigert een template zonder.
-5. Draai de pijplijn uit [`scripts/README.md`](scripts/README.md#volgorde).
+5. Beschrijf hem in `docs/policies.json`: een `doel` in nl, en en fr, de `letOp`-punten, en de
+   Intune-policies waar hij van afhangt (`intune`). `scripts/generate-docs.js` weigert een template
+   zonder doel.
+6. Draai de pijplijn uit [`scripts/README.md`](scripts/README.md#volgorde).
 
 **Bij een wijziging in `CATemplate/`:** `.github/workflows/generate-cipp.yml` regenereert
 `cipp/*.json` en opent daar een PR voor — controleer de diff vóór je merget. Dezelfde workflow

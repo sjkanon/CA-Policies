@@ -565,4 +565,6 @@ alors. Les deux la gèrent désormais.
 - **Les groupes portent les noms du tenant source** (`CA-…`, `U-WHfB-Passkeys`), pas la
   convention SG-U. Les renommer rompt le lien avec ce tenant.
 - **Le côté IntuneBackup** lit les clés de `controls/ca-controls.json` ; son `COMPLIANCE.md`
-  affiche les anciens noms `GLOBAL__` jusqu'à sa régénération.
+  affiche les anciens noms `GLOBAL__` jusqu'à sa régénération. *Résolu le 1er octobre 2026 :* les noms
+  venaient de `_licenties.json` là-bas, qui utilise désormais `CXNM__STANDARD__` ; `generate-compliance.js`
+  signale désormais un template CA de cette liste qui n'existe pas.

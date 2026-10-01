@@ -9,6 +9,9 @@ The source of this repo: the agreed Conditional Access policies in CIPP template
 in the tenant the policy is called `CXNM - STANDARD - <number> - <TYPE> - <Name>`. How to add one is in
 the [main README](../README.en.md#adding-a-policy).
 
+Every policy has its own README next to its JSON: what it does, what to watch out for, the standards,
+and which Intune policies it touches. Click the name in the table.
+
 | Type | Stage 1 | Stage 2 | Stage 3 | Total |
 |---|---:|---:|---:|---:|
 | [BLOCK](#block--1xxx) | 5 | 7 | 6 | **18** |
@@ -16,66 +19,66 @@ the [main README](../README.en.md#adding-a-policy).
 | [SESSION](#session--3xxx) | 4 | 2 | 1 | **7** |
 | **Total** | **17** | **12** | **15** | **44** |
 
-Stage 1 is `enabled`, stage 2 is prepared (report-only or off), stage 3 is optional: a licence or a decision per tenant (`*` in the tables). The split is described in [`cipp/`](../cipp/README.en.md).
+Stage 1 is `enabled`, stage 2 is prepared (report-only or off), stage 3 is optional: a licence or a decision per tenant (`*` in the tables). The split is described in [`cipp/`](../cipp/README.en.md). The Intune column counts the Intune policies a policy depends on.
 
 ## BLOCK — 1xxx
 
-| No | Policy | Who | On | Requirement | State | Stage |
-|---:|---|---|---|---|---|---|
-| 1010 | [Legacy Authentication](CXNM__STANDARD__1010__BLOCK__Legacy_Authentication.json) | everyone | all apps | block | enabled | 1 |
-| 1020 | [Device Code Auth Flow](CXNM__STANDARD__1020__BLOCK__Device_Code_Auth_Flow.json) | everyone | all apps | block | disabled | 2 |
-| 1030 | [Unsupported Device Platforms](CXNM__STANDARD__1030__BLOCK__Unsupported_Device_Platforms.json) | everyone | all apps | block | disabled | 2 |
-| 1040 | [Countries not Allowed](CXNM__STANDARD__1040__BLOCK__Countries_not_Allowed.json) | everyone | all apps | block | disabled | 2 (pinned to Report) |
-| 1050 | [High-Risk Countries](CXNM__STANDARD__1050__BLOCK__HighRisk_Countries.json) | everyone | all apps | block | enabled | 1 |
-| 1060 | [Service Accounts (Trusted Locations Excluded)](CXNM__STANDARD__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded.json) | `Conditional Access Service Accounts` | all apps | block | disabled | 2 (pinned to Report) |
-| 1070 | [Explicitly Blocked Cloud Apps](CXNM__STANDARD__1070__BLOCK__Explicitly_Blocked_Cloud_Apps.json) | everyone | no app (list per tenant) | block | disabled | 2 |
-| 1080 | [Guest Access to Sensitive Apps](CXNM__STANDARD__1080__BLOCK__Guest_Access_to_Sensitive_Apps.json) | guests | admin portals | block | disabled | 2 |
-| 1090 | [High-Risk Sign-Ins](CXNM__STANDARD__1090__BLOCK__HighRisk_SignIns.json) | everyone | all apps | block | enabled | 1 |
-| 1100 | [High-Risk Users](CXNM__STANDARD__1100__BLOCK__HighRisk_Users.json) | everyone | all apps | block | disabled | 2 |
-| 1110 | [Unlicensed Users](CXNM__STANDARD__1110__BLOCK__Unlicensed_Users.json) | everyone | all apps | block | enabled | 1 |
-| 1120 | [Guest Access Outside Approved Apps](CXNM__STANDARD__1120__BLOCK__Guest_Access_Outside_Approved_Apps.json) | guests | all apps | block | enabled | 1 |
-| 1130 | [Admins From Untrusted Locations](CXNM__STANDARD__1130__BLOCK__Admins_From_Untrusted_Locations.json) | 28 admin roles | all apps | block | enabled | 3* |
-| 1140 | [Managed Identities At Risk](CXNM__STANDARD__1140__BLOCK__Managed_Identities_At_Risk.json) | agent and workload identities | all apps | block | enabled | 3* |
-| 1150 | [Risky Agent Identities](CXNM__STANDARD__1150__BLOCK__Risky_Agent_Identities.json) | agent and workload identities | all apps | block | enabled | 3* |
-| 1160 | [Agent Identities To Agent Resources](CXNM__STANDARD__1160__BLOCK__Agent_Identities_To_Agent_Resources.json) | agent and workload identities | agent resources | block | report-only | 3* |
-| 1170 | [Risky Agent Users](CXNM__STANDARD__1170__BLOCK__Risky_Agent_Users.json) | agent and workload identities | all apps | block | report-only | 3* |
-| 1180 | [Agent Users Outside Compliant Network](CXNM__STANDARD__1180__BLOCK__Agent_Users_Outside_Compliant_Network.json) | agent and workload identities | agent resources | block | report-only | 3* (pinned to Report) |
+| No | Policy | Who | On | Requirement | State | Stage | Intune |
+|---:|---|---|---|---|---|---|---:|
+| 1010 | [Legacy Authentication](CXNM__STANDARD__1010__BLOCK__Legacy_Authentication.en.md) | everyone | all apps | block | enabled | 1 | — |
+| 1020 | [Device Code Auth Flow](CXNM__STANDARD__1020__BLOCK__Device_Code_Auth_Flow.en.md) | everyone | all apps | block | disabled | 2 | — |
+| 1030 | [Unsupported Device Platforms](CXNM__STANDARD__1030__BLOCK__Unsupported_Device_Platforms.en.md) | everyone | all apps | block | disabled | 2 | — |
+| 1040 | [Countries not Allowed](CXNM__STANDARD__1040__BLOCK__Countries_not_Allowed.en.md) | everyone | all apps | block | disabled | 2 (pinned to Report) | — |
+| 1050 | [High-Risk Countries](CXNM__STANDARD__1050__BLOCK__HighRisk_Countries.en.md) | everyone | all apps | block | enabled | 1 | — |
+| 1060 | [Service Accounts (Trusted Locations Excluded)](CXNM__STANDARD__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded.en.md) | `Conditional Access Service Accounts` | all apps | block | disabled | 2 (pinned to Report) | — |
+| 1070 | [Explicitly Blocked Cloud Apps](CXNM__STANDARD__1070__BLOCK__Explicitly_Blocked_Cloud_Apps.en.md) | everyone | no app (list per tenant) | block | disabled | 2 | — |
+| 1080 | [Guest Access to Sensitive Apps](CXNM__STANDARD__1080__BLOCK__Guest_Access_to_Sensitive_Apps.en.md) | guests | admin portals | block | disabled | 2 | — |
+| 1090 | [High-Risk Sign-Ins](CXNM__STANDARD__1090__BLOCK__HighRisk_SignIns.en.md) | everyone | all apps | block | enabled | 1 | — |
+| 1100 | [High-Risk Users](CXNM__STANDARD__1100__BLOCK__HighRisk_Users.en.md) | everyone | all apps | block | disabled | 2 | — |
+| 1110 | [Unlicensed Users](CXNM__STANDARD__1110__BLOCK__Unlicensed_Users.en.md) | everyone | all apps | block | enabled | 1 | — |
+| 1120 | [Guest Access Outside Approved Apps](CXNM__STANDARD__1120__BLOCK__Guest_Access_Outside_Approved_Apps.en.md) | guests | all apps | block | enabled | 1 | — |
+| 1130 | [Admins From Untrusted Locations](CXNM__STANDARD__1130__BLOCK__Admins_From_Untrusted_Locations.en.md) | 28 admin roles | all apps | block | enabled | 3* | — |
+| 1140 | [Managed Identities At Risk](CXNM__STANDARD__1140__BLOCK__Managed_Identities_At_Risk.en.md) | agent and workload identities | all apps | block | enabled | 3* | — |
+| 1150 | [Risky Agent Identities](CXNM__STANDARD__1150__BLOCK__Risky_Agent_Identities.en.md) | agent and workload identities | all apps | block | enabled | 3* | — |
+| 1160 | [Agent Identities To Agent Resources](CXNM__STANDARD__1160__BLOCK__Agent_Identities_To_Agent_Resources.en.md) | agent and workload identities | agent resources | block | report-only | 3* | — |
+| 1170 | [Risky Agent Users](CXNM__STANDARD__1170__BLOCK__Risky_Agent_Users.en.md) | agent and workload identities | all apps | block | report-only | 3* | — |
+| 1180 | [Agent Users Outside Compliant Network](CXNM__STANDARD__1180__BLOCK__Agent_Users_Outside_Compliant_Network.en.md) | agent and workload identities | agent resources | block | report-only | 3* (pinned to Report) | — |
 
 ## GRANT — 2xxx
 
-| No | Policy | Who | On | Requirement | State | Stage |
-|---:|---|---|---|---|---|---|
-| 2010 | [Medium-Risk Sign-ins](CXNM__STANDARD__2010__GRANT__MediumRisk_Signins.json) | everyone | all apps | `Multifactor authentication` + sign in every time | enabled | 1 |
-| 2020 | [Medium-Risk Users](CXNM__STANDARD__2020__GRANT__MediumRisk_Users.json) | everyone | all apps | `Multifactor authentication` + sign in every time | enabled | 1 |
-| 2050 | [MFA for All Users](CXNM__STANDARD__2050__GRANT__MFA_for_All_Users.json) | everyone | all apps | `Multifactor authentication` | enabled | 1 |
-| 2055 | [Phishing Resistant MFA for Admins](CXNM__STANDARD__2055__GRANT__Phishing_Resistant_MFA_for_Admins.json) | 28 admin roles | all apps | `Phishing-resistant MFA` | disabled | 2 |
-| 2060 | [Mobile Apps and Desktop Clients](CXNM__STANDARD__2060__GRANT__Mobile_Apps_and_Desktop_Clients.json) | everyone | all apps | compliant device | disabled | 2 |
-| 2070 | [Mobile Device Access Requirements](CXNM__STANDARD__2070__GRANT__Mobile_Device_Access_Requirements.json) | everyone | all apps | compliant app | disabled | 2 |
-| 2080 | [MFA for Device Registration](CXNM__STANDARD__2080__GRANT__MFA_For_Device_Registration.json) | everyone | register device | `Multifactor authentication` | enabled | 1 |
-| 2090 | [Browser Access On Unmanaged Devices](CXNM__STANDARD__2090__GRANT__Browser_Access_On_Unmanaged_Devices.json) | everyone | all apps | compliant device or hybrid joined device | enabled | 1 |
-| 2100 | [MFA for Admin Portals](CXNM__STANDARD__2100__GRANT__MFA_For_Admin_Portals.json) | everyone | admin portals | `Multifactor authentication` | enabled | 1 |
-| 2110 | [Token Protection](CXNM__STANDARD__2110__GRANT__Token_Protection.json) | everyone | 2 apps | token protection | enabled | 1 |
-| 2120 | [Phishing Resistant MFA for All Users](CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users.json) | everyone | all apps | `Phishing-resistant MFA` | enabled | 3* |
-| 2125 | [Phishing Resistant MFA for Rollout Groups](CXNM__STANDARD__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups.json) | `CA-Registered-Phishing-MFA`, `CA-Exception-Authenticator-Phishing-MFA` | all apps | `Phishing-resistant MFA` | enabled | 3* |
-| 2130 | [Admins Compliant Device](CXNM__STANDARD__2130__GRANT__Admins_Compliant_Device.json) | 28 admin roles | all apps | compliant device or hybrid joined device | enabled | 3* |
-| 2150 | [Cloud PC Mobile Access](CXNM__STANDARD__2150__GRANT__Cloud_PC_Mobile_Access.json) | everyone | 2 apps | compliant app or compliant device | enabled | 3* |
-| 2160 | [Agent Users Compliant Device](CXNM__STANDARD__2160__GRANT__Agent_Users_Compliant_Device.json) | agent and workload identities | all apps | compliant device | report-only | 3* |
-| 2170 | [MFA for Intune Enrollment](CXNM__STANDARD__2170__GRANT__MFA_For_Intune_Enrollment.json) | everyone | 1 app | `Multifactor authentication` + sign in every time | enabled | 1 |
-| 2180 | [Register Security Info TAP Only](CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only.json) | everyone | register security info | `Temporary Access Pass only` | report-only | 3* |
-| 2185 | [Register Security Info Passkey Rollout](CXNM__STANDARD__2185__GRANT__Register_Security_Info_Passkey_Rollout.json) | `CA-Rollout-Phishing-MFA` | register security info | `Passkey Rollout` + sign in every 7 days | enabled | 3* |
-| 2190 | [Windows Hello Passkeys](CXNM__STANDARD__2190__GRANT__Windows_Hello_Passkeys.json) | `U-WHfB-Passkeys` | all apps | `CA-WHfB-Passkeys` | report-only | 3* |
+| No | Policy | Who | On | Requirement | State | Stage | Intune |
+|---:|---|---|---|---|---|---|---:|
+| 2010 | [Medium-Risk Sign-ins](CXNM__STANDARD__2010__GRANT__MediumRisk_Signins.en.md) | everyone | all apps | `Multifactor authentication` + sign in every time | enabled | 1 | — |
+| 2020 | [Medium-Risk Users](CXNM__STANDARD__2020__GRANT__MediumRisk_Users.en.md) | everyone | all apps | `Multifactor authentication` + sign in every time | enabled | 1 | — |
+| 2050 | [MFA for All Users](CXNM__STANDARD__2050__GRANT__MFA_for_All_Users.en.md) | everyone | all apps | `Multifactor authentication` | enabled | 1 | — |
+| 2055 | [Phishing Resistant MFA for Admins](CXNM__STANDARD__2055__GRANT__Phishing_Resistant_MFA_for_Admins.en.md) | 28 admin roles | all apps | `Phishing-resistant MFA` | disabled | 2 | 3 |
+| 2060 | [Mobile Apps and Desktop Clients](CXNM__STANDARD__2060__GRANT__Mobile_Apps_and_Desktop_Clients.en.md) | everyone | all apps | compliant device | disabled | 2 | 28 |
+| 2070 | [Mobile Device Access Requirements](CXNM__STANDARD__2070__GRANT__Mobile_Device_Access_Requirements.en.md) | everyone | all apps | compliant app | disabled | 2 | 2 |
+| 2080 | [MFA for Device Registration](CXNM__STANDARD__2080__GRANT__MFA_For_Device_Registration.en.md) | everyone | register device | `Multifactor authentication` | enabled | 1 | — |
+| 2090 | [Browser Access On Unmanaged Devices](CXNM__STANDARD__2090__GRANT__Browser_Access_On_Unmanaged_Devices.en.md) | everyone | all apps | compliant device or hybrid joined device | enabled | 1 | 29 |
+| 2100 | [MFA for Admin Portals](CXNM__STANDARD__2100__GRANT__MFA_For_Admin_Portals.en.md) | everyone | admin portals | `Multifactor authentication` | enabled | 1 | — |
+| 2110 | [Token Protection](CXNM__STANDARD__2110__GRANT__Token_Protection.en.md) | everyone | 2 apps | token protection | enabled | 1 | 2 |
+| 2120 | [Phishing Resistant MFA for All Users](CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users.en.md) | everyone | all apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
+| 2125 | [Phishing Resistant MFA for Rollout Groups](CXNM__STANDARD__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups.en.md) | `CA-Registered-Phishing-MFA`, `CA-Exception-Authenticator-Phishing-MFA` | all apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
+| 2130 | [Admins Compliant Device](CXNM__STANDARD__2130__GRANT__Admins_Compliant_Device.en.md) | 28 admin roles | all apps | compliant device or hybrid joined device | enabled | 3* | 29 |
+| 2150 | [Cloud PC Mobile Access](CXNM__STANDARD__2150__GRANT__Cloud_PC_Mobile_Access.en.md) | everyone | 2 apps | compliant app or compliant device | enabled | 3* | 13 |
+| 2160 | [Agent Users Compliant Device](CXNM__STANDARD__2160__GRANT__Agent_Users_Compliant_Device.en.md) | agent and workload identities | all apps | compliant device | report-only | 3* | 15 |
+| 2170 | [MFA for Intune Enrollment](CXNM__STANDARD__2170__GRANT__MFA_For_Intune_Enrollment.en.md) | everyone | 1 app | `Multifactor authentication` + sign in every time | enabled | 1 | 2 |
+| 2180 | [Register Security Info TAP Only](CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only.en.md) | everyone | register security info | `Temporary Access Pass only` | report-only | 3* | — |
+| 2185 | [Register Security Info Passkey Rollout](CXNM__STANDARD__2185__GRANT__Register_Security_Info_Passkey_Rollout.en.md) | `CA-Rollout-Phishing-MFA` | register security info | `Passkey Rollout` + sign in every 7 days | enabled | 3* | — |
+| 2190 | [Windows Hello Passkeys](CXNM__STANDARD__2190__GRANT__Windows_Hello_Passkeys.en.md) | `U-WHfB-Passkeys` | all apps | `CA-WHfB-Passkeys` | report-only | 3* | 2 |
 
 ## SESSION — 3xxx
 
-| No | Policy | Who | On | Requirement | State | Stage |
-|---:|---|---|---|---|---|---|
-| 3010 | [Admin Persistence](CXNM__STANDARD__3010__SESSION__Admin_Persistence.json) | 28 admin roles | all apps | sign in every 9 hours + no persistent browser session | enabled | 1 |
-| 3020 | [BYOD Persistence](CXNM__STANDARD__3020__SESSION__BYOD_Persistence.json) | everyone | all apps | sign in every 9 hours + no persistent browser session | report-only | 2 |
-| 3030 | [Register Security Info Requirements](CXNM__STANDARD__3030__SESSION__Register_Security_Info_Requirements.json) | everyone | register security info | sign in every 90 days | enabled | 1 |
-| 3040 | [Block File Downloads On Unmanaged Devices](CXNM__STANDARD__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices.json) | everyone | 2 apps | app enforced restrictions | disabled | 2 |
-| 3050 | [Continuous Access Evaluation](CXNM__STANDARD__3050__SESSION__Continuous_Access_Evaluation.json) | everyone | all apps | strict CAE | enabled | 1 |
-| 3060 | [Defender for Cloud Apps](CXNM__STANDARD__3060__SESSION__Defender_for_Cloud_Apps.json) | everyone | all apps | Defender for Cloud Apps | enabled | 3* |
-| 3070 | [Session Limits All Users](CXNM__STANDARD__3070__SESSION__Session_Limits_All_Users.json) | everyone | all apps | sign in every 12 hours | enabled | 1 |
+| No | Policy | Who | On | Requirement | State | Stage | Intune |
+|---:|---|---|---|---|---|---|---:|
+| 3010 | [Admin Persistence](CXNM__STANDARD__3010__SESSION__Admin_Persistence.en.md) | 28 admin roles | all apps | sign in every 9 hours + no persistent browser session | enabled | 1 | — |
+| 3020 | [BYOD Persistence](CXNM__STANDARD__3020__SESSION__BYOD_Persistence.en.md) | everyone | all apps | sign in every 9 hours + no persistent browser session | report-only | 2 | 26 |
+| 3030 | [Register Security Info Requirements](CXNM__STANDARD__3030__SESSION__Register_Security_Info_Requirements.en.md) | everyone | register security info | sign in every 90 days | enabled | 1 | — |
+| 3040 | [Block File Downloads On Unmanaged Devices](CXNM__STANDARD__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices.en.md) | everyone | 2 apps | app enforced restrictions | disabled | 2 | 26 |
+| 3050 | [Continuous Access Evaluation](CXNM__STANDARD__3050__SESSION__Continuous_Access_Evaluation.en.md) | everyone | all apps | strict CAE | enabled | 1 | — |
+| 3060 | [Defender for Cloud Apps](CXNM__STANDARD__3060__SESSION__Defender_for_Cloud_Apps.en.md) | everyone | all apps | Defender for Cloud Apps | enabled | 3* | — |
+| 3070 | [Session Limits All Users](CXNM__STANDARD__3070__SESSION__Session_Limits_All_Users.en.md) | everyone | all apps | sign in every 12 hours | enabled | 1 | — |
 
 ## Why optional
 
@@ -102,6 +105,7 @@ From [`_manifest.json`](_manifest.json) (the reasons are kept in Dutch). These t
 | File or folder | What it records |
 |---|---|
 | [`_manifest.json`](_manifest.json) | which templates are optional, and why |
+| [`../docs/policies.json`](../docs/policies.json) | per template what it does, what to watch out for and which Intune policies it touches — the source of the per-policy README |
 | [`../prerequisites/`](../prerequisites/README.en.md) | the groups, named locations and custom authentication strengths the templates refer to |
 | [`../controls/`](../controls/README.en.md) | per template the ISO 27001, NIS2, CIS and NIST CSF controls |
 | [`../authentication-methods/`](../authentication-methods/README.en.md) | which sign-in methods are on — without passkeys `2120` cannot be met |

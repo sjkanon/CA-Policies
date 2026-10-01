@@ -564,4 +564,6 @@ maakte de strength zonder beperking aan. Dan voldoet elke passkey. Beide doen he
 - **De groepen dragen de namen uit de brontenant** (`CA-…`, `U-WHfB-Passkeys`), niet de
   SG-U-conventie. Hernoemen breekt de koppeling met die tenant.
 - **De IntuneBackup-kant** leest de sleutels uit `controls/ca-controls.json`; zijn `COMPLIANCE.md`
-  toont de oude `GLOBAL__`-namen tot die opnieuw gegenereerd is.
+  toont de oude `GLOBAL__`-namen tot die opnieuw gegenereerd is. *Opgelost op 1 oktober 2026:* de
+  namen kwamen uit `_licenties.json` daar, dat nu `CXNM__STANDARD__` gebruikt; `generate-compliance.js`
+  meldt voortaan een CA-template in die lijst dat niet bestaat.

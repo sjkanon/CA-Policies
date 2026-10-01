@@ -35,13 +35,16 @@ lit et écrit quoi, et comment ce dépôt est relié au dépôt IntuneBackup.
 confrontés (MCSB, CIS, les propres templates de Microsoft, j0eyv) et — plus important — ce qui n'y
 figure volontairement *pas*, et pourquoi.
 
+Chaque stratégie a son propre README à côté de son JSON — ce qu'elle fait, les points d'attention, les normes
+et les stratégies Intune qu'elle touche ; la liste se trouve dans [`CATemplate/`](CATemplate/README.fr.md).
+
 Chaque dossier a un README avec les détails : [`CATemplate/`](CATemplate/README.fr.md) (chaque stratégie, généré),
 [`prerequisites/`](prerequisites/README.fr.md), [`controls/`](controls/README.fr.md), [`cipp/`](cipp/README.fr.md),
 [`authentication-methods/`](authentication-methods/README.fr.md) et [`scripts/`](scripts/README.fr.md).
 
 ## Ce qui se trouve à côté des stratégies CA
 
-`CATemplate/` n'est pas toute l'histoire. Trois dossiers à côté portent ce dont une stratégie CA a
+`CATemplate/` n'est pas toute l'histoire. Trois dossiers et un fichier de données à côté portent ce dont une stratégie CA a
 besoin sans en faire elle-même partie :
 
 | Dossier | Contenu | Surveillé par |
@@ -49,6 +52,7 @@ besoin sans en faire elle-même partie :
 | [`prerequisites/`](prerequisites/README.fr.md) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | `scripts/prerequisites.js`, bloquant en CI |
 | [`authentication-methods/`](authentication-methods/README.fr.md) | Quelles méthodes d'authentification sont activées, et les profils passkey | `scripts/authentication-methods.js`, bloquant en CI |
 | [`controls/`](controls/README.fr.md) | Par template, quels contrôles ISO 27001, NIS2, CIS et NIST CSF il couvre | `scripts/check-controls.js`, bloquant en CI |
+| [`docs/policies.json`](docs/policies.json) | Par template ce qu'il fait, les pièges, et de quelles stratégies Intune il dépend — la source du README par stratégie, et du lien retour sur chaque stratégie Intune du dépôt IntuneBackup | `scripts/generate-docs.js`, bloquant en CI |
 
 Deux dépendances vont de `authentication-methods/` vers ici, et échouent toutes deux en silence —
 `2120` exige une méthode résistante au phishing qui n'existe pas, ou `2180` exige un Temporary Access
@@ -65,7 +69,10 @@ ces templates.
    `prerequisites/ca-prerequisites.json` — sinon l'export refuse de s'exécuter.
 4. Donnez-lui un mapping de normes dans `controls/ca-controls.json` — quels contrôles ISO, NIS2, CIS
    et CSF cette stratégie couvre. `scripts/check-controls.js` refuse un template sans mapping.
-5. Exécutez le pipeline de [`scripts/README.fr.md`](scripts/README.fr.md#ordre-dexécution).
+5. Décrivez-la dans `docs/policies.json` : un `doel` (objectif) en nl, en et fr, les points `letOp`
+   (attention), et les stratégies Intune dont elle dépend (`intune`). `scripts/generate-docs.js` refuse
+   un template sans objectif.
+6. Exécutez le pipeline de [`scripts/README.fr.md`](scripts/README.fr.md#ordre-dexécution).
 
 **Lors d'une modification dans `CATemplate/` :** `.github/workflows/generate-cipp.yml` régénère
 `cipp/*.json` et ouvre une PR pour cela — vérifiez le diff avant de merger. Le même workflow

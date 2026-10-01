@@ -564,4 +564,6 @@ created the strength without the restriction. Then any passkey satisfies. Both h
 - **The groups carry the names from the source tenant** (`CA-…`, `U-WHfB-Passkeys`), not the
   SG-U convention. Renaming breaks the link with that tenant.
 - **The IntuneBackup side** reads the keys from `controls/ca-controls.json`; its `COMPLIANCE.md`
-  shows the old `GLOBAL__` names until it is regenerated.
+  shows the old `GLOBAL__` names until it is regenerated. *Resolved on 1 October 2026:* the names
+  came from `_licenties.json` there, which now uses `CXNM__STANDARD__`; `generate-compliance.js` now
+  reports a CA template in that list that does not exist.

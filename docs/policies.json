@@ -1,0 +1,779 @@
+{
+  "_comment": [
+    "Per template in CATemplate/ wat de policy doet en welke Intune-policies hij raakt. Gelezen door",
+    "scripts/generate-docs.js, die er per policy een README van maakt (CATemplate/<naam>.md, .en.md,",
+    ".fr.md), en door scripts/generate-docs.js in de IntuneBackup-repo, die de koppeling omgekeerd",
+    "toont: bij elke Intune-policy welke CA-policies erop leunen.",
+    "",
+    "Sleutel   de bestandsnaam uit CATemplate/ zonder .json, zoals in controls/ca-controls.json.",
+    "doel      één of twee zinnen over wat de policy doet, in nl, en en fr. Wat er technisch in staat",
+    "          (wie, welke apps, welke eis) genereert het script zelf uit het template; hier staat",
+    "          wat je daar niet uit afleest: waarom, en wat er misgaat zonder.",
+    "letOp     optioneel: de valkuilen bij uitrol, elk in nl, en en fr. Wat iemand moet weten vóór",
+    "          hij de policy aanzet — wie er buiten valt, welke handstap per tenant nodig is.",
+    "intune    de Intune-policies waar deze CA-policy van afhangt of die hij raakt. Per regel:",
+    "            targets  paden onder IntuneTemplate/ in de IntuneBackup-repo, zonder .json, of",
+    "                     @<groep> voor een groep uit 'groepen' hieronder.",
+    "            waarom   wat de Intune-policy voor deze CA-policy doet, in nl, en en fr. Die zin",
+    "                     staat ook bij de Intune-policy, dus schrijf hem zo dat hij daar ook leest.",
+    "          Alleen echte afhankelijkheden: een Intune-policy die bepaalt of iemand aan deze",
+    "          policy voldoet, of die stukgaat als deze policy aan staat. Geen thematische buren.",
+    "",
+    "Elk template moet hier staan; generate-docs.js faalt op een template zonder doel en op een",
+    "sleutel zonder template. Of de Intune-paden bestaan kan alleen met de IntuneBackup-repo ernaast",
+    "(../IntuneBackup of ../CIPP-Templates-Intune); dan toetst generate-docs.js dat ook, en meldt het",
+    "een compliance-policy die in geen enkele groep staat — zo'n policy bepaalt wel of een apparaat",
+    "compliant is, en hoort dus bij elke CA-policy die een compliant apparaat eist."
+  ],
+  "groepen": {
+    "complianceWIN": [
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Antispyware",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Antivirus",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_BitLocker",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Code_Integrity",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Defender_Real_Time_Protection",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Defender_Security_Intelligence",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Defender_for_Endpoint_Risk",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Firewall",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_OS_Version",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_Secure_Boot",
+      "WIN/CompliancePolicies/Baseline_WIN_U_Compliance_TPM"
+    ],
+    "complianceMAC": [
+      "MAC/CompliancePolicies/Baseline_MAC_U_Compliance_Device_Health",
+      "MAC/CompliancePolicies/Baseline_MAC_U_Compliance_Device_Security",
+      "MAC/CompliancePolicies/Baseline_MAC_U_Compliance_OS_Version",
+      "MAC/CompliancePolicies/Baseline_MAC_U_Compliance_Password"
+    ],
+    "complianceIOS": [
+      "IOS/CompliancePolicies/Baseline_IOS_U_Compliance_Defender_for_Endpoint",
+      "IOS/CompliancePolicies/Baseline_IOS_U_Compliance_Device_Health",
+      "IOS/CompliancePolicies/Baseline_IOS_U_Compliance_Password"
+    ],
+    "complianceAND": [
+      "AND/CompliancePolicies/Baseline_AND_D_Compliance_Dedicated_Device_Health",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Block_Device_Administrator",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Corporate_Defender_for_Endpoint",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Corporate_Device_Health",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Corporate_Password",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Defender_for_Endpoint",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Device_Health",
+      "AND/CompliancePolicies/Baseline_AND_U_Compliance_Password"
+    ],
+    "appProtection": [
+      "AND/AppProtection/Baseline_AND_U_App_Protection",
+      "IOS/AppProtection/Baseline_IOS_U_App_Protection"
+    ],
+    "deviceIdentityInBrowser": [
+      "MAC/SettingsCatalog/Baseline_MAC_D_Platform_SSO",
+      "IOS/SettingsCatalog/Baseline_IOS_D_Enterprise_SSO",
+      "WIN/SettingsCatalog/Baseline_WIN_U_Microsoft_Edge_Profiles_and_Sync"
+    ],
+    "windowsHello": [
+      "WIN/SettingsCatalog/Baseline_WIN_D_Windows_Hello_for_Business",
+      "WIN/SettingsCatalog/Baseline_WIN_D_Windows_Hello_for_Business_Multi_User",
+      "WIN/SettingsCatalog/Baseline_WIN_U_Windows_Hello_for_Business"
+    ]
+  },
+  "policies": {
+    "CXNM__STANDARD__1010__BLOCK__Legacy_Authentication": {
+      "doel": {
+        "nl": "Blokkeert aanmelden via verouderde protocollen: Exchange ActiveSync en de andere legacy clients zoals POP, IMAP en SMTP AUTH. Die kennen geen MFA, dus zolang ze open staan is elke andere policy in deze set te omzeilen.",
+        "en": "Blocks sign-in over legacy protocols: Exchange ActiveSync and the other legacy clients such as POP, IMAP and SMTP AUTH. They have no MFA, so as long as they are open every other policy in this set can be bypassed.",
+        "fr": "Bloque la connexion via les protocoles hérités : Exchange ActiveSync et les autres clients legacy comme POP, IMAP et SMTP AUTH. Ils ne connaissent pas la MFA ; tant qu'ils restent ouverts, toutes les autres stratégies de cet ensemble peuvent être contournées."
+      },
+      "letOp": [
+        {
+          "nl": "Een apparaat of applicatie die nog via SMTP AUTH of IMAP mailt (scanner, oude app) stopt. Zet die tijdelijk in `Excluded from Legacy Authentication Block` en ruim de groep daarna op.",
+          "en": "A device or application that still sends mail over SMTP AUTH or IMAP (scanner, old app) stops working. Put it in `Excluded from Legacy Authentication Block` temporarily and clean up the group afterwards.",
+          "fr": "Un appareil ou une application qui envoie encore du courrier via SMTP AUTH ou IMAP (scanner, ancienne app) cesse de fonctionner. Placez-le temporairement dans `Excluded from Legacy Authentication Block` et nettoyez ensuite le groupe."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1020__BLOCK__Device_Code_Auth_Flow": {
+      "doel": {
+        "nl": "Blokkeert de device code flow en authentication transfer: aanmelden door een code op een ander apparaat in te voeren. Bij phishing laat een aanvaller het slachtoffer zo zijn token goedkeuren.",
+        "en": "Blocks the device code flow and authentication transfer: signing in by entering a code on another device. In phishing, an attacker uses this to get the victim to approve the attacker's token.",
+        "fr": "Bloque le device code flow et l'authentication transfer : la connexion en saisissant un code sur un autre appareil. En phishing, un attaquant s'en sert pour faire approuver son jeton par la victime."
+      },
+      "letOp": [
+        {
+          "nl": "Teams Rooms, sommige vergaderapparaten en CLI-tools melden zich met een device code aan. Zet ze in `Excluded from Device Code Auth Flow Block` vóór je deze policy aanzet.",
+          "en": "Teams Rooms, some meeting devices and CLI tools sign in with a device code. Put them in `Excluded from Device Code Auth Flow Block` before turning this policy on.",
+          "fr": "Teams Rooms, certains appareils de réunion et outils CLI se connectent avec un device code. Placez-les dans `Excluded from Device Code Auth Flow Block` avant d'activer cette stratégie."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1030__BLOCK__Unsupported_Device_Platforms": {
+      "doel": {
+        "nl": "Blokkeert aanmelden vanaf elk platform behalve Windows, macOS, iOS en Android — de platforms die Intune beheert en waar de andere policies op rekenen. Het platform komt uit de user agent; dit is een drempel, geen grens.",
+        "en": "Blocks sign-in from every platform except Windows, macOS, iOS and Android — the platforms Intune manages and the other policies rely on. The platform comes from the user agent; this is a hurdle, not a boundary.",
+        "fr": "Bloque la connexion depuis toute plateforme autre que Windows, macOS, iOS et Android — les plateformes gérées par Intune et sur lesquelles s'appuient les autres stratégies. La plateforme vient du user agent : c'est un obstacle, pas une frontière."
+      },
+      "letOp": [
+        {
+          "nl": "De uitsluitingsgroep is `Excluded from Legacy Authentication Block`, niet een eigen groep. Wie daar voor legacy auth in staat, mag hier ook vanaf elk platform aanmelden.",
+          "en": "The exclusion group is `Excluded from Legacy Authentication Block`, not a group of its own. Whoever is in it for legacy auth may also sign in from any platform here.",
+          "fr": "Le groupe d'exclusion est `Excluded from Legacy Authentication Block`, pas un groupe dédié. Qui y figure pour l'authentification legacy peut aussi se connecter ici depuis n'importe quelle plateforme."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1040__BLOCK__Countries_not_Allowed": {
+      "doel": {
+        "nl": "Blokkeert aanmelden van buiten de landen in de named location `Allowed Countries`. Staat vast op Report tot die landen per tenant zijn ingevuld: een lege lijst zou elke aanmelding blokkeren.",
+        "en": "Blocks sign-in from outside the countries in the named location `Allowed Countries`. Pinned to Report until those countries are filled in per tenant: an empty list would block every sign-in.",
+        "fr": "Bloque la connexion depuis l'extérieur des pays de la named location `Allowed Countries`. Bloqué sur Report tant que ces pays ne sont pas renseignés par tenant : une liste vide bloquerait toute connexion."
+      },
+      "letOp": [
+        {
+          "nl": "Wie op reis is buiten de toegestane landen kan niet aanmelden. Zet die tijdelijk in `Excluded from Country Block List`, en haal hem er na terugkomst weer uit.",
+          "en": "Anyone travelling outside the allowed countries cannot sign in. Put them in `Excluded from Country Block List` temporarily, and remove them again on return.",
+          "fr": "Qui voyage en dehors des pays autorisés ne peut pas se connecter. Placez-le temporairement dans `Excluded from Country Block List`, et retirez-le au retour."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1050__BLOCK__HighRisk_Countries": {
+      "doel": {
+        "nl": "Blokkeert aanmelden vanuit de landen in de named location `High-Risk Countries`.",
+        "en": "Blocks sign-in from the countries in the named location `High-Risk Countries`.",
+        "fr": "Bloque la connexion depuis les pays de la named location `High-Risk Countries`."
+      }
+    },
+    "CXNM__STANDARD__1060__BLOCK__Service_Accounts_Trusted_Locations_Excluded": {
+      "doel": {
+        "nl": "Blokkeert de serviceaccounts in `Conditional Access Service Accounts` buiten de IP-adressen in `Service Accounts Trusted IPs`. Serviceaccounts zijn uitgezonderd van MFA; deze policy komt daarvoor in de plaats. Staat vast op Report tot de IP-range per tenant is ingevuld.",
+        "en": "Blocks the service accounts in `Conditional Access Service Accounts` outside the IP addresses in `Service Accounts Trusted IPs`. Service accounts are excluded from MFA; this policy takes its place. Pinned to Report until the IP range is filled in per tenant.",
+        "fr": "Bloque les comptes de service de `Conditional Access Service Accounts` en dehors des adresses IP de `Service Accounts Trusted IPs`. Les comptes de service sont exclus de la MFA ; cette stratégie la remplace. Bloqué sur Report tant que la plage IP n'est pas renseignée par tenant."
+      },
+      "letOp": [
+        {
+          "nl": "Een serviceaccount in `Conditional Access Service Accounts` heeft geen MFA (zie `2050`). Staat deze policy niet aan, dan is zo'n account van overal met alleen een wachtwoord te gebruiken.",
+          "en": "A service account in `Conditional Access Service Accounts` has no MFA (see `2050`). If this policy is not on, such an account can be used from anywhere with just a password.",
+          "fr": "Un compte de service de `Conditional Access Service Accounts` n'a pas de MFA (voir `2050`). Si cette stratégie n'est pas active, un tel compte est utilisable de partout avec un simple mot de passe."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1070__BLOCK__Explicitly_Blocked_Cloud_Apps": {
+      "doel": {
+        "nl": "Blokkeert cloud-apps die de organisatie uitdrukkelijk niet wil toestaan. Het template bevat geen apps: de lijst wordt per tenant ingevuld, en tot dan doet de policy niets.",
+        "en": "Blocks cloud apps the organisation explicitly does not want to allow. The template contains no apps: the list is filled in per tenant, and until then the policy does nothing.",
+        "fr": "Bloque les applications cloud que l'organisation ne veut explicitement pas autoriser. Le template ne contient aucune app : la liste est renseignée par tenant, et d'ici là la stratégie ne fait rien."
+      }
+    },
+    "CXNM__STANDARD__1080__BLOCK__Guest_Access_to_Sensitive_Apps": {
+      "doel": {
+        "nl": "Blokkeert gasten en externe gebruikers op de Microsoft-beheerportalen en de Azure Service Management API.",
+        "en": "Blocks guests and external users on the Microsoft admin portals and the Azure Service Management API.",
+        "fr": "Bloque les invités et utilisateurs externes sur les portails d'administration Microsoft et l'API Azure Service Management."
+      }
+    },
+    "CXNM__STANDARD__1090__BLOCK__HighRisk_SignIns": {
+      "doel": {
+        "nl": "Blokkeert een aanmelding die Entra ID Protection als hoog risico inschat. Vraagt Entra ID P2; op P1 wordt de conditie nooit waar en doet de policy niets.",
+        "en": "Blocks a sign-in that Entra ID Protection rates as high risk. Requires Entra ID P2; on P1 the condition never becomes true and the policy does nothing.",
+        "fr": "Bloque une connexion qu'Entra ID Protection évalue à risque élevé. Requiert Entra ID P2 ; en P1 la condition n'est jamais vraie et la stratégie ne fait rien."
+      }
+    },
+    "CXNM__STANDARD__1100__BLOCK__HighRisk_Users": {
+      "doel": {
+        "nl": "Blokkeert een gebruiker die Entra ID Protection als hoog risico inschat, tot het risico is weggenomen. Vraagt Entra ID P2.",
+        "en": "Blocks a user that Entra ID Protection rates as high risk, until the risk has been remediated. Requires Entra ID P2.",
+        "fr": "Bloque un utilisateur qu'Entra ID Protection évalue à risque élevé, jusqu'à ce que le risque soit levé. Requiert Entra ID P2."
+      }
+    },
+    "CXNM__STANDARD__1110__BLOCK__Unlicensed_Users": {
+      "doel": {
+        "nl": "Blokkeert gebruikers die niet in `Licensed Users` zitten, zodat een account zonder licentie — een vergeten testaccount, een gedeelde mailbox met een wachtwoord — niet kan aanmelden.",
+        "en": "Blocks users who are not in `Licensed Users`, so that an account without a licence — a forgotten test account, a shared mailbox with a password — cannot sign in.",
+        "fr": "Bloque les utilisateurs qui ne sont pas dans `Licensed Users`, afin qu'un compte sans licence — un compte de test oublié, une boîte partagée avec un mot de passe — ne puisse pas se connecter."
+      },
+      "letOp": [
+        {
+          "nl": "`Licensed Users` moet iedereen met een licentie bevatten — in de praktijk een dynamische groep. Ontbreekt iemand, dan is die buitengesloten.",
+          "en": "`Licensed Users` must contain everyone with a licence — in practice a dynamic group. Anyone missing from it is locked out.",
+          "fr": "`Licensed Users` doit contenir toute personne disposant d'une licence — en pratique un groupe dynamique. Qui en est absent est bloqué."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1120__BLOCK__Guest_Access_Outside_Approved_Apps": {
+      "doel": {
+        "nl": "Blokkeert gasten en externe gebruikers op alles behalve Office 365 en My Apps. My Apps staat erbij omdat een gast anders zijn uitnodiging niet kan inwisselen.",
+        "en": "Blocks guests and external users on everything except Office 365 and My Apps. My Apps is included because otherwise a guest cannot redeem their invitation.",
+        "fr": "Bloque les invités et utilisateurs externes sur tout sauf Office 365 et My Apps. My Apps est inclus car sinon un invité ne peut pas accepter son invitation."
+      }
+    },
+    "CXNM__STANDARD__1130__BLOCK__Admins_From_Untrusted_Locations": {
+      "doel": {
+        "nl": "Blokkeert de 28 beheerrollen buiten de vertrouwde locaties. Optioneel: een beheerder die thuis of onderweg werkt, kan dan niet meer beheren.",
+        "en": "Blocks the 28 admin roles outside the trusted locations. Optional: an admin working from home or on the road can then no longer administer.",
+        "fr": "Bloque les 28 rôles d'administration en dehors des emplacements de confiance. Optionnel : un administrateur qui travaille chez lui ou en déplacement ne peut alors plus administrer."
+      }
+    },
+    "CXNM__STANDARD__1140__BLOCK__Managed_Identities_At_Risk": {
+      "doel": {
+        "nl": "Blokkeert workload-identiteiten (service principals) met een gemiddeld of hoog risico. Vraagt Microsoft Entra Workload ID Premium — dat zit niet in Entra ID P2.",
+        "en": "Blocks workload identities (service principals) with medium or high risk. Requires Microsoft Entra Workload ID Premium — which is not part of Entra ID P2.",
+        "fr": "Bloque les identités de workload (service principals) à risque moyen ou élevé. Requiert Microsoft Entra Workload ID Premium — qui n'est pas inclus dans Entra ID P2."
+      }
+    },
+    "CXNM__STANDARD__1150__BLOCK__Risky_Agent_Identities": {
+      "doel": {
+        "nl": "Blokkeert agent-identiteiten met een hoog risico. Vraagt Microsoft Entra Agent ID; een tenant zonder agents heeft niets om te beoordelen.",
+        "en": "Blocks agent identities with high risk. Requires Microsoft Entra Agent ID; a tenant without agents has nothing to evaluate.",
+        "fr": "Bloque les identités d'agent à risque élevé. Requiert Microsoft Entra Agent ID ; un tenant sans agents n'a rien à évaluer."
+      }
+    },
+    "CXNM__STANDARD__1160__BLOCK__Agent_Identities_To_Agent_Resources": {
+      "doel": {
+        "nl": "Blokkeert elke agent-identiteit op agent-resources, behalve de uitdrukkelijk uitgezonderde. Een allow-list, dus op report-only tot de bestaande agents in kaart zijn — blind aanzetten legt ze allemaal stil.",
+        "en": "Blocks every agent identity on agent resources, except the explicitly excluded ones. An allow list, so report-only until the existing agents have been mapped — switching it on blind stops all of them.",
+        "fr": "Bloque toute identité d'agent sur les ressources d'agent, sauf celles explicitement exclues. Une liste d'autorisation, donc en report-only jusqu'à l'inventaire des agents existants — l'activer à l'aveugle les arrête tous."
+      },
+      "letOp": [
+        {
+          "nl": "Controleer of CIPP de beta-velden voor agents meestuurt. Zo niet, dan rolt dit template uit zonder zijn agent-conditie en wordt het een blokkade op alles.",
+          "en": "Check whether CIPP sends the beta fields for agents. If not, this template deploys without its agent condition and becomes a block on everything.",
+          "fr": "Vérifiez que CIPP transmet les champs bêta pour les agents. Sinon, ce template est déployé sans sa condition d'agent et devient un blocage de tout."
+        }
+      ]
+    },
+    "CXNM__STANDARD__1170__BLOCK__Risky_Agent_Users": {
+      "doel": {
+        "nl": "Blokkeert agent-users met een gemiddeld of hoog risico. Report-only; vraagt Microsoft Entra Agent ID.",
+        "en": "Blocks agent users with medium or high risk. Report-only; requires Microsoft Entra Agent ID.",
+        "fr": "Bloque les agent users à risque moyen ou élevé. Report-only ; requiert Microsoft Entra Agent ID."
+      }
+    },
+    "CXNM__STANDARD__1180__BLOCK__Agent_Users_Outside_Compliant_Network": {
+      "doel": {
+        "nl": "Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Report-only; vraagt Microsoft Entra Agent ID en Global Secure Access.",
+        "en": "Blocks agent users outside a Global Secure Access compliant network. Report-only; requires Microsoft Entra Agent ID and Global Secure Access.",
+        "fr": "Bloque les agent users en dehors d'un réseau conforme Global Secure Access. Report-only ; requiert Microsoft Entra Agent ID et Global Secure Access."
+      }
+    },
+    "CXNM__STANDARD__2010__GRANT__MediumRisk_Signins": {
+      "doel": {
+        "nl": "Eist MFA, elke keer opnieuw, bij een aanmelding die Entra ID Protection als gemiddeld risico inschat. Vraagt Entra ID P2.",
+        "en": "Requires MFA, every time, for a sign-in that Entra ID Protection rates as medium risk. Requires Entra ID P2.",
+        "fr": "Exige la MFA, à chaque fois, pour une connexion qu'Entra ID Protection évalue à risque moyen. Requiert Entra ID P2."
+      }
+    },
+    "CXNM__STANDARD__2020__GRANT__MediumRisk_Users": {
+      "doel": {
+        "nl": "Eist MFA, elke keer opnieuw, voor een gebruiker die Entra ID Protection als gemiddeld risico inschat. Vraagt Entra ID P2.",
+        "en": "Requires MFA, every time, for a user that Entra ID Protection rates as medium risk. Requires Entra ID P2.",
+        "fr": "Exige la MFA, à chaque fois, pour un utilisateur qu'Entra ID Protection évalue à risque moyen. Requiert Entra ID P2."
+      }
+    },
+    "CXNM__STANDARD__2050__GRANT__MFA_for_All_Users": {
+      "doel": {
+        "nl": "Eist MFA voor alle gebruikers op alle apps. Microsoft Intune zelf is uitgezonderd, zodat een apparaat kan inchecken; serviceaccounts vallen onder `1060`.",
+        "en": "Requires MFA for all users on all apps. Microsoft Intune itself is excluded so that a device can check in; service accounts are covered by `1060`.",
+        "fr": "Exige la MFA pour tous les utilisateurs sur toutes les apps. Microsoft Intune lui-même est exclu pour qu'un appareil puisse se synchroniser ; les comptes de service relèvent de `1060`."
+      },
+      "letOp": [
+        {
+          "nl": "Serviceaccounts zijn uitgesloten; `1060` moet aan staan om ze tot vertrouwde IP-adressen te beperken.",
+          "en": "Service accounts are excluded; `1060` must be on to restrict them to trusted IP addresses.",
+          "fr": "Les comptes de service sont exclus ; `1060` doit être active pour les limiter à des adresses IP de confiance."
+        }
+      ]
+    },
+    "CXNM__STANDARD__2055__GRANT__Phishing_Resistant_MFA_for_Admins": {
+      "doel": {
+        "nl": "Eist phishing-resistente MFA — Windows Hello for Business, een passkey of een certificaat — voor de 28 beheerrollen. De eerste stap richting `2120`.",
+        "en": "Requires phishing-resistant MFA — Windows Hello for Business, a passkey or a certificate — for the 28 admin roles. The first step towards `2120`.",
+        "fr": "Exige une MFA résistante au phishing — Windows Hello for Business, une passkey ou un certificat — pour les 28 rôles d'administration. La première étape vers `2120`."
+      },
+      "letOp": [
+        {
+          "nl": "Zet hem pas aan als elke beheerder een phishing-resistente methode geregistreerd heeft, anders sluit je beheerders buiten. Controleer break-glass vooraf.",
+          "en": "Only turn it on once every admin has registered a phishing-resistant method, or you lock admins out. Check break-glass beforehand.",
+          "fr": "Ne l'activez qu'une fois que chaque administrateur a enregistré une méthode résistante au phishing, sinon vous bloquez les administrateurs. Vérifiez le break-glass au préalable."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@windowsHello"
+          ],
+          "waarom": {
+            "nl": "Richt Windows Hello for Business in: op Windows de gewone manier om aan phishing-resistente MFA te voldoen. Zonder WHfB blijft daar alleen een losse passkey of beveiligingssleutel over.",
+            "en": "Sets up Windows Hello for Business: on Windows the usual way to meet phishing-resistant MFA. Without WHfB only a separate passkey or security key is left there.",
+            "fr": "Configure Windows Hello for Business : sous Windows, la manière habituelle de satisfaire à une MFA résistante au phishing. Sans WHfB, il ne reste qu'une passkey séparée ou une clé de sécurité."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2060__GRANT__Mobile_Apps_and_Desktop_Clients": {
+      "doel": {
+        "nl": "Eist een compliant apparaat voor mobiele apps en desktopclients. Microsoft Intune en Intune Enrollment zijn uitgezonderd: anders kan een apparaat niet inschrijven om compliant te worden.",
+        "en": "Requires a compliant device for mobile apps and desktop clients. Microsoft Intune and Intune Enrollment are excluded: otherwise a device cannot enrol to become compliant.",
+        "fr": "Exige un appareil conforme pour les applications mobiles et les clients de bureau. Microsoft Intune et Intune Enrollment sont exclus : sinon un appareil ne peut pas s'inscrire pour devenir conforme."
+      },
+      "letOp": [
+        {
+          "nl": "Een privé-pc of -telefoon die niet in Intune is ingeschreven kan de apps van Outlook, Teams en OneDrive niet meer gebruiken. Combineer met `2070` voor persoonlijke telefoons.",
+          "en": "A personal PC or phone that is not enrolled in Intune can no longer use the Outlook, Teams or OneDrive apps. Combine with `2070` for personal phones.",
+          "fr": "Un PC ou téléphone personnel non inscrit dans Intune ne peut plus utiliser les apps Outlook, Teams ou OneDrive. À combiner avec `2070` pour les téléphones personnels."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC",
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "Bepaalt mee of een apparaat compliant is. Voldoet een apparaat hier niet aan, dan wordt het niet-compliant en houdt de compliant-eis van Conditional Access het tegen.",
+            "en": "Helps determine whether a device is compliant. If a device fails it, the device becomes non-compliant and the compliant-device requirement in Conditional Access stops it.",
+            "fr": "Contribue à déterminer si un appareil est conforme. Si un appareil n'y satisfait pas, il devient non conforme et l'exigence d'appareil conforme de Conditional Access le bloque."
+          }
+        },
+        {
+          "targets": [
+            "MAC/SettingsCatalog/Baseline_MAC_D_Platform_SSO",
+            "IOS/SettingsCatalog/Baseline_IOS_D_Enterprise_SSO"
+          ],
+          "waarom": {
+            "nl": "Zet de Microsoft Enterprise SSO-plug-in aan, die bij een Entra-aanmelding de apparaatidentiteit meegeeft. Zonder plug-in kan een compliant toestel in apps die geen MSAL gebruiken niet als compliant herkend worden.",
+            "en": "Turns on the Microsoft Enterprise SSO plug-in, which passes the device identity along with an Entra sign-in. Without the plug-in a compliant device cannot be recognised as compliant in apps that do not use MSAL.",
+            "fr": "Active le plug-in Microsoft Enterprise SSO, qui transmet l'identité de l'appareil lors d'une connexion Entra. Sans le plug-in, un appareil conforme ne peut pas être reconnu comme tel dans les apps qui n'utilisent pas MSAL."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2070__GRANT__Mobile_Device_Access_Requirements": {
+      "doel": {
+        "nl": "Eist op iOS en Android een app met een app protection policy voor mobiele apps. Zo blijft bedrijfsdata op een persoonlijke telefoon binnen beschermde Microsoft-apps.",
+        "en": "Requires an app with an app protection policy for mobile apps on iOS and Android. That keeps company data on a personal phone inside protected Microsoft apps.",
+        "fr": "Exige sur iOS et Android une app couverte par une app protection policy pour les applications mobiles. Les données de l'entreprise restent ainsi dans des apps Microsoft protégées sur un téléphone personnel."
+      },
+      "intune": [
+        {
+          "targets": [
+            "@appProtection"
+          ],
+          "waarom": {
+            "nl": "De app protection policy waar `compliantApplication` naar vraagt. Zonder toegewezen policy voldoet geen enkele app en is de toegang op iOS en Android dicht.",
+            "en": "The app protection policy that `compliantApplication` asks for. Without an assigned policy no app qualifies and access on iOS and Android is closed.",
+            "fr": "L'app protection policy que demande `compliantApplication`. Sans stratégie affectée, aucune app ne satisfait et l'accès sur iOS et Android est fermé."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2080__GRANT__MFA_For_Device_Registration": {
+      "doel": {
+        "nl": "Eist MFA bij het registreren of joinen van een apparaat in Entra ID, zodat een gestolen wachtwoord alleen geen apparaat aan de tenant kan hangen.",
+        "en": "Requires MFA when registering or joining a device in Entra ID, so that a stolen password alone cannot attach a device to the tenant.",
+        "fr": "Exige la MFA lors de l'enregistrement ou de la jonction d'un appareil dans Entra ID, afin qu'un mot de passe volé ne suffise pas à rattacher un appareil au tenant."
+      }
+    },
+    "CXNM__STANDARD__2090__GRANT__Browser_Access_On_Unmanaged_Devices": {
+      "doel": {
+        "nl": "Eist in de browser een compliant of hybrid joined apparaat; op een onbeheerd apparaat is er via de browser geen toegang. Microsoft Intune en Intune Enrollment zijn uitgezonderd.",
+        "en": "Requires a compliant or hybrid joined device in the browser; on an unmanaged device there is no access through the browser. Microsoft Intune and Intune Enrollment are excluded.",
+        "fr": "Exige dans le navigateur un appareil conforme ou hybrid joined ; sur un appareil non géré, il n'y a pas d'accès par le navigateur. Microsoft Intune et Intune Enrollment sont exclus."
+      },
+      "letOp": [
+        {
+          "nl": "Chrome op Windows geeft de apparaatstatus alleen door met de extensie Microsoft Single Sign On; Firefox met zijn instelling voor Windows SSO. Zonder die extensie of instelling faalt de eis ook op een beheerd apparaat.",
+          "en": "Chrome on Windows only passes the device state with the Microsoft Single Sign On extension; Firefox with its Windows SSO setting. Without them the requirement fails even on a managed device.",
+          "fr": "Chrome sous Windows ne transmet l'état de l'appareil qu'avec l'extension Microsoft Single Sign On ; Firefox avec son paramètre Windows SSO. Sans eux, l'exigence échoue même sur un appareil géré."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC",
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "Bepaalt mee of een apparaat compliant is. Voldoet een apparaat hier niet aan, dan wordt het niet-compliant en houdt de compliant-eis van Conditional Access het tegen.",
+            "en": "Helps determine whether a device is compliant. If a device fails it, the device becomes non-compliant and the compliant-device requirement in Conditional Access stops it.",
+            "fr": "Contribue à déterminer si un appareil est conforme. Si un appareil n'y satisfait pas, il devient non conforme et l'exigence d'appareil conforme de Conditional Access le bloque."
+          }
+        },
+        {
+          "targets": [
+            "@deviceIdentityInBrowser"
+          ],
+          "waarom": {
+            "nl": "Zorgt dat de browser de apparaatstatus meegeeft. Edge doet dat alleen met een werkprofiel; Safari op de Mac en iOS via de Microsoft Enterprise SSO-plug-in. Ontbreekt dat, dan faalt de compliant-eis ook op een beheerd apparaat.",
+            "en": "Makes sure the browser passes the device state along. Edge only does so with a work profile; Safari on Mac and iOS through the Microsoft Enterprise SSO plug-in. Without it, the compliant-device requirement fails even on a managed device.",
+            "fr": "Garantit que le navigateur transmet l'état de l'appareil. Edge ne le fait qu'avec un profil professionnel ; Safari sur Mac et iOS via le plug-in Microsoft Enterprise SSO. Sans cela, l'exigence d'appareil conforme échoue même sur un appareil géré."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2100__GRANT__MFA_For_Admin_Portals": {
+      "doel": {
+        "nl": "Eist MFA op de Microsoft-beheerportalen en de Azure Service Management API, voor iedereen — ook wie geen beheerrol heeft.",
+        "en": "Requires MFA on the Microsoft admin portals and the Azure Service Management API, for everyone — including those without an admin role.",
+        "fr": "Exige la MFA sur les portails d'administration Microsoft et l'API Azure Service Management, pour tout le monde — y compris ceux sans rôle d'administration."
+      }
+    },
+    "CXNM__STANDARD__2110__GRANT__Token_Protection": {
+      "doel": {
+        "nl": "Eist token protection voor Exchange Online en SharePoint Online in desktopapps op Windows: het aanmeldtoken is aan het apparaat gebonden en werkt niet meer als het gestolen wordt.",
+        "en": "Requires token protection for Exchange Online and SharePoint Online in desktop apps on Windows: the sign-in token is bound to the device and stops working when it is stolen.",
+        "fr": "Exige la token protection pour Exchange Online et SharePoint Online dans les applications de bureau sous Windows : le jeton de connexion est lié à l'appareil et ne fonctionne plus s'il est volé."
+      },
+      "letOp": [
+        {
+          "nl": "Alleen Windows-desktopapps op een Entra joined, hybrid joined of geregistreerd apparaat. Een niet-ondersteunde client wordt geblokkeerd, niet overgeslagen — kijk eerst in de sign-in-logs welke clients aanmelden.",
+          "en": "Only Windows desktop apps on an Entra joined, hybrid joined or registered device. An unsupported client is blocked, not skipped — check the sign-in logs first for which clients sign in.",
+          "fr": "Uniquement les applications de bureau Windows sur un appareil Entra joined, hybrid joined ou enregistré. Un client non pris en charge est bloqué, pas ignoré — vérifiez d'abord dans les journaux de connexion quels clients se connectent."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "WIN/SettingsCatalog/Baseline_WIN_D_Microsoft_Office_Updates",
+            "WIN/SettingsCatalog/Baseline_WIN_D_Microsoft_OneDrive"
+          ],
+          "waarom": {
+            "nl": "Token protection werkt alleen in client-versies die gebonden tokens ondersteunen. Een Office-app of OneDrive-sync-client op een te oude versie wordt door deze policy geblokkeerd; deze Intune-policy houdt die clients bij.",
+            "en": "Token protection only works in client versions that support bound tokens. An Office app or OneDrive sync client on too old a version is blocked by this policy; this Intune policy keeps those clients current.",
+            "fr": "La token protection ne fonctionne que dans les versions de client qui prennent en charge les jetons liés. Une app Office ou un client de synchronisation OneDrive trop ancien est bloqué par cette stratégie ; cette stratégie Intune maintient ces clients à jour."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2120__GRANT__Phishing_Resistant_MFA_for_All_Users": {
+      "doel": {
+        "nl": "Eist phishing-resistente MFA voor alle gebruikers. Werkt alleen als passkeys en Windows Hello aan staan in het authentication methods policy (zie `authentication-methods/`).",
+        "en": "Requires phishing-resistant MFA for all users. Only works if passkeys and Windows Hello are enabled in the authentication methods policy (see `authentication-methods/`).",
+        "fr": "Exige une MFA résistante au phishing pour tous les utilisateurs. Ne fonctionne que si les passkeys et Windows Hello sont activés dans la stratégie des méthodes d'authentification (voir `authentication-methods/`)."
+      },
+      "letOp": [
+        {
+          "nl": "Staat aan voor iedereen: een gebruiker zonder passkey, Windows Hello of certificaat komt nergens meer in. Zorg dat registreren mogelijk is (TAP, `2185`) vóór een nieuwe tenant deze policy krijgt.",
+          "en": "On for everyone: a user without a passkey, Windows Hello or certificate cannot get in anywhere. Make sure registering is possible (TAP, `2185`) before a new tenant gets this policy.",
+          "fr": "Active pour tous : un utilisateur sans passkey, Windows Hello ou certificat n'accède plus à rien. Assurez-vous que l'enregistrement est possible (TAP, `2185`) avant qu'un nouveau tenant reçoive cette stratégie."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@windowsHello"
+          ],
+          "waarom": {
+            "nl": "Richt Windows Hello for Business in: op Windows de gewone manier om aan phishing-resistente MFA te voldoen. Zonder WHfB blijft daar alleen een losse passkey of beveiligingssleutel over.",
+            "en": "Sets up Windows Hello for Business: on Windows the usual way to meet phishing-resistant MFA. Without WHfB only a separate passkey or security key is left there.",
+            "fr": "Configure Windows Hello for Business : sous Windows, la manière habituelle de satisfaire à une MFA résistante au phishing. Sans WHfB, il ne reste qu'une passkey séparée ou une clé de sécurité."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups": {
+      "doel": {
+        "nl": "Eist phishing-resistente MFA voor de uitrolgroepen `CA-Registered-Phishing-MFA` en `CA-Exception-Authenticator-Phishing-MFA`: de groepsgewijze weg naar `2120`.",
+        "en": "Requires phishing-resistant MFA for the rollout groups `CA-Registered-Phishing-MFA` and `CA-Exception-Authenticator-Phishing-MFA`: the group-by-group route to `2120`.",
+        "fr": "Exige une MFA résistante au phishing pour les groupes de déploiement `CA-Registered-Phishing-MFA` et `CA-Exception-Authenticator-Phishing-MFA` : la voie groupe par groupe vers `2120`."
+      },
+      "letOp": [
+        {
+          "nl": "De groepen dragen de namen uit de brontenant (`CA-…`), niet de SG-U-conventie. Hernoemen breekt de koppeling met die tenant.",
+          "en": "The groups carry the names from the source tenant (`CA-…`), not the SG-U convention. Renaming breaks the link with that tenant.",
+          "fr": "Les groupes portent les noms du tenant source (`CA-…`), pas la convention SG-U. Les renommer rompt le lien avec ce tenant."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@windowsHello"
+          ],
+          "waarom": {
+            "nl": "Richt Windows Hello for Business in: op Windows de gewone manier om aan phishing-resistente MFA te voldoen. Zonder WHfB blijft daar alleen een losse passkey of beveiligingssleutel over.",
+            "en": "Sets up Windows Hello for Business: on Windows the usual way to meet phishing-resistant MFA. Without WHfB only a separate passkey or security key is left there.",
+            "fr": "Configure Windows Hello for Business : sous Windows, la manière habituelle de satisfaire à une MFA résistante au phishing. Sans WHfB, il ne reste qu'une passkey séparée ou une clé de sécurité."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2130__GRANT__Admins_Compliant_Device": {
+      "doel": {
+        "nl": "Eist voor de 28 beheerrollen een compliant of hybrid joined apparaat. Beheren vanaf een privélaptop kan dan niet meer.",
+        "en": "Requires a compliant or hybrid joined device for the 28 admin roles. Administering from a personal laptop is then no longer possible.",
+        "fr": "Exige un appareil conforme ou hybrid joined pour les 28 rôles d'administration. Administrer depuis un ordinateur personnel n'est alors plus possible."
+      },
+      "letOp": [
+        {
+          "nl": "Ook de break-glass-accounts hebben geen compliant apparaat: controleer dat ze in `SG-U-CA-Exclude-Breakglass` staan vóór deze policy aan gaat.",
+          "en": "The break-glass accounts have no compliant device either: check that they are in `SG-U-CA-Exclude-Breakglass` before this policy goes on.",
+          "fr": "Les comptes break-glass n'ont pas non plus d'appareil conforme : vérifiez qu'ils figurent dans `SG-U-CA-Exclude-Breakglass` avant d'activer cette stratégie."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC",
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "Bepaalt mee of een apparaat compliant is. Voldoet een apparaat hier niet aan, dan wordt het niet-compliant en houdt de compliant-eis van Conditional Access het tegen.",
+            "en": "Helps determine whether a device is compliant. If a device fails it, the device becomes non-compliant and the compliant-device requirement in Conditional Access stops it.",
+            "fr": "Contribue à déterminer si un appareil est conforme. Si un appareil n'y satisfait pas, il devient non conforme et l'exigence d'appareil conforme de Conditional Access le bloque."
+          }
+        },
+        {
+          "targets": [
+            "@deviceIdentityInBrowser"
+          ],
+          "waarom": {
+            "nl": "Zorgt dat de browser de apparaatstatus meegeeft. Edge doet dat alleen met een werkprofiel; Safari op de Mac en iOS via de Microsoft Enterprise SSO-plug-in. Ontbreekt dat, dan faalt de compliant-eis ook op een beheerd apparaat.",
+            "en": "Makes sure the browser passes the device state along. Edge only does so with a work profile; Safari on Mac and iOS through the Microsoft Enterprise SSO plug-in. Without it, the compliant-device requirement fails even on a managed device.",
+            "fr": "Garantit que le navigateur transmet l'état de l'appareil. Edge ne le fait qu'avec un profil professionnel ; Safari sur Mac et iOS via le plug-in Microsoft Enterprise SSO. Sans cela, l'exigence d'appareil conforme échoue même sur un appareil géré."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2150__GRANT__Cloud_PC_Mobile_Access": {
+      "doel": {
+        "nl": "Eist voor Windows 365 en Microsoft Remote Desktop op iOS en Android een app protection policy of een compliant toestel, zodat een Cloud PC niet vanaf een willekeurige telefoon bereikbaar is.",
+        "en": "Requires an app protection policy or a compliant device for Windows 365 and Microsoft Remote Desktop on iOS and Android, so that a Cloud PC cannot be reached from just any phone.",
+        "fr": "Exige une app protection policy ou un appareil conforme pour Windows 365 et Microsoft Remote Desktop sur iOS et Android, afin qu'un Cloud PC ne soit pas accessible depuis n'importe quel téléphone."
+      },
+      "intune": [
+        {
+          "targets": [
+            "@appProtection"
+          ],
+          "waarom": {
+            "nl": "Eén van de twee manieren om aan deze policy te voldoen: de app valt onder een app protection policy. Zonder toegewezen policy blijft alleen een compliant toestel over.",
+            "en": "One of the two ways to meet this policy: the app is covered by an app protection policy. Without an assigned policy only a compliant device is left.",
+            "fr": "L'une des deux façons de satisfaire à cette stratégie : l'app est couverte par une app protection policy. Sans stratégie affectée, il ne reste qu'un appareil conforme."
+          }
+        },
+        {
+          "targets": [
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "De andere manier: een compliant toestel. Bepaalt mee of een iPhone of Android-toestel als compliant telt.",
+            "en": "The other way: a compliant device. Helps determine whether an iPhone or Android device counts as compliant.",
+            "fr": "L'autre façon : un appareil conforme. Contribue à déterminer si un iPhone ou un appareil Android est considéré comme conforme."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2160__GRANT__Agent_Users_Compliant_Device": {
+      "doel": {
+        "nl": "Eist een compliant apparaat voor agent-users die vanaf een endpoint een sessie starten. Report-only; vraagt Microsoft Entra Agent ID.",
+        "en": "Requires a compliant device for agent users that start a session from an endpoint. Report-only; requires Microsoft Entra Agent ID.",
+        "fr": "Exige un appareil conforme pour les agent users qui ouvrent une session depuis un terminal. Report-only ; requiert Microsoft Entra Agent ID."
+      },
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC"
+          ],
+          "waarom": {
+            "nl": "Bepaalt of het endpoint waarvandaan een agent-user werkt compliant is. Voldoet het daar niet aan, dan houdt deze policy de agent-user tegen zodra hij uit report-only gaat.",
+            "en": "Determines whether the endpoint an agent user works from is compliant. If it fails, this policy stops the agent user once it leaves report-only.",
+            "fr": "Détermine si le terminal depuis lequel travaille un agent user est conforme. S'il ne l'est pas, cette stratégie bloque l'agent user dès qu'elle quitte le report-only."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2170__GRANT__MFA_For_Intune_Enrollment": {
+      "doel": {
+        "nl": "Eist MFA, elke keer opnieuw, bij het inschrijven in Intune (de app Microsoft Intune Enrollment). Een ander pad dan `2080`, op hetzelfde moment.",
+        "en": "Requires MFA, every time, when enrolling in Intune (the Microsoft Intune Enrollment app). A different path from `2080`, at the same moment.",
+        "fr": "Exige la MFA, à chaque fois, lors de l'inscription dans Intune (l'app Microsoft Intune Enrollment). Un autre chemin que `2080`, au même moment."
+      },
+      "letOp": [
+        {
+          "nl": "Een nieuwe medewerker zonder geregistreerde MFA-methode kan zijn eerste apparaat niet inschrijven. Geef bij indiensttreding een TAP uit.",
+          "en": "A new employee without a registered MFA method cannot enrol their first device. Issue a TAP at onboarding.",
+          "fr": "Un nouvel employé sans méthode MFA enregistrée ne peut pas inscrire son premier appareil. Délivrez un TAP lors de l'arrivée."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "MAC/SettingsCatalog/Baseline_MAC_D_Enrollment_Profile_Administrator_User_Affinity",
+            "MAC/SettingsCatalog/Baseline_MAC_D_Enrollment_Profile_Standard_User_Affinity"
+          ],
+          "waarom": {
+            "nl": "Setup Assistant met moderne authenticatie meldt aan bij Microsoft Intune Enrollment, dus deze CA-policy vraagt daar MFA. Heeft de gebruiker op dat moment geen werkend MFA-middel, dan loopt de inschrijving vast.",
+            "en": "Setup Assistant with modern authentication signs in to Microsoft Intune Enrollment, so this CA policy asks for MFA there. If the user has no working MFA method at that moment, enrolment gets stuck.",
+            "fr": "Setup Assistant avec authentification moderne se connecte à Microsoft Intune Enrollment ; cette stratégie CA y demande donc la MFA. Si l'utilisateur n'a pas de méthode MFA fonctionnelle à ce moment, l'inscription est bloquée."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__2180__GRANT__Register_Security_Info_TAP_Only": {
+      "doel": {
+        "nl": "Laat beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.",
+        "en": "Only allows security info (MFA methods, passkeys) to be registered with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.",
+        "fr": "N'autorise l'enregistrement des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk."
+      },
+      "letOp": [
+        {
+          "nl": "Het strength-id in het template is een placeholder (nul-GUID); bij uitrol moet het id van de aangemaakte strength erin. Controleer ook dat CIPP de custom strength meestuurt, anders rolt een lege policy uit.",
+          "en": "The strength id in the template is a placeholder (zero GUID); on deployment the id of the created strength must go in. Also check that CIPP sends the custom strength, or an empty policy is deployed.",
+          "fr": "L'id de strength du template est un placeholder (GUID nul) ; au déploiement, l'id de la strength créée doit y figurer. Vérifiez aussi que CIPP transmet la strength personnalisée, sinon une stratégie vide est déployée."
+        },
+        {
+          "nl": "Verlegt het aanvalsoppervlak naar de servicedesk: zonder identiteitsverificatie bij de TAP-aanvraag is de winst kleiner dan hij lijkt.",
+          "en": "Moves the attack surface to the service desk: without identity verification when a TAP is requested, the gain is smaller than it looks.",
+          "fr": "Déplace la surface d'attaque vers le service desk : sans vérification d'identité lors de la demande de TAP, le gain est plus faible qu'il n'y paraît."
+        }
+      ]
+    },
+    "CXNM__STANDARD__2185__GRANT__Register_Security_Info_Passkey_Rollout": {
+      "doel": {
+        "nl": "Eist voor de uitrolgroep `CA-Rollout-Phishing-MFA` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. Staan zowel deze als `2180` aan, dan voldoet alleen nog een TAP.",
+        "en": "Requires the `Passkey Rollout` strength for the rollout group `CA-Rollout-Phishing-MFA` when registering security info, and signing in again every seven days. With both this and `2180` on, only a TAP still qualifies.",
+        "fr": "Exige la strength `Passkey Rollout` pour le groupe de déploiement `CA-Rollout-Phishing-MFA` lors de l'enregistrement des infos de sécurité, avec une reconnexion tous les sept jours. Si celle-ci et `2180` sont actives, seul un TAP convient encore."
+      },
+      "letOp": [
+        {
+          "nl": "Het strength-id in het template is een placeholder (nul-GUID); bij uitrol moet het id van de aangemaakte strength erin.",
+          "en": "The strength id in the template is a placeholder (zero GUID); on deployment the id of the created strength must go in.",
+          "fr": "L'id de strength du template est un placeholder (GUID nul) ; au déploiement, l'id de la strength créée doit y figurer."
+        },
+        {
+          "nl": "SMS en spraak zitten niet in `Passkey Rollout`, omdat `authentication-methods/` ze uitzet.",
+          "en": "SMS and voice are not in `Passkey Rollout`, because `authentication-methods/` turns them off.",
+          "fr": "Le SMS et la voix ne figurent pas dans `Passkey Rollout`, car `authentication-methods/` les désactive."
+        }
+      ]
+    },
+    "CXNM__STANDARD__2190__GRANT__Windows_Hello_Passkeys": {
+      "doel": {
+        "nl": "Eist voor `U-WHfB-Passkeys` een Windows Hello-passkey: FIDO2, beperkt tot de Windows Hello-AAGUID's. Report-only. Een gewone WHfB-credential telt hier niet mee.",
+        "en": "Requires a Windows Hello passkey for `U-WHfB-Passkeys`: FIDO2, restricted to the Windows Hello AAGUIDs. Report-only. A regular WHfB credential does not count here.",
+        "fr": "Exige une passkey Windows Hello pour `U-WHfB-Passkeys` : FIDO2, limitée aux AAGUID Windows Hello. Report-only. Un credential WHfB ordinaire ne compte pas ici."
+      },
+      "letOp": [
+        {
+          "nl": "Wie op een joined toestel met WHfB werkt voldoet niet, en kan daar vaak ook geen Windows Hello-passkey registreren. Moet WHfB wel tellen, dan hoort `windowsHelloForBusiness` in de strength.",
+          "en": "Anyone working on a joined device with WHfB does not qualify, and often cannot register a Windows Hello passkey there either. If WHfB should count, `windowsHelloForBusiness` belongs in the strength.",
+          "fr": "Qui travaille sur un appareil joined avec WHfB ne satisfait pas, et ne peut souvent pas y enregistrer de passkey Windows Hello. Si WHfB doit compter, `windowsHelloForBusiness` doit figurer dans la strength."
+        },
+        {
+          "nl": "De strength staat de software-AAGUID van Windows Hello toe; `authentication-methods/` beperkt het profiel tot hardware en VBS. De twee lijsten spreken elkaar tegen.",
+          "en": "The strength allows the Windows Hello software AAGUID; `authentication-methods/` restricts the profile to hardware and VBS. The two lists contradict each other.",
+          "fr": "La strength autorise l'AAGUID logiciel de Windows Hello ; `authentication-methods/` limite le profil au matériel et au VBS. Les deux listes se contredisent."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "WIN/SettingsCatalog/Baseline_WIN_D_Windows_Hello_Passkey_PIN_Complexity_Alphanumeric",
+            "WIN/SettingsCatalog/Baseline_WIN_D_Windows_Hello_Passkey_PIN_Complexity_Numeric"
+          ],
+          "waarom": {
+            "nl": "Bepaalt de PIN van de Windows Hello-passkey die deze CA-policy eist. Strenger dan de gebruiker gewend is, en registreren gaat pas als de PIN aan de eis voldoet.",
+            "en": "Sets the PIN of the Windows Hello passkey that this CA policy requires. Stricter than users are used to, and registering only succeeds once the PIN meets the requirement.",
+            "fr": "Définit le code PIN de la passkey Windows Hello qu'exige cette stratégie CA. Plus strict que ce dont l'utilisateur a l'habitude, et l'enregistrement ne réussit qu'une fois le PIN conforme."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__3010__SESSION__Admin_Persistence": {
+      "doel": {
+        "nl": "Laat de 28 beheerrollen elke 9 uur opnieuw aanmelden en geeft hun geen blijvende browsersessie.",
+        "en": "Makes the 28 admin roles sign in again every 9 hours and gives them no persistent browser session.",
+        "fr": "Oblige les 28 rôles d'administration à se reconnecter toutes les 9 heures et ne leur accorde pas de session de navigateur persistante."
+      }
+    },
+    "CXNM__STANDARD__3020__SESSION__BYOD_Persistence": {
+      "doel": {
+        "nl": "Op een apparaat dat niet compliant is: elke 9 uur opnieuw aanmelden en geen blijvende browsersessie. Report-only.",
+        "en": "On a device that is not compliant: sign in again every 9 hours and no persistent browser session. Report-only.",
+        "fr": "Sur un appareil non conforme : reconnexion toutes les 9 heures et pas de session de navigateur persistante. Report-only."
+      },
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC",
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "Bepaalt welk apparaat als compliant telt en dus búiten deze sessiebegrenzing valt. Een beheerd apparaat dat niet-compliant wordt, valt eronder.",
+            "en": "Determines which device counts as compliant and therefore falls outside this session limit. A managed device that becomes non-compliant falls under it.",
+            "fr": "Détermine quel appareil est considéré comme conforme et échappe donc à cette limite de session. Un appareil géré qui devient non conforme y est soumis."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__3030__SESSION__Register_Security_Info_Requirements": {
+      "doel": {
+        "nl": "Begrenst de sessie waarmee beveiligingsinfo wordt geregistreerd op 90 dagen: wie langer aangemeld is, meldt eerst opnieuw aan. `2180` regelt waarmee je mag registreren.",
+        "en": "Limits the session used to register security info to 90 days: anyone signed in for longer signs in again first. `2180` governs what you may register with.",
+        "fr": "Limite à 90 jours la session utilisée pour enregistrer les infos de sécurité : qui est connecté depuis plus longtemps se reconnecte d'abord. `2180` règle avec quoi on peut s'enregistrer."
+      }
+    },
+    "CXNM__STANDARD__3040__SESSION__Block_File_Downloads_On_Unmanaged_Devices": {
+      "doel": {
+        "nl": "Op een apparaat dat niet compliant is: SharePoint, OneDrive en Exchange Online alleen in de browser en zonder downloaden. Voor Exchange werkt dit pas met de OWA-mailboxpolicy erbij.",
+        "en": "On a device that is not compliant: SharePoint, OneDrive and Exchange Online in the browser only, without downloads. For Exchange this only works with the OWA mailbox policy alongside it.",
+        "fr": "Sur un appareil non conforme : SharePoint, OneDrive et Exchange Online uniquement dans le navigateur et sans téléchargement. Pour Exchange, cela ne fonctionne qu'avec la stratégie de boîte aux lettres OWA."
+      },
+      "letOp": [
+        {
+          "nl": "Voor Exchange per tenant: `Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -ConditionalAccessPolicy ReadOnly`. Zonder die stap is de policy voor Exchange stil.",
+          "en": "For Exchange, per tenant: `Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -ConditionalAccessPolicy ReadOnly`. Without that step the policy is silent for Exchange.",
+          "fr": "Pour Exchange, par tenant : `Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -ConditionalAccessPolicy ReadOnly`. Sans cette étape, la stratégie est sans effet pour Exchange."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@complianceWIN",
+            "@complianceMAC",
+            "@complianceIOS",
+            "@complianceAND"
+          ],
+          "waarom": {
+            "nl": "Bepaalt welk apparaat als compliant telt en dus mag downloaden. Een beheerd apparaat dat niet-compliant wordt, krijgt alleen nog de browser zonder downloads.",
+            "en": "Determines which device counts as compliant and may therefore download. A managed device that becomes non-compliant only gets the browser without downloads.",
+            "fr": "Détermine quel appareil est considéré comme conforme et peut donc télécharger. Un appareil géré qui devient non conforme n'a plus que le navigateur sans téléchargement."
+          }
+        }
+      ]
+    },
+    "CXNM__STANDARD__3050__SESSION__Continuous_Access_Evaluation": {
+      "doel": {
+        "nl": "Zet strikte Continuous Access Evaluation aan: een ingetrokken sessie of een gewijzigde locatie geldt direct, niet pas als het token verloopt.",
+        "en": "Turns on strict Continuous Access Evaluation: a revoked session or a changed location takes effect immediately, not only when the token expires.",
+        "fr": "Active la Continuous Access Evaluation stricte : une session révoquée ou un emplacement modifié prend effet immédiatement, et pas seulement à l'expiration du jeton."
+      }
+    },
+    "CXNM__STANDARD__3060__SESSION__Defender_for_Cloud_Apps": {
+      "doel": {
+        "nl": "Leidt browsersessies via Defender for Cloud Apps, in monitor-only. Vraagt een licentie voor Defender for Cloud Apps.",
+        "en": "Routes browser sessions through Defender for Cloud Apps, in monitor-only. Requires a Defender for Cloud Apps licence.",
+        "fr": "Fait passer les sessions de navigateur par Defender for Cloud Apps, en monitor-only. Requiert une licence Defender for Cloud Apps."
+      },
+      "letOp": [
+        {
+          "nl": "Zonder licentie voor Defender for Cloud Apps is de sessiecontrole niet te kiezen en doet de policy niets.",
+          "en": "Without a Defender for Cloud Apps licence the session control cannot be selected and the policy does nothing.",
+          "fr": "Sans licence Defender for Cloud Apps, le contrôle de session ne peut pas être sélectionné et la stratégie ne fait rien."
+        }
+      ]
+    },
+    "CXNM__STANDARD__3070__SESSION__Session_Limits_All_Users": {
+      "doel": {
+        "nl": "Laat alle gebruikers elke 12 uur opnieuw aanmelden, ook gasten. Beheerders zitten met `3010` strenger op 9 uur.",
+        "en": "Makes all users sign in again every 12 hours, guests included. Admins are held to a stricter 9 hours by `3010`.",
+        "fr": "Oblige tous les utilisateurs à se reconnecter toutes les 12 heures, invités compris. Les administrateurs sont soumis à 9 heures, plus strict, par `3010`."
+      }
+    }
+  }
+}
