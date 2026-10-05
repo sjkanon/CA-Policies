@@ -213,7 +213,7 @@
       "displayName": "Temporary Access Pass only",
       "definition": {
         "displayName": "Temporary Access Pass only",
-        "description": "Only a one-time Temporary Access Pass satisfies this strength. Intended for the user action \"Register security information\": a new MFA method or passkey can then only be registered after the helpdesk has issued a TAP, not from an existing (possibly hijacked) session.",
+        "description": "One-time Temporary Access Pass only. For the user action Register security information: a new method requires a TAP.",
         "policyType": "custom",
         "requirementsSatisfied": "mfa",
         "allowedCombinations": [
@@ -230,7 +230,7 @@
       "displayName": "Passkey Rollout",
       "definition": {
         "displayName": "Passkey Rollout",
-        "description": "Every MFA method except SMS and voice, plus a Temporary Access Pass. For users in a passkey rollout: they may register their passkey with the MFA they already have.",
+        "description": "Every MFA method except SMS and voice, plus a Temporary Access Pass: passkey rollout users register with their own MFA.",
         "policyType": "custom",
         "requirementsSatisfied": "mfa",
         "allowedCombinations": [
@@ -257,7 +257,7 @@
       "displayName": "CA-WHfB-Passkeys",
       "definition": {
         "displayName": "CA-WHfB-Passkeys",
-        "description": "Only a passkey in the Windows Hello container (Microsoft Entra passkey on Windows) satisfies this strength: FIDO2, restricted to the Windows Hello AAGUIDs.",
+        "description": "Only a passkey in the Windows Hello container (Entra passkey on Windows): FIDO2 restricted to the Windows Hello AAGUIDs.",
         "policyType": "custom",
         "requirementsSatisfied": "mfa",
         "allowedCombinations": [

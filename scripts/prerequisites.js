@@ -32,6 +32,9 @@ const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
 const PREREQ_PATH = path.join(REPO_ROOT, "prerequisites", "ca-prerequisites.json");
 const METHODS_PATH = path.join(REPO_ROOT, "authentication-methods", "authentication-methods.json");
 
+/** Langer weigert Entra bij het aanmaken van een authentication strength. */
+const MAX_STRENGTH_DESCRIPTION = 120;
+
 /**
  * Een passkey profile richt zich op een groep, niet op directory-rollen. Die groep is dus
  * net zo goed een randvoorwaarde als een uitzonderingsgroep in een CA-template, en hoort in
@@ -250,6 +253,19 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
           `Dat is het id uit één tenant; in elke andere tenant wijst de grant daarmee naar niets. Zet de placeholder terug.`
       );
     }
+  }
+
+  // Entra weigert een authentication strength met een langere beschrijving ("Policy Description
+  // length cannot be longer than 120 characters") — pas bij het aanmaken, in CIPP of in
+  // New-CaPrerequisites.ps1, en dan halverwege een uitrol.
+  const teLang = [
+    ...[...refs.strengths].map(([naam, { file, definition }]) => [naam, file, definition.description]),
+    ...(prereq.authenticationStrengths || []).map((s) => [s.displayName, "prerequisites/ca-prerequisites.json", s.definition?.description]),
+  ].filter(([, , beschrijving]) => (beschrijving || "").length > MAX_STRENGTH_DESCRIPTION);
+  for (const [naam, waar, beschrijving] of teLang) {
+    errors.push(
+      `Authentication strength "${naam}" heeft in ${waar} een beschrijving van ${beschrijving.length} tekens; Entra accepteert er hooguit ${MAX_STRENGTH_DESCRIPTION}.`
+    );
   }
 
   for (const naam of strengthsOpNaam.keys()) {
