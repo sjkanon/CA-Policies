@@ -36,6 +36,7 @@ flowchart TD
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **out of** the source | Writes `cipp/ca-templates-import.json` (the templates, without tenant-specific values) and `cipp/baseline-stages.json` (stage, state and action per template). Reads `CATemplate/_manifest.json` for the optional templates. Everything on Report; `--remediate-stage1` sets stage 1 to Remediate, and refuses as long as there are templates new in stage 1 compared to the previous export — `--accept-new` confirms them. |
 | [`generate-docs.js`](generate-docs.js) | **from** the source | Writes `CATemplate/README.md` (and `.en`, `.fr`): every policy with who, what, state and stage, and per policy its own README with the purpose, the conditions, the pitfalls, the standards and the Intune policies it depends on (from `docs/policies.json`). With the IntuneBackup repo next to it, it also checks that those Intune paths exist and that every compliance policy is in a group. Runs after the export, because the stage comes from `cipp/baseline-stages.json`. `--check` writes nothing and fails if a README is out of date; a test does the same. |
 | [`sync-mirror.js`](sync-mirror.js) | mirror | Brings a second clone in line with what is in git here — see [below](#mirroring-to-a-second-clone). |
+| [`set-organisation.js`](set-organisation.js) | organisation | Puts the repo on a different prefix (`CATemplate/_organisation.json`): text, file names, then `cipp/` and the docs. |
 
 Every check script has a `*.test.js` next to it; `node --test scripts/*.test.js` runs them
 all. The tests also guard what the scripts themselves do not see: that the export in git is entirely on
@@ -106,6 +107,12 @@ strength — is English.
 
 `sync-mirror.js` is not part of the pipeline above. It brings the files in a second clone
 in line with what is in git here and makes one ordinary commit of it there.
+
+The mirror keeps its own prefix: if its `CATemplate/_organisation.json` has a different `prefix`
+than here, `set-organisation.js` runs there after copying. So everything here carries
+the prefix `CA - ` and in the mirror for instance `CXNM - STANDARD - `. If the target clone has
+no `_organisation.json` yet, the script refuses until you pass the prefix once:
+`--prefix "CXNM - STANDARD - "`. After that it is fixed there.
 
 ```bash
 node scripts/sync-mirror.js <target-dir> --dry-run   # first see what would shift

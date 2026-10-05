@@ -17,18 +17,27 @@
  * to be clean — but a mirror of uncommitted changes is a mirror of something that can still
  * change here, so it warns about that.
  *
+ * The target keeps its own organisation: if its CATemplate/_organisation.json has a different
+ * prefix than here, set-organisation.js runs there after copying, so the mirror gets the content
+ * from here under its own policy names. `--prefix` sets (or changes) that the first time; after
+ * that it is in the target's own _organisation.json. A target without one is refused without
+ * `--prefix`: otherwise the first sync would rename everything there to the prefix from here.
+ *
  * Usage:
  *   node scripts/sync-mirror.js <target-dir>              # copy and commit
  *   node scripts/sync-mirror.js <target-dir> --dry-run    # only show what would happen
  *   node scripts/sync-mirror.js <target-dir> --push       # and push the target clone
  *   node scripts/sync-mirror.js <target-dir> --message "…"
+ *   node scripts/sync-mirror.js <target-dir> --prefix "Contoso - "
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { validPrefix } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
+const ORGANISATION_REL = "CATemplate/_organisation.json";
 
 function git(cwd, args) {
   return execFileSync("git", ["-C", cwd, ...args], {
@@ -43,10 +52,11 @@ function trackedFiles(repo) {
 }
 
 function parseArgs(argv) {
-  const opts = { target: null, dryRun: false, push: false, message: null };
+  const opts = { target: null, dryRun: false, push: false, message: null, prefix: undefined };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") opts.dryRun = true;
+    else if (arg === "--prefix") opts.prefix = argv[++i];
     else if (arg === "--push") opts.push = true;
     else if (arg === "--message") opts.message = argv[++i];
     else if (arg.startsWith("--")) {
@@ -58,13 +68,17 @@ function parseArgs(argv) {
       process.exit(2);
     }
   }
+  if (opts.prefix !== undefined && !validPrefix(opts.prefix)) {
+    console.error(`Ongeldig voorvoegsel ${JSON.stringify(opts.prefix)}: het eindigt op " - " en bevat geen " \\ / : * ? < > | _.`);
+    process.exit(2);
+  }
   return opts;
 }
 
 const opts = parseArgs(process.argv.slice(2));
 
 if (!opts.target) {
-  console.error("Gebruik: node scripts/sync-mirror.js <doelmap> [--dry-run] [--push] [--message \"…\"]");
+  console.error("Gebruik: node scripts/sync-mirror.js <doelmap> [--dry-run] [--push] [--message \"…\"] [--prefix \"<tekst> - \"]");
   process.exit(2);
 }
 
@@ -83,6 +97,26 @@ const dirty = git(REPO_ROOT, ["status", "--porcelain"]).trim();
 if (dirty) {
   console.warn("Let op: de werkmap hier is niet schoon. De spiegel krijgt de huidige bestanden,");
   console.warn("ook wat nog niet gecommit is.\n");
+}
+
+/** Het voorvoegsel van een clone, of null als die nog geen _organisation.json heeft. */
+function prefixOf(root) {
+  const file = path.join(root, ORGANISATION_REL);
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")).prefix : null;
+}
+
+// Vóór het kopiëren lezen: daarna staat er de versie van hier.
+const sourcePrefix = prefixOf(REPO_ROOT);
+const wantedPrefix = opts.prefix ?? prefixOf(targetRoot);
+if (!wantedPrefix) {
+  console.error(`${ORGANISATION_REL} ontbreekt in ${targetRoot}, dus het voorvoegsel daar is onbekend.`);
+  console.error(`Geef het de eerste keer mee: --prefix "<tekst> - " (dat van hier is "${sourcePrefix}").`);
+  process.exit(1);
+}
+const convert = wantedPrefix !== sourcePrefix;
+if (convert) {
+  console.log(`De spiegel houdt voorvoegsel "${wantedPrefix}";`);
+  console.log("de lijst hieronder is vóór die omzetting, dus ruimer dan wat er uiteindelijk verandert.\n");
 }
 
 const source = trackedFiles(REPO_ROOT);
@@ -137,6 +171,16 @@ if (opts.dryRun) {
 if (total === 0) {
   console.log("De spiegel liep al gelijk.");
   process.exit(0);
+}
+
+if (convert) {
+  console.log("\nOmzetten naar het voorvoegsel van de spiegel (set-organisation.js daar):");
+  execFileSync(process.execPath, [path.join(targetRoot, "scripts", "set-organisation.js"), "--prefix", wantedPrefix], {
+    cwd: targetRoot,
+    stdio: ["ignore", "ignore", "inherit"],
+  });
+  const left = git(targetRoot, ["status", "--porcelain"]).trim();
+  console.log(left ? `${left.split("\n").length} wijziging(en) over na de omzetting.` : "Na de omzetting is er niets meer anders.");
 }
 
 const head = git(REPO_ROOT, ["rev-parse", "--short", "HEAD"]).trim();

@@ -5,13 +5,14 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { FILE_PREFIX } = require("./lib/organisation");
 const assert = require("node:assert");
 const { test } = require("node:test");
 
 const { build, isBij, validate } = require("./generate-docs");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "CATemplate");
-const templates = fs.readdirSync(TEMPLATE_DIR).filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".json"));
+const templates = fs.readdirSync(TEMPLATE_DIR).filter((f) => f.startsWith(FILE_PREFIX) && f.endsWith(".json"));
 const OVERVIEWS = ["README.md", "README.en.md", "README.fr.md"];
 
 test("de README's in CATemplate/ zijn bij (anders: node scripts/generate-docs.js)", () => {
@@ -47,19 +48,19 @@ test("geen README per policy zonder template (wees)", () => {
   const files = new Set(Object.keys(build()));
   const wezen = fs
     .readdirSync(TEMPLATE_DIR)
-    .filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".md"))
+    .filter((f) => f.startsWith(FILE_PREFIX) && f.endsWith(".md"))
     .filter((f) => !files.has(path.join(TEMPLATE_DIR, f)));
   assert.deepStrictEqual(wezen, []);
 });
 
 test("docs/policies.json: een template zonder doel of een koppeling naar een onbekende groep faalt", () => {
-  const t = [{ name: "CXNM__STANDARD__9999__BLOCK__Test" }];
+  const t = [{ name: "CA__9999__BLOCK__Test" }];
   const ok = { nl: "a", en: "b", fr: "c" };
-  assert.deepStrictEqual(validate(t, { groepen: {}, policies: { CXNM__STANDARD__9999__BLOCK__Test: { doel: ok } } }), []);
+  assert.deepStrictEqual(validate(t, { groepen: {}, policies: { CA__9999__BLOCK__Test: { doel: ok } } }), []);
   assert.strictEqual(validate(t, { groepen: {}, policies: {} }).length, 1);
-  assert.strictEqual(validate(t, { groepen: {}, policies: { CXNM__STANDARD__9999__BLOCK__Test: { doel: { nl: "a" } } } }).length, 1);
+  assert.strictEqual(validate(t, { groepen: {}, policies: { CA__9999__BLOCK__Test: { doel: { nl: "a" } } } }).length, 1);
   const metGroep = { doel: ok, intune: [{ targets: ["@bestaatNiet"], waarom: ok }] };
-  assert.strictEqual(validate(t, { groepen: {}, policies: { CXNM__STANDARD__9999__BLOCK__Test: metGroep } }).length, 1);
-  const wees = { CXNM__STANDARD__9999__BLOCK__Test: { doel: ok }, CXNM__STANDARD__0000__BLOCK__Weg: { doel: ok } };
+  assert.strictEqual(validate(t, { groepen: {}, policies: { CA__9999__BLOCK__Test: metGroep } }).length, 1);
+  const wees = { CA__9999__BLOCK__Test: { doel: ok }, CA__0000__BLOCK__Weg: { doel: ok } };
   assert.strictEqual(validate(t, { groepen: {}, policies: wees }).length, 1);
 });

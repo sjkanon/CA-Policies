@@ -51,7 +51,7 @@ Solid arrows write; dotted lines only read.
 
 | Folder | What it holds | Made by | Picked up by |
 |---|---|---|---|
-| [`CATemplate/`](../CATemplate/README.en.md) | The policies, one `CXNM__STANDARD__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
+| [`CATemplate/`](../CATemplate/README.en.md) | The policies, one `CA__<number>__<BLOCK\|GRANT\|SESSION>__<Name>.json` each, plus `_manifest.json` | hand (export from CIPP) | all scripts, IntuneBackup's `generate-compliance.js` |
 | [`cipp/`](../cipp/README.en.md) | Import file and stage layout for a CIPP baseline | `export-cipp-baseline.js` | CIPP (manual import) |
 | [`prerequisites/`](../prerequisites/README.en.md) | Groups, named locations, custom authentication strengths and authentication contexts that templates refer to | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.en.md) | Desired state of the authentication methods policy, with passkey profiles | hand | `authentication-methods.js`, the two Entra scripts |
@@ -66,6 +66,7 @@ Solid arrows write; dotted lines only read.
 |---|---|---|
 | `state` (field in every template) | Stage 1 (`enabled`) or stage 2 (`disabled`, report-only); also the phase in COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, IntuneBackup's `generate-compliance.js` |
 | `CATemplate/_manifest.json` | Which templates are optional (stage 3), with the reason | `export-cipp-baseline.js` |
+| `CATemplate/_organisation.json` | The prefix of the policies (`CA - `, file name `CA__`) | every script via `scripts/lib/organisation.js`; change it with `set-organisation.js` |
 | `prerequisites/ca-prerequisites.json` | What must exist in the tenant before deployment, and how dangerous it is if it is missing | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | `controls/ca-controls.json` | Which standards labels each template fulfils | `check-controls.js`, `generate-docs.js`, IntuneBackup's `generate-compliance.js` |
 | `docs/policies.json` | What each template does, what to watch out for, and which Intune policies it depends on | `generate-docs.js`, IntuneBackup's `generate-docs.js` |
@@ -73,7 +74,7 @@ Solid arrows write; dotted lines only read.
 
 `_manifest.json` sits in `CATemplate/` like the `_` files in IntuneBackup's
 `IntuneTemplate/`: next to the templates it describes. The scripts only read
-`CXNM__STANDARD__*.json` as a template, and to CIPP it is a `.json` without `displayName` — no
+`CA__*.json` as a template, and to CIPP it is a `.json` without `displayName` — no
 policy comes out of it (see [below](#what-cipp-does-with-this-repo)).
 
 ## Stages
@@ -103,6 +104,7 @@ Three templates are fixed on Report until their prerequisite is in the tenant: `
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groups, locations and strengths in the tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | the authentication methods policy in the tenant (with `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | nothing — only a report |
+| – | `set-organisation.js` | `CATemplate/_organisation.json`, every text file | a different prefix in text and file names, then `cipp/` and the docs |
 | – | `sync-mirror.js` | `git ls-files` | a second clone |
 
 Steps 1 to 6 are run by [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
@@ -118,7 +120,7 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 | CIPP | repo → CIPP | import `cipp/ca-templates-import.json`, build the baseline according to `cipp/baseline-stages.json` | The baseline in CIPP is a copy that is updated by hand |
 | Microsoft Graph | repo → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | `-WhatIf` first; the id of a custom strength goes into the CIPP deployment by hand |
 | GitHub Actions | repo → repo | `generate-cipp.yml` opens a PR | the only workflow |
-| Mirror clone | repo → mirror | `sync-mirror.js <target-dir> --push` | its own history on that side, no force push; run it *after* the pipeline |
+| Mirror clone | repo → mirror | `sync-mirror.js <target-dir> --push` | its own history on that side, no force push; run it *after* the pipeline. The mirror keeps its own prefix (`set-organisation.js` there) |
 
 ### What CIPP does with this repo
 
@@ -132,8 +134,8 @@ after every change. Details: [scripts/README.en.md](../scripts/README.en.md).
 
 ## Conventions
 
-- **Naming:** `CXNM - STANDARD - <number> - <BLOCK|GRANT|SESSION> - <Description>` in the tenant,
-  `CXNM__STANDARD__<number>__<TYPE>__<Name>.json` as a file. The keys in `_manifest.json` and
+- **Naming:** `CA - <number> - <BLOCK|GRANT|SESSION> - <Description>` in the tenant,
+  `CA__<number>__<TYPE>__<Name>.json` as a file. The keys in `_manifest.json` and
   `ca-controls.json` are that file name without `.json`.
 - **GUIDs stay the same**: the GUID identifies the CIPP template row; a new GUID results in
   a second template with the same name.

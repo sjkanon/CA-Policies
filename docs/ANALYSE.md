@@ -40,8 +40,8 @@ naast drie persona- of nummergebaseerde frameworks:
 Het legde ook de herkomst vast, en dat is nog steeds het belangrijkste stuk context in deze
 repo: **onze nummering *is* Chronlunds baseline.** De reeks `1010`–`3040`, de indeling
 BLOCK/GRANT/SESSION en de naamvorm `GLOBAL - nnnn - ACTIE - Omschrijving` komen één op één
-uit zijn ontwerp. Dat verklaart waarom alles één prefix draagt — sinds 30 september 2026
-`CXNM - STANDARD` in plaats van Chronlunds `GLOBAL` — terwijl de andere twee
+uit zijn ontwerp. Dat verklaart waarom alles één prefix draagt — sinds 5 oktober 2026 een
+voorvoegsel per organisatie in plaats van Chronlunds `GLOBAL` — terwijl de andere twee
 frameworks persona-gebaseerd zijn — zie *Waarom er geen persona's zijn* hieronder.
 
 **Dat rapport is verlopen.** Het beschrijft 20 templates; er zijn er 33. En dat is geen
@@ -256,9 +256,10 @@ afwijst — *"één regel per maatregel, niet per policy"* — omdat het twee po
 oplevert voor één vraag.
 
 **Het prefix.** Tot 30 september 2026 heette alles `GLOBAL`, naar Chronlund. Dat suggereerde een
-tweede dimensie die er niet is en ook niet komt. Nu is het `CXNM - STANDARD` in de tenant en
-`CXNM__STANDARD__` als bestandsnaam: het zegt van wie de set is en dat het de standaard is, niet
-voor wie. De nummering is ongewijzigd. Als er ooit een tweede persona bijkomt, is dat een
+tweede dimensie die er niet is en ook niet komt. Van 30 september tot 5 oktober 2026 was het `CXNM - STANDARD`; nu staat het
+in `CATemplate/_organisation.json` (generiek `CA - `, als bestandsnaam `CA__`) en zet
+`scripts/set-organisation.js` een kopie om naar een eigen voorvoegsel. Het zegt van wie de set is,
+niet voor wie. De nummering is ongewijzigd. Als er ooit een tweede persona bijkomt, is dat een
 herontwerp en geen toevoeging.
 
 ## Wat we bewust niet doen
@@ -532,7 +533,8 @@ ze droegen wat de set er bewust uit houdt: echte strength-id's, IP-ranges van tw
 en een klantnaam in de displayName.
 
 Tegelijk is het prefix veranderd: `GLOBAL` wordt `CXNM - STANDARD` in de tenant en
-`CXNM__STANDARD__` als bestandsnaam. Zie *Waarom er geen persona's zijn*.
+`CXNM__STANDARD__` als bestandsnaam. Op 5 oktober 2026 werd dat het generieke `CA` / `CA__`.
+Zie *Waarom er geen persona's zijn*.
 
 ## Wat is aangepast
 

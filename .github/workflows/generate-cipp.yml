@@ -22,6 +22,7 @@ on:
       - "scripts/check-controls.js"
       - "scripts/authentication-methods.js"
       - "scripts/generate-docs.js"
+      - "scripts/lib/**"
       - "scripts/*.test.js"
       - ".github/workflows/generate-cipp.yml"
   # Also on a PR, and that is the more important of the two: a template that refers to an
@@ -39,6 +40,7 @@ on:
       - "scripts/check-controls.js"
       - "scripts/authentication-methods.js"
       - "scripts/generate-docs.js"
+      - "scripts/lib/**"
       - "scripts/*.test.js"
       - ".github/workflows/generate-cipp.yml"
   workflow_dispatch:

@@ -3,9 +3,9 @@
 # CA-Policies
 
 `CATemplate/` is the source: the agreed Conditional Access policies in CIPP template format
-(a Table Storage row with a nested `JSON` string), numbered `CXNM__STANDARD__1xxx` BLOCK, `2xxx` GRANT
+(a Table Storage row with a nested `JSON` string), numbered `CA__1xxx` BLOCK, `2xxx` GRANT
 and `3xxx` SESSION. 44 templates. The numbering and the layout come from Daniel Chronlund's CA design;
-why everything is called `CXNM - STANDARD` and there are no personas is explained in [`ANALYSE.en.md`](docs/ANALYSE.en.md#why-there-are-no-personas).
+why everything carries one prefix and there are no personas is explained in [`ANALYSE.en.md`](docs/ANALYSE.en.md#why-there-are-no-personas).
 
 ```mermaid
 flowchart LR
@@ -60,7 +60,7 @@ templates.
 
 ## Adding a policy
 
-1. Put the template in `CATemplate/` as `CXNM__STANDARD__<number>__<BLOCK|GRANT|SESSION>__<Name>.json`.
+1. Put the template in `CATemplate/` as `CA__<number>__<BLOCK|GRANT|SESSION>__<Name>.json`.
 2. Does the policy require a licence, or is it a per-tenant decision? Then put it in
    [`CATemplate/_manifest.json`](CATemplate/_manifest.json) with `optional: true` and a `reden`.
    It then goes to stage 3 and stays on Report there.

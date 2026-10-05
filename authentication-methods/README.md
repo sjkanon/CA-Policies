@@ -12,8 +12,8 @@ mis als je er één los bekijkt:
 
 | Als dit hier uit staat | Dan gebeurt dit aan de CA-kant |
 |---|---|
-| Passkey (FIDO2) | `CXNM__STANDARD__2120` eist een phishing-bestendige methode die niemand heeft — de tenant is dicht |
-| Temporary Access Pass | `CXNM__STANDARD__2180` laat registratie alleen achter een TAP toe; een nieuwe medewerker kan dan niets registreren |
+| Passkey (FIDO2) | `CA__2120` eist een phishing-bestendige methode die niemand heeft — de tenant is dicht |
+| Temporary Access Pass | `CA__2180` laat registratie alleen achter een TAP toe; een nieuwe medewerker kan dan niets registreren |
 
 `scripts/authentication-methods.js` controleert die twee koppelingen tegen de werkelijke `state`
 van die templates, en faalt hard. Dat is geen schemavalidatie maar de enige plek waar deze

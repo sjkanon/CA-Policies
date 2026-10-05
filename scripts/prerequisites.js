@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Guards that every group, named location, custom authentication strength and authentication
- * context that CATemplate/CXNM__STANDARD__*.json refers to has a definition in
+ * context that CATemplate/CA__*.json refers to has a definition in
  * prerequisites/ca-prerequisites.json — plus the group a passkey profile in
  * authentication-methods/ targets.
  *
@@ -25,6 +25,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { FILE_PREFIX } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -54,11 +55,11 @@ function readPrerequisites() {
   return JSON.parse(fs.readFileSync(PREREQ_PATH, "utf8"));
 }
 
-/** Alle CXNM__STANDARD__*.json, geparsed: { file, row, policy }. */
+/** Alle CA__*.json, geparsed: { file, row, policy }. */
 function readTemplates() {
   return fs
     .readdirSync(TEMPLATE_DIR)
-    .filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".json"))
+    .filter((f) => f.startsWith(FILE_PREFIX) && f.endsWith(".json"))
     .sort()
     .map((f) => {
       const row = JSON.parse(fs.readFileSync(path.join(TEMPLATE_DIR, f), "utf8"));

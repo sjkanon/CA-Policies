@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates, from CATemplate/CXNM__STANDARD__*.json, the two files needed to deploy this set as a
+ * Generates, from CATemplate/CA__*.json, the two files needed to deploy this set as a
  * CIPP baseline:
  *
  *   cipp/ca-templates-import.json   the templates in CIPP's CATemplate table shape, ready to
@@ -33,6 +33,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { PREFIX } = require("./lib/organisation");
 const { readPrerequisites, readTemplates, collectReferences, validate } = require("./prerequisites");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
@@ -184,6 +185,9 @@ function stapSamenvatting(wijzigingen) {
   return ["## CIPP-baseline: wijzigingen in de stage-indeling", "", ...regels, ""].join("\n");
 }
 
+/** "CA - " -> "CA Baseline v1.0", "CXNM - STANDARD - " -> "CXNM - STANDARD CA Baseline v1.0". */
+const baselineName = (prefix) => `${prefix.replace(/ - $/, "").replace(/(^| )CA$/, "")} CA Baseline v1.0`.trimStart();
+
 function main() {
   const remediateStage1 = process.argv.includes("--remediate-stage1");
   const accepteerNieuw = process.argv.includes("--accept-new");
@@ -286,7 +290,7 @@ function main() {
     version: "cipp-baseline-v1.0",
     generatedAt: new Date().toISOString().slice(0, 10),
     generatedBy: "scripts/export-cipp-baseline.js",
-    baselineName: "CXNM - STANDARD CA Baseline v1.0",
+    baselineName: baselineName(PREFIX),
     _comment: [
       "ONS formaat, niet dat van CIPP — zie de kop van export-cipp-baseline.js. Elke regel in",
       "'standards' is één keer de standard 'Conditional Access Template' toevoegen in het",

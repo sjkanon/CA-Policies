@@ -51,7 +51,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 
 | Map | Wat erin staat | Gemaakt door | Opgepikt door |
 |---|---|---|---|
-| [`CATemplate/`](../CATemplate/README.md) | De policies, één `CXNM__STANDARD__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
+| [`CATemplate/`](../CATemplate/README.md) | De policies, één `CA__<nummer>__<BLOCK\|GRANT\|SESSION>__<Naam>.json` per stuk, plus `_manifest.json` | hand (export uit CIPP) | alle scripts, IntuneBackup's `generate-compliance.js` |
 | [`cipp/`](../cipp/README.md) | Importbestand en stage-indeling voor een CIPP-baseline | `export-cipp-baseline.js` | CIPP (handmatige import) |
 | [`prerequisites/`](../prerequisites/README.md) | Groepen, named locations, custom authentication strengths en authentication contexts waar templates naar verwijzen | hand | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.md) | Gewenste stand van het authentication methods policy, met passkey-profielen | hand | `authentication-methods.js`, de twee Entra-scripts |
@@ -66,6 +66,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 |---|---|---|
 | `state` (veld in elk template) | Stage 1 (`enabled`) of stage 2 (`disabled`, report-only); ook de fase in COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, IntuneBackup's `generate-compliance.js` |
 | `CATemplate/_manifest.json` | Welke templates optioneel zijn (stage 3), met de reden | `export-cipp-baseline.js` |
+| `CATemplate/_organisation.json` | Het voorvoegsel van de policies (`CA - `, bestandsnaam `CA__`) | alle scripts via `scripts/lib/organisation.js`; wijzigen met `set-organisation.js` |
 | `prerequisites/ca-prerequisites.json` | Wat er in de tenant moet bestaan vóór de uitrol, en hoe gevaarlijk het is als het ontbreekt | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | `controls/ca-controls.json` | Welke normlabels elk template invult | `check-controls.js`, `generate-docs.js`, IntuneBackup's `generate-compliance.js` |
 | `docs/policies.json` | Wat elk template doet, waar je op let, en van welke Intune-policies hij afhangt | `generate-docs.js`, IntuneBackup's `generate-docs.js` |
@@ -73,7 +74,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 
 `_manifest.json` staat in `CATemplate/` zoals de `_`-bestanden in IntuneBackup's
 `IntuneTemplate/`: naast de templates die hij beschrijft. De scripts lezen alleen
-`CXNM__STANDARD__*.json` als template, en voor CIPP is het een `.json` zonder `displayName` — daar komt
+`CA__*.json` als template, en voor CIPP is het een `.json` zonder `displayName` — daar komt
 geen policy uit (zie [hieronder](#wat-cipp-met-deze-repo-doet)).
 
 ## Stages
@@ -103,6 +104,7 @@ Drie templates staan vast op Report tot hun randvoorwaarde in de tenant staat: `
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groepen, locaties en strengths in de tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | het authentication methods policy in de tenant (met `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | niets — alleen een rapport |
+| – | `set-organisation.js` | `CATemplate/_organisation.json`, alle tekstbestanden | ander voorvoegsel in tekst en bestandsnamen, daarna `cipp/` en de docs |
 | – | `sync-mirror.js` | `git ls-files` | een tweede clone |
 
 Stap 1 t/m 6 draait [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
@@ -118,7 +120,7 @@ na elke wijziging. Details: [scripts/README.md](../scripts/README.md).
 | CIPP | repo → CIPP | `cipp/ca-templates-import.json` importeren, de baseline opbouwen volgens `cipp/baseline-stages.json` | De baseline in CIPP is een kopie die met de hand wordt bijgewerkt |
 | Microsoft Graph | repo → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | eerst `-WhatIf`; het id van een custom strength met de hand in de CIPP-uitrol |
 | GitHub Actions | repo → repo | `generate-cipp.yml` opent een PR | de enige workflow |
-| Spiegelclone | repo → spiegel | `sync-mirror.js <doelmap> --push` | eigen geschiedenis aan die kant, geen force-push; draai het ná de pijplijn |
+| Spiegelclone | repo → spiegel | `sync-mirror.js <doelmap> --push` | eigen geschiedenis aan die kant, geen force-push; draai het ná de pijplijn. De spiegel houdt zijn eigen voorvoegsel (`set-organisation.js` daar) |
 
 ### Wat CIPP met deze repo doet
 
@@ -132,8 +134,8 @@ na elke wijziging. Details: [scripts/README.md](../scripts/README.md).
 
 ## Afspraken
 
-- **Naamgeving:** `CXNM - STANDARD - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` in de tenant,
-  `CXNM__STANDARD__<nummer>__<TYPE>__<Naam>.json` als bestand. De sleutels in `_manifest.json` en
+- **Naamgeving:** `CA - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` in de tenant,
+  `CA__<nummer>__<TYPE>__<Naam>.json` als bestand. De sleutels in `_manifest.json` en
   `ca-controls.json` zijn die bestandsnaam zonder `.json`.
 - **GUID's blijven gelijk**: de GUID identificeert de CIPP-templaterij; een nieuwe GUID levert
   een tweede template met dezelfde naam op.

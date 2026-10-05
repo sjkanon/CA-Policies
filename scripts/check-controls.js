@@ -25,6 +25,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { FILE_PREFIX } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -49,7 +50,7 @@ function readControls() {
 function readTemplateNames() {
   return fs
     .readdirSync(TEMPLATE_DIR)
-    .filter((f) => f.startsWith("CXNM__STANDARD__") && f.endsWith(".json"))
+    .filter((f) => f.startsWith(FILE_PREFIX) && f.endsWith(".json"))
     .map((f) => f.replace(/\.json$/, ""))
     .sort();
 }

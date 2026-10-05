@@ -36,6 +36,7 @@ flowchart TD
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **depuis** la source | Écrit `cipp/ca-templates-import.json` (les templates, sans valeurs propres au tenant) et `cipp/baseline-stages.json` (stage, state et action par template). Lit `CATemplate/_manifest.json` pour les templates optionnels. Tout sur Report ; `--remediate-stage1` met le stage 1 sur Remediate, et refuse tant que des templates sont nouveaux au stage 1 par rapport à l'export précédent — `--accept-new` les confirme. |
 | [`generate-docs.js`](generate-docs.js) | **depuis** la source | Écrit `CATemplate/README.md` (et `.en`, `.fr`) : chaque stratégie avec pour qui, quoi, state et stage, et par stratégie son propre README avec l'objectif, les conditions, les pièges, les normes et les stratégies Intune dont elle dépend (depuis `docs/policies.json`). Avec le dépôt IntuneBackup à côté, il vérifie aussi que ces chemins Intune existent et que chaque stratégie de conformité figure dans un groupe. S'exécute après l'export, car le stage vient de `cipp/baseline-stages.json`. `--check` n'écrit rien et échoue si un README est périmé ; un test fait de même. |
 | [`sync-mirror.js`](sync-mirror.js) | miroir | Aligne un second clone sur ce qui est dans git ici — voir [ci-dessous](#mise-en-miroir-vers-un-second-clone). |
+| [`set-organisation.js`](set-organisation.js) | organisation | Passe le dépôt sur un autre préfixe (`CATemplate/_organisation.json`) : texte, noms de fichiers, puis `cipp/` et les docs. |
 
 Chaque script de contrôle a un `*.test.js` à côté de lui ; `node --test scripts/*.test.js` les exécute
 tous. Les tests surveillent aussi ce que les scripts eux-mêmes ne voient pas : que l'export dans git
@@ -106,6 +107,12 @@ description d'un groupe ou d'une authentication strength — est en anglais.
 
 `sync-mirror.js` ne fait pas partie du pipeline ci-dessus. Il aligne les fichiers d'un second clone
 sur ce qui est dans git ici et en fait un commit ordinaire là-bas.
+
+Le miroir garde son propre préfixe : si son `CATemplate/_organisation.json` a un autre `prefix`
+qu'ici, `set-organisation.js` s'exécute là-bas après la copie. Ainsi tout porte ici le
+préfixe `CA - ` et dans le miroir par exemple `CXNM - STANDARD - `. Si le clone cible n'a
+pas encore de `_organisation.json`, le script refuse tant que vous ne passez pas le préfixe une
+fois : `--prefix "CXNM - STANDARD - "`. Ensuite, il y est fixé.
 
 ```bash
 node scripts/sync-mirror.js <doelmap> --dry-run   # d'abord voir ce qui changerait

@@ -3,9 +3,9 @@
 # CA-Policies
 
 `CATemplate/` est la source : les stratégies Conditional Access convenues au format de template CIPP
-(ligne Table Storage avec une chaîne `JSON` imbriquée), numérotées `CXNM__STANDARD__1xxx` BLOCK, `2xxx` GRANT
+(ligne Table Storage avec une chaîne `JSON` imbriquée), numérotées `CA__1xxx` BLOCK, `2xxx` GRANT
 et `3xxx` SESSION. 44 templates. La numérotation et l'organisation viennent de la conception CA de
-Daniel Chronlund ; pourquoi tout s'appelle `CXNM - STANDARD` et pourquoi il n'y a pas de personas est
+Daniel Chronlund ; pourquoi tout porte un seul préfixe et pourquoi il n'y a pas de personas est
 expliqué dans [`ANALYSE.fr.md`](docs/ANALYSE.fr.md#pourquoi-il-ny-a-pas-de-personas).
 
 ```mermaid
@@ -61,7 +61,7 @@ ces templates.
 
 ## Ajouter une stratégie
 
-1. Placez le template dans `CATemplate/` sous `CXNM__STANDARD__<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json`.
+1. Placez le template dans `CATemplate/` sous `CA__<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json`.
 2. La stratégie exige-t-elle une licence ou est-elle une décision par tenant ? Ajoutez-la alors dans
    [`CATemplate/_manifest.json`](CATemplate/_manifest.json) avec `optional: true` et une `reden`.
    Elle passe alors au stage 3 et y reste sur Report.

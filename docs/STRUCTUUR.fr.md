@@ -51,7 +51,7 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 
 | Dossier | Contenu | Créé par | Repris par |
 |---|---|---|---|
-| [`CATemplate/`](../CATemplate/README.fr.md) | Les stratégies, un `CXNM__STANDARD__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
+| [`CATemplate/`](../CATemplate/README.fr.md) | Les stratégies, un `CA__<numéro>__<BLOCK\|GRANT\|SESSION>__<Nom>.json` par stratégie, plus `_manifest.json` | main (export depuis CIPP) | tous les scripts, `generate-compliance.js` d'IntuneBackup |
 | [`cipp/`](../cipp/README.fr.md) | Fichier d'import et répartition en stages pour une baseline CIPP | `export-cipp-baseline.js` | CIPP (import manuel) |
 | [`prerequisites/`](../prerequisites/README.fr.md) | Groupes, named locations, custom authentication strengths et authentication contexts auxquels les templates font référence | main | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | [`authentication-methods/`](../authentication-methods/README.fr.md) | État souhaité de l'authentication methods policy, avec les profils passkey | main | `authentication-methods.js`, les deux scripts Entra |
@@ -66,13 +66,14 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 |---|---|---|
 | `state` (champ de chaque template) | Stage 1 (`enabled`) ou stage 2 (`disabled`, report-only) ; aussi la phase dans COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, `generate-compliance.js` d'IntuneBackup |
 | `CATemplate/_manifest.json` | Quels templates sont optionnels (stage 3), avec la raison | `export-cipp-baseline.js` |
+| `CATemplate/_organisation.json` | Le préfixe des stratégies (`CA - `, nom de fichier `CA__`) | tous les scripts via `scripts/lib/organisation.js` ; à changer avec `set-organisation.js` |
 | `prerequisites/ca-prerequisites.json` | Ce qui doit exister dans le tenant avant le déploiement, et à quel point c'est dangereux si cela manque | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | `controls/ca-controls.json` | Quels libellés de normes chaque template couvre | `check-controls.js`, `generate-docs.js`, `generate-compliance.js` d'IntuneBackup |
 | `docs/policies.json` | Ce que fait chaque template, les points d'attention, et de quelles stratégies Intune il dépend | `generate-docs.js`, `generate-docs.js` d'IntuneBackup |
 | `authentication-methods/authentication-methods.json` | Quelles méthodes d'authentification sont activées ou désactivées, dans quel ordre, et les profils passkey | `authentication-methods.js`, `Set-EntraAuthenticationMethods.ps1`, `Test-EntraPasskeyReadiness.ps1` |
 
 `_manifest.json` se trouve dans `CATemplate/` comme les fichiers `_` dans `IntuneTemplate/`
-d'IntuneBackup : à côté des templates qu'il décrit. Les scripts ne lisent que `CXNM__STANDARD__*.json` comme
+d'IntuneBackup : à côté des templates qu'il décrit. Les scripts ne lisent que `CA__*.json` comme
 template, et pour CIPP c'est un `.json` sans `displayName` — aucune stratégie n'en sort (voir
 [ci-dessous](#ce-que-cipp-fait-de-ce-dépôt)).
 
@@ -103,6 +104,7 @@ tenant : `1040` (pays), `1060` (plages IP) et `1180` (Global Secure Access).
 | – | `New-CaPrerequisites.ps1` | `prerequisites/` | groupes, emplacements et strengths dans le tenant |
 | – | `Set-EntraAuthenticationMethods.ps1` | `authentication-methods/` | l'authentication methods policy dans le tenant (avec `-Apply`) |
 | – | `Test-EntraPasskeyReadiness.ps1` | `authentication-methods/` | rien — un rapport uniquement |
+| – | `set-organisation.js` | `CATemplate/_organisation.json`, tous les fichiers texte | un autre préfixe dans le texte et les noms de fichiers, puis `cipp/` et les docs |
 | – | `sync-mirror.js` | `git ls-files` | un second clone |
 
 Les étapes 1 à 6 sont exécutées par [`.github/workflows/generate-cipp.yml`](../.github/workflows/generate-cipp.yml)
@@ -118,7 +120,7 @@ après chaque modification. Détails : [scripts/README.fr.md](../scripts/README.
 | CIPP | dépôt → CIPP | importer `cipp/ca-templates-import.json`, construire la baseline selon `cipp/baseline-stages.json` | La baseline dans CIPP est une copie mise à jour à la main |
 | Microsoft Graph | dépôt → tenant | `New-CaPrerequisites.ps1`, `Set-EntraAuthenticationMethods.ps1` | d'abord `-WhatIf` ; l'id d'une custom strength à reporter à la main dans le déploiement CIPP |
 | GitHub Actions | dépôt → dépôt | `generate-cipp.yml` ouvre une PR | le seul workflow |
-| Clone miroir | dépôt → miroir | `sync-mirror.js <doelmap> --push` | historique propre de ce côté, pas de force push ; à lancer après le pipeline |
+| Clone miroir | dépôt → miroir | `sync-mirror.js <doelmap> --push` | historique propre de ce côté, pas de force push ; à lancer après le pipeline. Le miroir garde son propre préfixe (`set-organisation.js` là-bas) |
 
 ### Ce que CIPP fait de ce dépôt
 
@@ -132,8 +134,8 @@ après chaque modification. Détails : [scripts/README.fr.md](../scripts/README.
 
 ## Conventions
 
-- **Nommage :** `CXNM - STANDARD - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` dans le tenant,
-  `CXNM__STANDARD__<nummer>__<TYPE>__<Naam>.json` comme fichier. Les clés dans `_manifest.json` et
+- **Nommage :** `CA - <nummer> - <BLOCK|GRANT|SESSION> - <Omschrijving>` dans le tenant,
+  `CA__<nummer>__<TYPE>__<Naam>.json` comme fichier. Les clés dans `_manifest.json` et
   `ca-controls.json` sont ce nom de fichier sans `.json`.
 - **Les GUID restent identiques** : le GUID identifie la ligne de template CIPP ; un nouveau GUID
   produit un second template portant le même nom.

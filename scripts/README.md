@@ -36,6 +36,7 @@ flowchart TD
 | [`export-cipp-baseline.js`](export-cipp-baseline.js) | **uit** de bron | Schrijft `cipp/ca-templates-import.json` (de templates, zonder tenant-specifieke waarden) en `cipp/baseline-stages.json` (stage, state en actie per template). Leest `CATemplate/_manifest.json` voor de optionele templates. Alles op Report; `--remediate-stage1` zet stage 1 op Remediate, en weigert zolang er templates nieuw in stage 1 staan ten opzichte van de vorige export — `--accept-new` bevestigt die. |
 | [`generate-docs.js`](generate-docs.js) | **uit** de bron | Schrijft `CATemplate/README.md` (en `.en`, `.fr`): elke policy met voor wie, wat, state en stage, en per policy een eigen README met het doel, de voorwaarden, de valkuilen, de normen en de Intune-policies waar hij van afhangt (uit `docs/policies.json`). Met de IntuneBackup-repo ernaast toetst hij ook of die Intune-paden bestaan en of elke compliance-policy in een groep staat. Draait ná de export, want de stage komt uit `cipp/baseline-stages.json`. `--check` schrijft niets en faalt als een README verouderd is; een test doet hetzelfde. |
 | [`sync-mirror.js`](sync-mirror.js) | spiegel | Zet een tweede clone gelijk aan wat hier in git staat — zie [hieronder](#spiegelen-naar-een-tweede-clone). |
+| [`set-organisation.js`](set-organisation.js) | organisatie | Zet de repo op een ander voorvoegsel (`CATemplate/_organisation.json`): tekst, bestandsnamen, daarna `cipp/` en de docs. |
 
 Elk controlescript heeft een `*.test.js` ernaast; `node --test scripts/*.test.js` draait ze
 allemaal. De tests bewaken ook wat de scripts zelf niet zien: dat de export in git volledig op
@@ -106,6 +107,12 @@ strength — is Engels.
 
 `sync-mirror.js` hoort niet bij de pijplijn hierboven. Hij zet de bestanden in een tweede clone
 gelijk aan wat hier in git staat en maakt daar één gewone commit van.
+
+De spiegel houdt zijn eigen voorvoegsel: heeft zijn `CATemplate/_organisation.json` een ander
+`prefix` dan hier, dan draait na het kopiëren `set-organisation.js` daar. Zo draagt alles hier
+het voorvoegsel `CA - ` en in de spiegel bijvoorbeeld `CXNM - STANDARD - `. Heeft de doelclone nog
+geen `_organisation.json`, dan weigert het script tot je het voorvoegsel één keer meegeeft:
+`--prefix "CXNM - STANDARD - "`. Daarna staat het daar vast.
 
 ```bash
 node scripts/sync-mirror.js <doelmap> --dry-run   # eerst kijken wat er zou verschuiven

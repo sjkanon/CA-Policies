@@ -1,0 +1,11 @@
+{
+  "_comment": [
+    "Wat per organisatie verschilt, op één plek. Alle scripts lezen dit via scripts/lib/organisation.js.",
+    "",
+    "prefix - voorvoegsel van elke CA-policy in de tenant: <prefix><nummer> - <TYPE> - <Naam>.",
+    "         De bestandsnaam volgt eruit: \"CA - \" wordt CA__, \"Contoso - Std - \" wordt Contoso__Std__.",
+    "         Niet met de hand wijzigen: scripts/set-organisation.js zet het om in álle bestanden en",
+    "         bestandsnamen. sync-mirror.js houdt zo het voorvoegsel van een spiegel."
+  ],
+  "prefix": "CA - "
+}

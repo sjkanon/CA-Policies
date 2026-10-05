@@ -39,8 +39,8 @@ Un rapport d'écarts du 13 août 2026, généré en dehors de ce dépôt. Ce rap
 Il consignait aussi l'origine, et c'est toujours l'élément de contexte le plus important de ce
 dépôt : **notre numérotation *est* la baseline de Chronlund.** La série `1010`–`3040`, la répartition
 BLOCK/GRANT/SESSION et la forme de nom `GLOBAL - nnnn - ACTIE - Omschrijving` viennent telles quelles
-de sa conception. Cela explique pourquoi tout porte un seul préfixe — depuis le 30 septembre 2026
-`CXNM - STANDARD` au lieu du `GLOBAL` de Chronlund — alors que les deux autres
+de sa conception. Cela explique pourquoi tout porte un seul préfixe — depuis le 5 octobre 2026 un
+préfixe par organisation au lieu du `GLOBAL` de Chronlund — alors que les deux autres
 frameworks sont basés sur des personas — voir *Pourquoi il n'y a pas de personas* ci-dessous.
 
 **Ce rapport est périmé.** Il décrit 20 modèles ; il y en a 33. Et ce n'est pas un
@@ -255,9 +255,11 @@ explicitement — *« één regel per maatregel, niet per policy »* — parce q
 deux stratégies pour une seule question.
 
 **Le préfixe.** Jusqu'au 30 septembre 2026, tout s'appelait `GLOBAL`, d'après Chronlund. Cela
-suggérait une deuxième dimension qui n'existe pas et ne viendra pas. C'est désormais
-`CXNM - STANDARD` dans le tenant et `CXNM__STANDARD__` comme nom de fichier : il dit à qui
-appartient l'ensemble et que c'est le standard, pas à qui il s'adresse. La numérotation est
+suggérait une deuxième dimension qui n'existe pas et ne viendra pas. Du 30 septembre au
+5 octobre 2026, c'était `CXNM - STANDARD` ; il est désormais dans
+`CATemplate/_organisation.json` (générique `CA - `, comme nom de fichier `CA__`) et
+`scripts/set-organisation.js` passe une copie sur son propre préfixe. Il dit à qui appartient
+l'ensemble, pas à qui il s'adresse. La numérotation est
 inchangée. Si une deuxième persona s'ajoute un jour, ce sera une refonte et non un ajout.
 
 ## Ce que nous ne faisons délibérément pas
@@ -531,7 +533,8 @@ l'export CIPP — et ils portaient ce que l'ensemble exclut délibérément : de
 les plages IP de deux emplacements AVD, et un nom de client dans le displayName.
 
 En même temps, le préfixe a changé : `GLOBAL` devient `CXNM - STANDARD` dans le tenant et
-`CXNM__STANDARD__` comme nom de fichier. Voir *Pourquoi il n'y a pas de personas*.
+`CXNM__STANDARD__` comme nom de fichier. Le 5 octobre 2026, c'est devenu le `CA` / `CA__` générique.
+Voir *Pourquoi il n'y a pas de personas*.
 
 ## Ce qui a été modifié
 

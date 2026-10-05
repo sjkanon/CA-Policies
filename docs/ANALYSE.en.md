@@ -40,8 +40,8 @@ with three persona- or number-based frameworks:
 It also recorded the origin, and that is still the most important piece of context in this
 repo: **our numbering *is* Chronlund's baseline.** The range `1010`–`3040`, the split into
 BLOCK/GRANT/SESSION and the naming pattern `GLOBAL - nnnn - ACTIE - Omschrijving` come straight
-from his design. That explains why everything carries one prefix — since 30 September 2026
-`CXNM - STANDARD` instead of Chronlund's `GLOBAL` — while the other two
+from his design. That explains why everything carries one prefix — since 5 October 2026 a
+prefix per organisation instead of Chronlund's `GLOBAL` — while the other two
 frameworks are persona-based — see *Why there are no personas* below.
 
 **That report is stale.** It describes 20 templates; there are 33. And that is not a
@@ -256,9 +256,11 @@ rejects — *"één regel per maatregel, niet per policy"* (one rule per measure
 because it produces two policies for one question.
 
 **The prefix.** Until 30 September 2026 everything was called `GLOBAL`, after Chronlund. That
-suggested a second dimension that does not exist and is not coming. It is now `CXNM - STANDARD`
-in the tenant and `CXNM__STANDARD__` as the file name: it says whose set this is and that it is
-the standard, not who it is for. The numbering is unchanged. If a second persona is ever added,
+suggested a second dimension that does not exist and is not coming. From 30 September to 5 October
+2026 it was `CXNM - STANDARD`; it now lives in
+`CATemplate/_organisation.json` (generic `CA - `, as the file name `CA__`) and
+`scripts/set-organisation.js` puts a copy on a prefix of its own. It says whose set this is, not
+who it is for. The numbering is unchanged. If a second persona is ever added,
 that is a redesign and not an addition.
 
 ## What we deliberately do not do
@@ -532,7 +534,8 @@ export — and they carried what the set deliberately keeps out: real strength i
 AVD locations, and a customer name in the displayName.
 
 At the same time the prefix changed: `GLOBAL` becomes `CXNM - STANDARD` in the tenant and
-`CXNM__STANDARD__` as the file name. See *Why there are no personas*.
+`CXNM__STANDARD__` as the file name. On 5 October 2026 that became the generic `CA` / `CA__`.
+See *Why there are no personas*.
 
 ## What was changed
 

@@ -12,8 +12,8 @@ et c'est précisément là que cela tourne mal si vous en examinez une isolémen
 
 | Si ceci est désactivé ici | Alors voici ce qui se passe côté CA |
 |---|---|
-| Passkey (FIDO2) | `CXNM__STANDARD__2120` exige une méthode résistante au phishing que personne n'a — le tenant est fermé |
-| Temporary Access Pass | `CXNM__STANDARD__2180` n'autorise l'enregistrement que derrière un TAP ; un nouveau collaborateur ne peut alors rien enregistrer |
+| Passkey (FIDO2) | `CA__2120` exige une méthode résistante au phishing que personne n'a — le tenant est fermé |
+| Temporary Access Pass | `CA__2180` n'autorise l'enregistrement que derrière un TAP ; un nouveau collaborateur ne peut alors rien enregistrer |
 
 `scripts/authentication-methods.js` contrôle ces deux liens par rapport au `state` réel de ces
 templates, et échoue sans appel. Ce n'est pas une validation de schéma mais le seul endroit où cette

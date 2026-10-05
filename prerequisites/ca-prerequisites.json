@@ -2,7 +2,7 @@
   "version": "ca-prerequisites-v1.0",
   "reviewedAt": "2026-09-30",
   "_comment": [
-    "De groepen en named locations waar CATemplate/CXNM__STANDARD__*.json naar verwijzen. Zonder deze",
+    "De groepen en named locations waar CATemplate/CA__*.json naar verwijzen. Zonder deze",
     "bestaat de verwijzing in de tenant niet, en dat faalt de verkeerde kant op: een",
     "uitzonderingsgroep die niet bestaat sluit niemand uit, dus de policy wordt strenger dan",
     "bedoeld in plaats van dat de uitrol stukloopt. Zie docs/ANALYSE.md, 'Wat er stuk is aan de",
@@ -144,7 +144,7 @@
       "displayName": "SEC-Passkey-Profile-Admins",
       "mailNickname": "sec-passkey-profile-admins",
       "membershipType": "assigned",
-      "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar CXNM__STANDARD__2055 en 2100 zich op richten.",
+      "purpose": "Het doelwit van het strenge passkey-profiel in authentication-methods/authentication-methods.json: alleen apparaatgebonden passkeys met attestation. Een passkey profile kan niet op directory-rollen richten zoals een CA-policy dat doet — alleen op groepen — dus deze groep spiegelt de rolhouders waar CA__2055 en 2100 zich op richten.",
       "description": "Target of the strict passkey profile (device-bound passkeys with attestation). Mirrors the admin role holders targeted by CA 2055 and 2100.",
       "danger": "medium",
       "dangerReason": "Leeg is hier ongevaarlijk: het profiel geldt dan voor niemand en iedereen valt onder het ruimere profiel voor alle gebruikers. Vergeten te vullen betekent dus geen lock-out, maar wél dat beheerders stilzwijgend een gesynchroniseerde passkey mogen gebruiken.",

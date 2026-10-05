@@ -30,6 +30,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { PREFIX: NAME_PREFIX, FILE_PREFIX, DISPLAY_NAME_RE } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -37,7 +38,7 @@ const MANIFEST_PATH = path.join(TEMPLATE_DIR, "_manifest.json");
 const STAGES_PATH = path.join(REPO_ROOT, "cipp", "baseline-stages.json");
 const POLICIES_PATH = path.join(REPO_ROOT, "docs", "policies.json");
 const CONTROLS_PATH = path.join(REPO_ROOT, "controls", "ca-controls.json");
-const PREFIX = "CXNM__STANDARD__";
+const PREFIX = FILE_PREFIX;
 
 /**
  * De Intune-kant staat in een andere repo. Een relatief pad naar ../IntuneBackup werkt op GitHub
@@ -62,8 +63,8 @@ const T = {
   intro: {
     nl: [
       "De bron van deze repo: de afgesproken Conditional Access-policies in CIPP-templateformaat. Alles in",
-      "`cipp/` is hieruit afgeleid. De naam is `CXNM__STANDARD__<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json`;",
-      "in de tenant heet de policy `CXNM - STANDARD - <nummer> - <TYPE> - <Naam>`. Hoe je er een toevoegt staat",
+      `\`cipp/\` is hieruit afgeleid. De naam is \`${PREFIX}<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json\`;`,
+      `in de tenant heet de policy \`${NAME_PREFIX}<nummer> - <TYPE> - <Naam>\`. Hoe je er een toevoegt staat`,
       "in de [hoofd-README](../README.md#een-policy-toevoegen).",
       "",
       "Elke policy heeft een eigen README naast zijn JSON: wat hij doet, waar je op moet letten, de normen,",
@@ -71,8 +72,8 @@ const T = {
     ],
     en: [
       "The source of this repo: the agreed Conditional Access policies in CIPP template format. Everything in",
-      "`cipp/` is derived from it. The name is `CXNM__STANDARD__<number>__<BLOCK|GRANT|SESSION>__<Name>.json`;",
-      "in the tenant the policy is called `CXNM - STANDARD - <number> - <TYPE> - <Name>`. How to add one is in",
+      `\`cipp/\` is derived from it. The name is \`${PREFIX}<number>__<BLOCK|GRANT|SESSION>__<Name>.json\`;`,
+      `in the tenant the policy is called \`${NAME_PREFIX}<number> - <TYPE> - <Name>\`. How to add one is in`,
       "the [main README](../README.en.md#adding-a-policy).",
       "",
       "Every policy has its own README next to its JSON: what it does, what to watch out for, the standards,",
@@ -80,8 +81,8 @@ const T = {
     ],
     fr: [
       "La source de ce dépôt : les stratégies Conditional Access convenues au format de template CIPP. Tout ce qui",
-      "se trouve dans `cipp/` en est dérivé. Le nom est `CXNM__STANDARD__<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json` ;",
-      "dans le tenant, la stratégie s'appelle `CXNM - STANDARD - <numéro> - <TYPE> - <Nom>`. Comment en ajouter une",
+      `se trouve dans \`cipp/\` en est dérivé. Le nom est \`${PREFIX}<numéro>__<BLOCK|GRANT|SESSION>__<Nom>.json\` ;`,
+      `dans le tenant, la stratégie s'appelle \`${NAME_PREFIX}<numéro> - <TYPE> - <Nom>\`. Comment en ajouter une`,
       "figure dans le [README principal](../README.fr.md#ajouter-une-stratégie).",
       "",
       "Chaque stratégie a son propre README à côté de son JSON : ce qu'elle fait, les points d'attention, les normes,",
@@ -492,7 +493,7 @@ function overview(lang, ctx) {
   for (const type of ["BLOCK", "GRANT", "SESSION"]) {
     out.push(`## ${T.section[type][lang]}`, "", T.tableHead[lang], "|---:|---|---|---|---|---|---|---:|");
     for (const t of templates.filter((x) => x.type === type)) {
-      const title = t.policy.displayName.replace(/^CXNM - STANDARD - \d+ - \w+ - /, "");
+      const title = (DISPLAY_NAME_RE.exec(t.policy.displayName)?.[3] ?? t.policy.displayName);
       const n = intuneTargets(ctx.policies[t.name], ctx.groups).length;
       out.push(`| ${t.nr} | [${title}](${variant(`${t.name}.md`, lang)}) | ${who(t.policy, lang)} | ${on(t.policy, lang)} | ${requirement(t.policy, lang)} | ${STATE[t.policy.state] || t.policy.state} | ${stageLabel(t, ctx, lang)} | ${n || "—"} |`);
     }
