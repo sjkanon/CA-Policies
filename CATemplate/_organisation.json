@@ -5,7 +5,13 @@
     "prefix - voorvoegsel van elke CA-policy in de tenant: <prefix><nummer> - <TYPE> - <Naam>.",
     "         De bestandsnaam volgt eruit: \"CA - \" wordt CA__, \"Contoso - Std - \" wordt Contoso__Std__.",
     "         Niet met de hand wijzigen: scripts/set-organisation.js zet het om in álle bestanden en",
-    "         bestandsnamen. sync-mirror.js houdt zo het voorvoegsel van een spiegel."
+    "         bestandsnamen. sync-mirror.js houdt zo het voorvoegsel van een spiegel.",
+    "",
+    "serviceProviderTenantId - tenant-id van de eigen MSP-tenant, of null. Met een id sluit elke policy",
+    "         die op gebruikers richt de technici uit die vanuit die tenant via GDAP binnenkomen",
+    "         (excludeGuestsOrExternalUsers, type serviceProvider, alleen deze tenant). Ook dit zet",
+    "         scripts/set-organisation.js, in de templates en hier; sync-mirror.js houdt het van de spiegel."
   ],
-  "prefix": "CA - "
+  "prefix": "CA - ",
+  "serviceProviderTenantId": null
 }

@@ -66,7 +66,7 @@ Doorgetrokken pijlen schrijven; stippellijnen lezen alleen.
 |---|---|---|
 | `state` (veld in elk template) | Stage 1 (`enabled`) of stage 2 (`disabled`, report-only); ook de fase in COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, IntuneBackup's `generate-compliance.js` |
 | `CATemplate/_manifest.json` | Welke templates optioneel zijn (stage 3), met de reden | `export-cipp-baseline.js` |
-| `CATemplate/_organisation.json` | Het voorvoegsel van de policies (`CA - `, bestandsnaam `CA__`) | alle scripts via `scripts/lib/organisation.js`; wijzigen met `set-organisation.js` |
+| `CATemplate/_organisation.json` | Het voorvoegsel van de policies (`CA - `, bestandsnaam `CA__`) en de eigen service provider-tenant (generiek `null`; met een id sluit elke gebruikerspolicy de GDAP-technici van die tenant uit) | alle scripts via `scripts/lib/organisation.js`; wijzigen met `set-organisation.js` |
 | `prerequisites/ca-prerequisites.json` | Wat er in de tenant moet bestaan vóór de uitrol, en hoe gevaarlijk het is als het ontbreekt | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | `controls/ca-controls.json` | Welke normlabels elk template invult | `check-controls.js`, `generate-docs.js`, IntuneBackup's `generate-compliance.js` |
 | `docs/policies.json` | Wat elk template doet, waar je op let, en van welke Intune-policies hij afhangt | `generate-docs.js`, IntuneBackup's `generate-docs.js` |

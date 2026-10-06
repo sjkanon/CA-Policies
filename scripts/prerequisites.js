@@ -25,7 +25,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { FILE_PREFIX } = require("./lib/organisation");
+const { FILE_PREFIX, SERVICE_PROVIDER_TENANT_ID, serviceProviderTenantOf, wantsServiceProviderExclusion } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -299,6 +299,24 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
   for (const id of contextsOpId.keys()) {
     if (!refs.contexts.has(id)) {
       warnings.push(`Authentication context "${id}" staat in prerequisites maar geen enkel template verwijst ernaar.`);
+    }
+  }
+
+  // ------------------------------------------ eigen service provider-tenant ----
+
+  // Wat set-organisation.js op de templates zet, moet kloppen met _organisation.json: een template
+  // dat er later bij kwam heeft de uitsluiting nog niet, en dan houdt die policy de eigen
+  // technici (GDAP) wél tegen.
+  for (const { file, policy } of readTemplates()) {
+    const huidig = policy.conditions?.users?.excludeGuestsOrExternalUsers ?? null;
+    const huidigeTenant = serviceProviderTenantOf(huidig);
+    if (huidig && !huidigeTenant) continue; // een eigen gastenuitsluiting
+    const gewenst = SERVICE_PROVIDER_TENANT_ID && wantsServiceProviderExclusion(policy) ? SERVICE_PROVIDER_TENANT_ID : null;
+    if (huidigeTenant !== gewenst) {
+      errors.push(
+        `${file} sluit ${huidigeTenant ? `service provider-tenant ${huidigeTenant}` : "geen service provider-tenant"} uit, maar volgens ` +
+          `CATemplate/_organisation.json hoort dat ${gewenst || "geen"} te zijn. Draai node scripts/set-organisation.js om de templates bij te werken.`
+      );
     }
   }
 

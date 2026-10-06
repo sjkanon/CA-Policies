@@ -30,7 +30,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { PREFIX: NAME_PREFIX, FILE_PREFIX, DISPLAY_NAME_RE } = require("./lib/organisation");
+const { PREFIX: NAME_PREFIX, FILE_PREFIX, DISPLAY_NAME_RE, serviceProviderTenantOf } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -204,6 +204,11 @@ const P = {
 const L = {
   everyone: { nl: "iedereen", en: "everyone", fr: "tout le monde" },
   guests: { nl: "gasten", en: "guests", fr: "invités" },
+  serviceProvider: {
+    nl: "technici uit de eigen service provider-tenant (GDAP)",
+    en: "technicians from the own service provider tenant (GDAP)",
+    fr: "techniciens du propre tenant fournisseur de services (GDAP)",
+  },
   roles: { nl: (n) => `${n} beheerrollen`, en: (n) => `${n} admin roles`, fr: (n) => `${n} rôles d'admin` },
   agents: { nl: "agent- en workload-identiteiten", en: "agent and workload identities", fr: "identités d'agent et de workload" },
   allApps: { nl: "alle apps", en: "all apps", fr: "toutes les apps" },
@@ -299,7 +304,8 @@ function excluded(p, lang) {
   const parts = (u.excludeGroups || []).map(code);
   if ((u.excludeRoles || []).length) parts.push(L.roles[lang](u.excludeRoles.length));
   if ((u.excludeUsers || []).length) parts.push(C.users[lang](u.excludeUsers.length));
-  if (u.excludeGuestsOrExternalUsers) parts.push(L.guests[lang]);
+  if (serviceProviderTenantOf(u.excludeGuestsOrExternalUsers)) parts.push(L.serviceProvider[lang]);
+  else if (u.excludeGuestsOrExternalUsers) parts.push(L.guests[lang]);
   return parts.join(", ") || "—";
 }
 

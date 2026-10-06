@@ -114,6 +114,11 @@ préfixe `CA - ` et dans le miroir par exemple `CXNM - STANDARD - `. Si le clone
 pas encore de `_organisation.json`, le script refuse tant que vous ne passez pas le préfixe une
 fois : `--prefix "CXNM - STANDARD - "`. Ensuite, il y est fixé.
 
+De même pour le propre tenant fournisseur de services : avec `--service-provider-tenant <tenant-id>`,
+chaque stratégie qui cible des utilisateurs exclut dans le miroir les techniciens qui arrivent de ce
+tenant via GDAP. Ici c'est `null`, donc générique sans exclusion. Un template ajouté plus tard la
+reçoit avec `node scripts/set-organisation.js` ; `prerequisites.js` le signale jusque-là.
+
 ```bash
 node scripts/sync-mirror.js <doelmap> --dry-run   # d'abord voir ce qui changerait
 node scripts/sync-mirror.js <doelmap> --push

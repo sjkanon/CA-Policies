@@ -18,9 +18,10 @@
  * change here, so it warns about that.
  *
  * The target keeps its own organisation: if its CATemplate/_organisation.json has a different
- * prefix than here, set-organisation.js runs there after copying, so the mirror gets the content
- * from here under its own policy names. `--prefix` sets (or changes) that the first time; after
- * that it is in the target's own _organisation.json. A target without one is refused without
+ * prefix or service provider tenant than here, set-organisation.js runs there after copying, so
+ * the mirror gets the content from here under its own policy names and exclusion.
+ * `--prefix` and `--service-provider-tenant` set (or change) that; after that it is in the
+ * target's own _organisation.json. A target without one is refused without
  * `--prefix`: otherwise the first sync would rename everything there to the prefix from here.
  *
  * Usage:
@@ -29,12 +30,13 @@
  *   node scripts/sync-mirror.js <target-dir> --push       # and push the target clone
  *   node scripts/sync-mirror.js <target-dir> --message "…"
  *   node scripts/sync-mirror.js <target-dir> --prefix "Contoso - "
+ *   node scripts/sync-mirror.js <target-dir> --service-provider-tenant <tenant-id>
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
-const { validPrefix } = require("./lib/organisation");
+const { validPrefix, GUID_RE } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const ORGANISATION_REL = "CATemplate/_organisation.json";
@@ -52,11 +54,13 @@ function trackedFiles(repo) {
 }
 
 function parseArgs(argv) {
-  const opts = { target: null, dryRun: false, push: false, message: null, prefix: undefined };
+  const opts = { target: null, dryRun: false, push: false, message: null, prefix: undefined, tenant: undefined };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") opts.dryRun = true;
     else if (arg === "--prefix") opts.prefix = argv[++i];
+    else if (arg === "--service-provider-tenant") opts.tenant = (argv[++i] || "").toLowerCase();
+    else if (arg === "--no-service-provider-tenant") opts.tenant = null;
     else if (arg === "--push") opts.push = true;
     else if (arg === "--message") opts.message = argv[++i];
     else if (arg.startsWith("--")) {
@@ -70,6 +74,10 @@ function parseArgs(argv) {
   }
   if (opts.prefix !== undefined && !validPrefix(opts.prefix)) {
     console.error(`Ongeldig voorvoegsel ${JSON.stringify(opts.prefix)}: het eindigt op " - " en bevat geen " \\ / : * ? < > | _.`);
+    process.exit(2);
+  }
+  if (opts.tenant && !GUID_RE.test(opts.tenant)) {
+    console.error(`Ongeldig tenant-id ${JSON.stringify(opts.tenant)}: verwacht een GUID.`);
     process.exit(2);
   }
   return opts;
@@ -99,23 +107,28 @@ if (dirty) {
   console.warn("ook wat nog niet gecommit is.\n");
 }
 
-/** Het voorvoegsel van een clone, of null als die nog geen _organisation.json heeft. */
-function prefixOf(root) {
+/** De organisatie van een clone, of null als die nog geen _organisation.json heeft. */
+function organisationOf(root) {
   const file = path.join(root, ORGANISATION_REL);
-  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")).prefix : null;
+  if (!fs.existsSync(file)) return null;
+  const org = JSON.parse(fs.readFileSync(file, "utf8"));
+  return { prefix: org.prefix, tenant: org.serviceProviderTenantId ?? null };
 }
 
 // Vóór het kopiëren lezen: daarna staat er de versie van hier.
-const sourcePrefix = prefixOf(REPO_ROOT);
-const wantedPrefix = opts.prefix ?? prefixOf(targetRoot);
+const sourceOrg = organisationOf(REPO_ROOT);
+const targetOrg = organisationOf(targetRoot);
+const sourcePrefix = sourceOrg.prefix;
+const wantedPrefix = opts.prefix ?? targetOrg?.prefix;
+const wantedTenant = opts.tenant === undefined ? (targetOrg ? targetOrg.tenant : sourceOrg.tenant) : opts.tenant;
 if (!wantedPrefix) {
   console.error(`${ORGANISATION_REL} ontbreekt in ${targetRoot}, dus het voorvoegsel daar is onbekend.`);
   console.error(`Geef het de eerste keer mee: --prefix "<tekst> - " (dat van hier is "${sourcePrefix}").`);
   process.exit(1);
 }
-const convert = wantedPrefix !== sourcePrefix;
+const convert = wantedPrefix !== sourcePrefix || wantedTenant !== sourceOrg.tenant;
 if (convert) {
-  console.log(`De spiegel houdt voorvoegsel "${wantedPrefix}";`);
+  console.log(`De spiegel houdt voorvoegsel "${wantedPrefix}" en service provider-tenant ${wantedTenant || "(geen)"};`);
   console.log("de lijst hieronder is vóór die omzetting, dus ruimer dan wat er uiteindelijk verandert.\n");
 }
 
@@ -174,8 +187,9 @@ if (total === 0) {
 }
 
 if (convert) {
-  console.log("\nOmzetten naar het voorvoegsel van de spiegel (set-organisation.js daar):");
-  execFileSync(process.execPath, [path.join(targetRoot, "scripts", "set-organisation.js"), "--prefix", wantedPrefix], {
+  console.log("\nOmzetten naar de organisatie van de spiegel (set-organisation.js daar):");
+  const args = ["--prefix", wantedPrefix, ...(wantedTenant ? ["--service-provider-tenant", wantedTenant] : ["--no-service-provider-tenant"])];
+  execFileSync(process.execPath, [path.join(targetRoot, "scripts", "set-organisation.js"), ...args], {
     cwd: targetRoot,
     stdio: ["ignore", "ignore", "inherit"],
   });
