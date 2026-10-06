@@ -30,13 +30,13 @@
  *   node scripts/sync-mirror.js <target-dir> --push       # and push the target clone
  *   node scripts/sync-mirror.js <target-dir> --message "…"
  *   node scripts/sync-mirror.js <target-dir> --prefix "Contoso - "
- *   node scripts/sync-mirror.js <target-dir> --service-provider-tenant <tenant-id>
+ *   node scripts/sync-mirror.js <target-dir> --service-provider-tenant <tenant-id>[,<tenant-id>…]
  */
 
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
-const { validPrefix, GUID_RE } = require("./lib/organisation");
+const { validPrefix, GUID_RE, tenantIdsOf } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const ORGANISATION_REL = "CATemplate/_organisation.json";
@@ -54,13 +54,15 @@ function trackedFiles(repo) {
 }
 
 function parseArgs(argv) {
-  const opts = { target: null, dryRun: false, push: false, message: null, prefix: undefined, tenant: undefined };
+  const opts = { target: null, dryRun: false, push: false, message: null, prefix: undefined, tenants: undefined };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") opts.dryRun = true;
     else if (arg === "--prefix") opts.prefix = argv[++i];
-    else if (arg === "--service-provider-tenant") opts.tenant = (argv[++i] || "").toLowerCase();
-    else if (arg === "--no-service-provider-tenant") opts.tenant = null;
+    else if (arg === "--service-provider-tenant") {
+      const ids = (argv[++i] || "").split(",").map((id) => id.trim().toLowerCase()).filter(Boolean);
+      opts.tenants = [...(opts.tenants || []), ...ids];
+    } else if (arg === "--no-service-provider-tenant") opts.tenants = [];
     else if (arg === "--push") opts.push = true;
     else if (arg === "--message") opts.message = argv[++i];
     else if (arg.startsWith("--")) {
@@ -76,8 +78,9 @@ function parseArgs(argv) {
     console.error(`Ongeldig voorvoegsel ${JSON.stringify(opts.prefix)}: het eindigt op " - " en bevat geen " \\ / : * ? < > | _.`);
     process.exit(2);
   }
-  if (opts.tenant && !GUID_RE.test(opts.tenant)) {
-    console.error(`Ongeldig tenant-id ${JSON.stringify(opts.tenant)}: verwacht een GUID.`);
+  const tenants = opts.tenants || [];
+  if (tenants.some((id) => !GUID_RE.test(id)) || new Set(tenants).size !== tenants.length) {
+    console.error(`Ongeldige tenant-id's ${JSON.stringify(opts.tenants)}: verwacht verschillende GUID's.`);
     process.exit(2);
   }
   return opts;
@@ -112,7 +115,7 @@ function organisationOf(root) {
   const file = path.join(root, ORGANISATION_REL);
   if (!fs.existsSync(file)) return null;
   const org = JSON.parse(fs.readFileSync(file, "utf8"));
-  return { prefix: org.prefix, tenant: org.serviceProviderTenantId ?? null };
+  return { prefix: org.prefix, tenants: tenantIdsOf(org, file), oldForm: "serviceProviderTenantId" in org };
 }
 
 // Vóór het kopiëren lezen: daarna staat er de versie van hier.
@@ -120,15 +123,15 @@ const sourceOrg = organisationOf(REPO_ROOT);
 const targetOrg = organisationOf(targetRoot);
 const sourcePrefix = sourceOrg.prefix;
 const wantedPrefix = opts.prefix ?? targetOrg?.prefix;
-const wantedTenant = opts.tenant === undefined ? (targetOrg ? targetOrg.tenant : sourceOrg.tenant) : opts.tenant;
+const wantedTenants = opts.tenants ?? (targetOrg ? targetOrg.tenants : sourceOrg.tenants);
 if (!wantedPrefix) {
   console.error(`${ORGANISATION_REL} ontbreekt in ${targetRoot}, dus het voorvoegsel daar is onbekend.`);
   console.error(`Geef het de eerste keer mee: --prefix "<tekst> - " (dat van hier is "${sourcePrefix}").`);
   process.exit(1);
 }
-const convert = wantedPrefix !== sourcePrefix || wantedTenant !== sourceOrg.tenant;
+const convert = wantedPrefix !== sourcePrefix || JSON.stringify(wantedTenants) !== JSON.stringify(sourceOrg.tenants);
 if (convert) {
-  console.log(`De spiegel houdt voorvoegsel "${wantedPrefix}" en service provider-tenant ${wantedTenant || "(geen)"};`);
+  console.log(`De spiegel houdt voorvoegsel "${wantedPrefix}" en service provider-tenants ${wantedTenants.join(", ") || "(geen)"};`);
   console.log("de lijst hieronder is vóór die omzetting, dus ruimer dan wat er uiteindelijk verandert.\n");
 }
 
@@ -188,7 +191,7 @@ if (total === 0) {
 
 if (convert) {
   console.log("\nOmzetten naar de organisatie van de spiegel (set-organisation.js daar):");
-  const args = ["--prefix", wantedPrefix, ...(wantedTenant ? ["--service-provider-tenant", wantedTenant] : ["--no-service-provider-tenant"])];
+  const args = ["--prefix", wantedPrefix, ...(wantedTenants.length ? ["--service-provider-tenant", wantedTenants.join(",")] : ["--no-service-provider-tenant"])];
   execFileSync(process.execPath, [path.join(targetRoot, "scripts", "set-organisation.js"), ...args], {
     cwd: targetRoot,
     stdio: ["ignore", "ignore", "inherit"],

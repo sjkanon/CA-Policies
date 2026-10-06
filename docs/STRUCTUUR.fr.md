@@ -66,7 +66,7 @@ Les flèches pleines écrivent ; les pointillés ne font que lire.
 |---|---|---|
 | `state` (champ de chaque template) | Stage 1 (`enabled`) ou stage 2 (`disabled`, report-only) ; aussi la phase dans COMPLIANCE.md | `export-cipp-baseline.js`, `authentication-methods.js`, `generate-compliance.js` d'IntuneBackup |
 | `CATemplate/_manifest.json` | Quels templates sont optionnels (stage 3), avec la raison | `export-cipp-baseline.js` |
-| `CATemplate/_organisation.json` | Le préfixe des stratégies (`CA - `, nom de fichier `CA__`) et le propre tenant fournisseur de services (générique `null` ; avec un id, chaque stratégie utilisateurs exclut les techniciens GDAP de ce tenant) | tous les scripts via `scripts/lib/organisation.js` ; à changer avec `set-organisation.js` |
+| `CATemplate/_organisation.json` | Le préfixe des stratégies (`CA - `, nom de fichier `CA__`) et les propres tenants fournisseurs de services (générique une liste vide ; avec des id, chaque stratégie utilisateurs exclut les techniciens GDAP de ces tenants) | tous les scripts via `scripts/lib/organisation.js` ; à changer avec `set-organisation.js` |
 | `prerequisites/ca-prerequisites.json` | Ce qui doit exister dans le tenant avant le déploiement, et à quel point c'est dangereux si cela manque | `prerequisites.js`, `export-cipp-baseline.js`, `New-CaPrerequisites.ps1` |
 | `controls/ca-controls.json` | Quels libellés de normes chaque template couvre | `check-controls.js`, `generate-docs.js`, `generate-compliance.js` d'IntuneBackup |
 | `docs/policies.json` | Ce que fait chaque template, les points d'attention, et de quelles stratégies Intune il dépend | `generate-docs.js`, `generate-docs.js` d'IntuneBackup |

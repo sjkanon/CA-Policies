@@ -114,9 +114,9 @@ het voorvoegsel `CA - ` en in de spiegel bijvoorbeeld `CXNM - STANDARD - `. Heef
 geen `_organisation.json`, dan weigert het script tot je het voorvoegsel één keer meegeeft:
 `--prefix "CXNM - STANDARD - "`. Daarna staat het daar vast.
 
-Hetzelfde geldt voor de eigen service provider-tenant: met `--service-provider-tenant <tenant-id>`
-sluit elke policy die op gebruikers richt in de spiegel de technici uit die vanuit die tenant via
-GDAP binnenkomen. Hier is het `null`, dus generiek zonder uitsluiting. Een template dat er later
+Hetzelfde geldt voor de eigen service provider-tenants: met `--service-provider-tenant <id>,<id>`
+sluit elke policy die op gebruikers richt in de spiegel de technici uit die vanuit die tenants via
+GDAP binnenkomen. Hier is de lijst leeg, dus generiek zonder uitsluiting. Een template dat er later
 bij komt krijgt hem met `node scripts/set-organisation.js`; `prerequisites.js` meldt het tot dan.
 
 ```bash

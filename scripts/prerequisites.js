@@ -25,7 +25,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { FILE_PREFIX, SERVICE_PROVIDER_TENANT_ID, serviceProviderTenantOf, wantsServiceProviderExclusion } = require("./lib/organisation");
+const { FILE_PREFIX, SERVICE_PROVIDER_TENANT_IDS, serviceProviderTenantsOf, wantsServiceProviderExclusion } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TEMPLATE_DIR = path.join(REPO_ROOT, "CATemplate");
@@ -309,13 +309,14 @@ function validate(prereq = readPrerequisites(), refs = collectReferences()) {
   // technici (GDAP) wél tegen.
   for (const { file, policy } of readTemplates()) {
     const huidig = policy.conditions?.users?.excludeGuestsOrExternalUsers ?? null;
-    const huidigeTenant = serviceProviderTenantOf(huidig);
-    if (huidig && !huidigeTenant) continue; // een eigen gastenuitsluiting
-    const gewenst = SERVICE_PROVIDER_TENANT_ID && wantsServiceProviderExclusion(policy) ? SERVICE_PROVIDER_TENANT_ID : null;
-    if (huidigeTenant !== gewenst) {
+    const huidigeTenants = serviceProviderTenantsOf(huidig);
+    if (huidig && !huidigeTenants) continue; // een eigen gastenuitsluiting
+    const gewenst = wantsServiceProviderExclusion(policy) ? SERVICE_PROVIDER_TENANT_IDS : [];
+    const lijst = (ids) => (ids.length ? `service provider-tenant(s) ${ids.join(", ")}` : "geen service provider-tenant");
+    if (JSON.stringify(huidigeTenants || []) !== JSON.stringify(gewenst)) {
       errors.push(
-        `${file} sluit ${huidigeTenant ? `service provider-tenant ${huidigeTenant}` : "geen service provider-tenant"} uit, maar volgens ` +
-          `CATemplate/_organisation.json hoort dat ${gewenst || "geen"} te zijn. Draai node scripts/set-organisation.js om de templates bij te werken.`
+        `${file} sluit ${lijst(huidigeTenants || [])} uit, maar volgens CATemplate/_organisation.json hoort dat ${lijst(gewenst)} ` +
+          `te zijn (in die volgorde). Draai node scripts/set-organisation.js om de templates bij te werken.`
       );
     }
   }

@@ -7,11 +7,12 @@
     "         Niet met de hand wijzigen: scripts/set-organisation.js zet het om in álle bestanden en",
     "         bestandsnamen. sync-mirror.js houdt zo het voorvoegsel van een spiegel.",
     "",
-    "serviceProviderTenantId - tenant-id van de eigen MSP-tenant, of null. Met een id sluit elke policy",
-    "         die op gebruikers richt de technici uit die vanuit die tenant via GDAP binnenkomen",
-    "         (excludeGuestsOrExternalUsers, type serviceProvider, alleen deze tenant). Ook dit zet",
-    "         scripts/set-organisation.js, in de templates en hier; sync-mirror.js houdt het van de spiegel."
+    "serviceProviderTenantIds - tenant-id's van de eigen MSP-tenants, of een lege lijst. Met id's sluit",
+    "         elke policy die op gebruikers richt de technici uit die vanuit die tenants via GDAP",
+    "         binnenkomen (excludeGuestsOrExternalUsers, type serviceProvider, alleen deze tenants, in",
+    "         deze volgorde). Ook dit zet scripts/set-organisation.js, in de templates en hier;",
+    "         sync-mirror.js houdt het van de spiegel."
   ],
   "prefix": "CA - ",
-  "serviceProviderTenantId": null
+  "serviceProviderTenantIds": []
 }

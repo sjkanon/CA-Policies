@@ -114,9 +114,9 @@ the prefix `CA - ` and in the mirror for instance `CXNM - STANDARD - `. If the t
 no `_organisation.json` yet, the script refuses until you pass the prefix once:
 `--prefix "CXNM - STANDARD - "`. After that it is fixed there.
 
-The same goes for the own service provider tenant: with `--service-provider-tenant <tenant-id>`
-every policy aimed at users in the mirror excludes the technicians who come in from that tenant
-via GDAP. Here it is `null`, so generic without an exclusion. A template added later gets it with
+The same goes for the own service provider tenants: with `--service-provider-tenant <id>,<id>`
+every policy aimed at users in the mirror excludes the technicians who come in from those tenants
+via GDAP. Here the list is empty, so generic without an exclusion. A template added later gets it with
 `node scripts/set-organisation.js`; `prerequisites.js` reports it until then.
 
 ```bash

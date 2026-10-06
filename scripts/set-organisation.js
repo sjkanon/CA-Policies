@@ -4,9 +4,9 @@
  *
  *  - prefix: the name prefix of every CA policy, in two forms — "CA - 1010 - BLOCK - …" in the
  *    tenant and CA__1010__BLOCK__….json as the file name; the second follows from the first.
- *  - serviceProviderTenantId: the organisation's own MSP tenant, or null. With an id, every policy
- *    aimed at users excludes the technicians who come in from that tenant via GDAP
- *    (excludeGuestsOrExternalUsers, type serviceProvider, only that tenant).
+ *  - serviceProviderTenantIds: the organisation's own MSP tenants, or an empty list. With ids,
+ *    every policy aimed at users excludes the technicians who come in from those tenants via GDAP
+ *    (excludeGuestsOrExternalUsers, type serviceProvider, only those tenants, in this order).
  *
  * Neither is only read by the scripts; both are in the data and the generated output — every
  * displayName and users condition in CATemplate/, the keys in _manifest.json, ca-controls.json and
@@ -33,7 +33,8 @@
  *
  * Usage:
  *   node scripts/set-organisation.js --prefix "Contoso - "
- *   node scripts/set-organisation.js --service-provider-tenant <tenant-id>
+ *   node scripts/set-organisation.js --service-provider-tenant <tenant-id> [--service-provider-tenant <tenant-id> …]
+ *   node scripts/set-organisation.js --service-provider-tenant <tenant-id>,<tenant-id>
  *   node scripts/set-organisation.js --no-service-provider-tenant
  *   node scripts/set-organisation.js                 # only step 2: templates in line with _organisation.json
  *   node scripts/set-organisation.js ... --dry-run   # only show what would change
@@ -51,7 +52,7 @@ const {
   filePrefixOf,
   escapeRegExp,
   serviceProviderExclusion,
-  serviceProviderTenantOf,
+  serviceProviderTenantsOf,
   wantsServiceProviderExclusion,
 } = require("./lib/organisation");
 
@@ -59,12 +60,12 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const ORGANISATION_REL = path.relative(REPO_ROOT, ORGANISATION_PATH).split(path.sep).join("/");
 
 function parseArgs(argv) {
-  const opts = { prefix: undefined, tenant: undefined, dryRun: false, generate: true };
+  const opts = { prefix: undefined, tenants: undefined, dryRun: false, generate: true };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--prefix") opts.prefix = argv[++i];
-    else if (arg === "--service-provider-tenant") opts.tenant = (argv[++i] || "").toLowerCase();
-    else if (arg === "--no-service-provider-tenant") opts.tenant = null;
+    else if (arg === "--service-provider-tenant") opts.tenants = [...(opts.tenants || []), ...splitTenants(argv[++i])];
+    else if (arg === "--no-service-provider-tenant") opts.tenants = [];
     else if (arg === "--dry-run") opts.dryRun = true;
     else if (arg === "--no-generate") opts.generate = false;
     else {
@@ -76,12 +77,20 @@ function parseArgs(argv) {
     console.error(`Ongeldig voorvoegsel ${JSON.stringify(opts.prefix)}: het eindigt op " - " en bevat geen " \\ / : * ? < > | _.`);
     process.exit(2);
   }
-  if (opts.tenant && !GUID_RE.test(opts.tenant)) {
-    console.error(`Ongeldig tenant-id ${JSON.stringify(opts.tenant)}: verwacht een GUID.`);
+  const bad = (opts.tenants || []).filter((id) => !GUID_RE.test(id));
+  if (bad.length > 0 || new Set(opts.tenants).size !== (opts.tenants || []).length) {
+    console.error(`Ongeldige tenant-id's ${JSON.stringify(opts.tenants)}: verwacht verschillende GUID's.`);
     process.exit(2);
   }
   return opts;
 }
+
+/** "a,b" of "a" -> ["a", "b"]: zo kan --service-provider-tenant herhaald én met komma's. */
+function splitTenants(value) {
+  return (value || "").split(",").map((id) => id.trim().toLowerCase()).filter(Boolean);
+}
+
+const sameList = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 const git = (args) => execFileSync("git", ["-C", REPO_ROOT, ...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 
@@ -118,12 +127,11 @@ const containsPrefix = (text, prefix) => patterns(prefix).some(({ re }) => new R
 const exclusionToken = (value) => JSON.stringify(`"excludeGuestsOrExternalUsers":${JSON.stringify(value)}`).slice(1, -1);
 
 /** Stap 2 op één template: de nieuwe tekst, of null als er niets verandert. */
-function reconcileTenant(text, tenant, rel) {
+function reconcileTenants(text, tenants, rel) {
   const policy = JSON.parse(JSON.parse(text).JSON);
   const current = policy.conditions?.users?.excludeGuestsOrExternalUsers ?? null;
-  const currentTenant = serviceProviderTenantOf(current);
-  if (current && !currentTenant) return null; // een eigen gastenuitsluiting (2125): niet van ons
-  const wanted = tenant && wantsServiceProviderExclusion(policy) ? serviceProviderExclusion(tenant) : null;
+  if (current && !serviceProviderTenantsOf(current)) return null; // een eigen gastenuitsluiting (2125): niet van ons
+  const wanted = tenants.length > 0 && wantsServiceProviderExclusion(policy) ? serviceProviderExclusion(tenants) : null;
   if (JSON.stringify(current) === JSON.stringify(wanted)) return null;
   const from = exclusionToken(current);
   if (text.split(from).length !== 2) throw new Error(`${rel}: excludeGuestsOrExternalUsers niet precies één keer gevonden als ${from}`);
@@ -135,8 +143,10 @@ function main() {
   const current = readOrganisation();
   const from = current.prefix;
   const to = opts.prefix ?? from;
-  const tenant = opts.tenant === undefined ? current.serviceProviderTenantId : opts.tenant;
+  const tenants = opts.tenants ?? current.serviceProviderTenantIds;
   const prefixChanges = to !== from;
+  // Een _organisation.json in de oude vorm (één serviceProviderTenantId) gaat naar de lijst, ook als de tenants gelijk blijven.
+  const oldForm = "serviceProviderTenantId" in JSON.parse(fs.readFileSync(ORGANISATION_PATH, "utf8"));
 
   const files = repoFiles().filter((rel) => rel !== ORGANISATION_REL);
 
@@ -162,7 +172,7 @@ function main() {
     const text = buf.toString("utf8");
     let next = prefixChanges ? replacePrefix(text, from, to) : text;
     if (rel.startsWith(`CATemplate/${filePrefixOf(from)}`) && rel.endsWith(".json")) {
-      next = reconcileTenant(next, tenant, rel) ?? next;
+      next = reconcileTenants(next, tenants, rel) ?? next;
     }
     if (next !== text) edits.set(rel, next);
     if (prefixChanges) {
@@ -170,7 +180,7 @@ function main() {
       if (renamed !== rel) moves.push({ from: rel, to: renamed });
     }
   }
-  const tenantChanges = tenant !== current.serviceProviderTenantId;
+  const tenantChanges = !sameList(tenants, current.serviceProviderTenantIds) || oldForm;
 
   if (!prefixChanges && !tenantChanges && edits.size === 0) {
     console.log("Er verandert niets.");
@@ -182,7 +192,8 @@ function main() {
   if (prefixChanges || tenantChanges) console.log(`~ ${ORGANISATION_REL}`);
   console.log("");
   if (prefixChanges) console.log(`Voorvoegsel "${from}" -> "${to}" (${filePrefixOf(from)} -> ${filePrefixOf(to)}), ${moves.length} bestanden hernoemd.`);
-  if (tenantChanges) console.log(`Service provider-tenant: ${current.serviceProviderTenantId || "(geen)"} -> ${tenant || "(geen)"}.`);
+  const list = (ids) => (ids.length ? ids.join(", ") : "(geen)");
+  if (tenantChanges) console.log(`Service provider-tenants: ${list(current.serviceProviderTenantIds)} -> ${list(tenants)}.`);
   console.log(`${edits.size} bestanden aangepast.`);
 
   if (opts.dryRun) {
@@ -199,9 +210,8 @@ function main() {
   }
 
   const raw = fs.readFileSync(ORGANISATION_PATH, "utf8");
-  const org = JSON.parse(raw);
-  org.prefix = to;
-  org.serviceProviderTenantId = tenant;
+  const { _comment, prefix, serviceProviderTenantId, serviceProviderTenantIds, ...rest } = JSON.parse(raw);
+  const org = { _comment, prefix: to, serviceProviderTenantIds: tenants, ...rest };
   const eol = raw.includes("\r\n") ? "\r\n" : "\n";
   fs.writeFileSync(ORGANISATION_PATH, JSON.stringify(org, null, 2).replace(/\n/g, eol) + eol);
 

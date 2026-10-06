@@ -28,34 +28,42 @@ function readOrganisation(file = ORGANISATION_PATH) {
   if (!validPrefix(org.prefix)) {
     throw new Error(`${file}: "prefix" moet een tekst zijn die eindigt op " - ", zonder " \\ / : * ? < > | _ (nu: ${JSON.stringify(org.prefix)})`);
   }
-  const tenant = org.serviceProviderTenantId ?? null;
-  if (tenant !== null && !GUID_RE.test(tenant)) {
-    throw new Error(`${file}: "serviceProviderTenantId" moet null zijn of een tenant-id in kleine letters (nu: ${JSON.stringify(tenant)})`);
+  return { prefix: org.prefix, serviceProviderTenantIds: tenantIdsOf(org, file) };
+}
+
+/**
+ * De service provider-tenants uit een _organisation.json, in de volgorde waarin ze er staan. Ook de
+ * oude vorm met één `serviceProviderTenantId`, zodat een spiegel van vóór de lijst gewoon meegaat.
+ */
+function tenantIdsOf(org, file = ORGANISATION_PATH) {
+  const ids = org.serviceProviderTenantIds ?? (org.serviceProviderTenantId ? [org.serviceProviderTenantId] : []);
+  if (!Array.isArray(ids) || ids.some((id) => !GUID_RE.test(id)) || new Set(ids).size !== ids.length) {
+    throw new Error(`${file}: "serviceProviderTenantIds" moet een lijst van verschillende tenant-id's in kleine letters zijn (nu: ${JSON.stringify(ids)})`);
   }
-  return { prefix: org.prefix, serviceProviderTenantId: tenant };
+  return ids;
 }
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * De uitsluiting van de eigen service provider-tenant: technici die via GDAP in een klant-tenant
- * werken. Alleen die ene tenant, niet elke partner. Vaste sleutelvolgorde: set-organisation.js
- * zoekt hem als tekst terug om hem weer weg te halen.
+ * De uitsluiting van de eigen service provider-tenants: technici die via GDAP in een klant-tenant
+ * werken. Alleen deze tenants, niet elke partner; members in de volgorde van _organisation.json.
+ * Vaste sleutelvolgorde: set-organisation.js zoekt hem als tekst terug om hem weer weg te halen.
  */
-const serviceProviderExclusion = (tenantId) => ({
+const serviceProviderExclusion = (tenantIds) => ({
   guestOrExternalUserTypes: "serviceProvider",
   externalTenants: {
     "@odata.type": "#microsoft.graph.conditionalAccessEnumeratedExternalTenants",
     membershipKind: "enumerated",
-    members: [tenantId],
+    members: [...tenantIds],
   },
 });
 
-/** Is dit de uitsluiting hierboven, voor welke tenant dan ook? Geeft dan het tenant-id, anders null. */
-function serviceProviderTenantOf(exclusion) {
+/** Is dit de uitsluiting hierboven, voor welke tenants dan ook? Geeft dan de tenant-id's, anders null. */
+function serviceProviderTenantsOf(exclusion) {
   if (!exclusion || exclusion.guestOrExternalUserTypes !== "serviceProvider") return null;
   const members = exclusion.externalTenants?.members || [];
-  return members.length === 1 && JSON.stringify(exclusion) === JSON.stringify(serviceProviderExclusion(members[0])) ? members[0] : null;
+  return members.length > 0 && JSON.stringify(exclusion) === JSON.stringify(serviceProviderExclusion(members)) ? members : null;
 }
 
 /**
@@ -67,11 +75,11 @@ function serviceProviderTenantOf(exclusion) {
 function wantsServiceProviderExclusion(policy) {
   const u = policy.conditions?.users || {};
   const onUsers = (u.includeUsers || []).includes("All") || (u.includeRoles || []).length > 0 || (u.includeGroups || []).length > 0;
-  const ownGuestExclusion = Boolean(u.excludeGuestsOrExternalUsers) && !serviceProviderTenantOf(u.excludeGuestsOrExternalUsers);
+  const ownGuestExclusion = Boolean(u.excludeGuestsOrExternalUsers) && !serviceProviderTenantsOf(u.excludeGuestsOrExternalUsers);
   return onUsers && !u.includeGuestsOrExternalUsers && !ownGuestExclusion;
 }
 
-const { prefix: PREFIX, serviceProviderTenantId: SERVICE_PROVIDER_TENANT_ID } = readOrganisation();
+const { prefix: PREFIX, serviceProviderTenantIds: SERVICE_PROVIDER_TENANT_IDS } = readOrganisation();
 const FILE_PREFIX = filePrefixOf(PREFIX);
 
 /** `<prefix><nummer> - <TYPE> - <Naam>`; groep 1 is het nummer, 2 het type, 3 de naam. */
@@ -82,13 +90,14 @@ module.exports = {
   PREFIX,
   FILE_PREFIX,
   DISPLAY_NAME_RE,
-  SERVICE_PROVIDER_TENANT_ID,
+  SERVICE_PROVIDER_TENANT_IDS,
   GUID_RE,
   readOrganisation,
+  tenantIdsOf,
   validPrefix,
   filePrefixOf,
   escapeRegExp,
   serviceProviderExclusion,
-  serviceProviderTenantOf,
+  serviceProviderTenantsOf,
   wantsServiceProviderExclusion,
 };
