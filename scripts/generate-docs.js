@@ -332,6 +332,8 @@ const APP_NAMES = {
   "2793995e-0a7d-40d7-bd35-6968ba142197": "My Apps",
   "0af06dc6-e4b5-4f28-818e-e78e62d137a5": "Windows 365",
   "a4a365df-50f1-4397-bc59-1a1564b8bb9c": "Microsoft Remote Desktop",
+  "9cdead84-a844-4324-93f2-b2e6bb768d07": "Azure Virtual Desktop",
+  "270efc09-cd0d-444b-a71f-39af4910ec45": "Windows Cloud Login",
   MicrosoftAdminPortals: "Microsoft Admin Portals",
   Office365: "Office 365",
 };

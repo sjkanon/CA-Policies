@@ -211,6 +211,12 @@
     "cis": ["CIS Controls v8.1 4.12 Separate Enterprise Workspaces on Mobile End-User Devices", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
     "nistcsf": ["PR.AA-05"]
   },
+  "CA__2155__GRANT__Virtual_Desktop_Phishing_Resistant_MFA": {
+    "iso": ["A.6.7 Werken op afstand", "A.8.5 Veilige authenticatie"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie"],
+    "cis": ["CIS Controls v8.1 6.4 Require MFA for Remote Network Access", "CIS Controls v8.1 13.5 Manage Access Control for Remote Assets"],
+    "nistcsf": ["PR.AA-03", "PR.AA-05"]
+  },
   "CA__2160__GRANT__Agent_Users_Compliant_Device": {
     "iso": ["A.8.1 Eindpuntapparatuur van gebruikers", "A.5.15 Toegangsbeveiliging"],
     "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],

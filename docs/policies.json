@@ -537,9 +537,9 @@
     },
     "CA__2150__GRANT__Cloud_PC_Mobile_Access": {
       "doel": {
-        "nl": "Eist voor Windows 365 en Microsoft Remote Desktop op iOS en Android een app protection policy of een compliant toestel, zodat een Cloud PC niet vanaf een willekeurige telefoon bereikbaar is.",
-        "en": "Requires an app protection policy or a compliant device for Windows 365 and Microsoft Remote Desktop on iOS and Android, so that a Cloud PC cannot be reached from just any phone.",
-        "fr": "Exige une app protection policy ou un appareil conforme pour Windows 365 et Microsoft Remote Desktop sur iOS et Android, afin qu'un Cloud PC ne soit pas accessible depuis n'importe quel téléphone."
+        "nl": "Eist voor Azure Virtual Desktop en Windows 365 op iOS en Android een app protection policy of een compliant toestel, zodat een virtuele werkplek niet vanaf een willekeurige telefoon bereikbaar is. Alle drie de apps waarlangs Windows App aanmeldt staan erin — ook Windows Cloud Login, de aanmelding op de sessiehost zelf bij single sign-on — zodat de eis niet via één van de drie te omzeilen is.",
+        "en": "Requires an app protection policy or a compliant device for Azure Virtual Desktop and Windows 365 on iOS and Android, so that a virtual desktop cannot be reached from just any phone. All three apps Windows App signs in to are included — also Windows Cloud Login, the sign-in to the session host itself with single sign-on — so the requirement cannot be bypassed through one of them.",
+        "fr": "Exige une app protection policy ou un appareil conforme pour Azure Virtual Desktop et Windows 365 sur iOS et Android, afin qu'un poste de travail virtuel ne soit pas accessible depuis n'importe quel téléphone. Les trois apps auxquelles Windows App se connecte y figurent — y compris Windows Cloud Login, la connexion à l'hôte de session lui-même avec l'authentification unique — afin que l'exigence ne puisse pas être contournée par l'une d'elles."
       },
       "intune": [
         {
@@ -561,6 +561,44 @@
             "nl": "De andere manier: een compliant toestel. Bepaalt mee of een iPhone of Android-toestel als compliant telt.",
             "en": "The other way: a compliant device. Helps determine whether an iPhone or Android device counts as compliant.",
             "fr": "L'autre façon : un appareil conforme. Contribue à déterminer si un iPhone ou un appareil Android est considéré comme conforme."
+          }
+        }
+      ],
+      "letOp": [
+        {
+          "nl": "Een app protection policy die Windows App niet expliciet bevat telt niet: 'alle Microsoft-apps' dekt Windows App niet. Zonder zo'n policy komt alleen een compliant toestel nog binnen.",
+          "en": "An app protection policy that does not explicitly include Windows App does not count: 'all Microsoft apps' does not cover Windows App. Without such a policy only a compliant device gets in.",
+          "fr": "Une app protection policy qui n'inclut pas explicitement Windows App ne compte pas : « toutes les apps Microsoft » ne couvre pas Windows App. Sans une telle stratégie, seul un appareil conforme peut entrer."
+        }
+      ]
+    },
+    "CA__2155__GRANT__Virtual_Desktop_Phishing_Resistant_MFA": {
+      "doel": {
+        "nl": "Eist phishing-resistente MFA — een passkey, Windows Hello for Business of een certificaat — voor Azure Virtual Desktop, Windows 365 en Windows Cloud Login vanaf een toestel dat niet compliant is. Waar de virtuele werkplek de route is voor persoonlijke toestellen en derden, is het toestel onbekend; dan is de aanmelding het enige wat je kunt eisen, en een gestolen wachtwoord met sms-code mag daar niet genoeg zijn.",
+        "en": "Requires phishing-resistant MFA — a passkey, Windows Hello for Business or a certificate — for Azure Virtual Desktop, Windows 365 and Windows Cloud Login from a device that is not compliant. Where the virtual desktop is the route for personal devices and third parties, the device is unknown; then the sign-in is all you can require, and a stolen password with a text-message code must not be enough there.",
+        "fr": "Exige une MFA résistante au phishing — une passkey, Windows Hello for Business ou un certificat — pour Azure Virtual Desktop, Windows 365 et Windows Cloud Login depuis un appareil non conforme. Là où le poste de travail virtuel est la voie d'accès des appareils personnels et des tiers, l'appareil est inconnu ; la connexion est alors tout ce que l'on peut exiger, et un mot de passe volé avec un code SMS ne doit pas y suffire."
+      },
+      "letOp": [
+        {
+          "nl": "Zet hem pas aan als elke gebruiker van de virtuele werkplek een phishing-resistente methode heeft; controleer dat met scripts/Test-EntraPasskeyReadiness.ps1. Een compliant toestel valt er buiten: daar dekken 2050 en de compliance al de aanmelding.",
+          "en": "Only turn it on once every virtual desktop user has a phishing-resistant method; check that with scripts/Test-EntraPasskeyReadiness.ps1. A compliant device is out of scope: there 2050 and compliance already cover the sign-in.",
+          "fr": "Ne l'activez qu'une fois que chaque utilisateur du poste de travail virtuel dispose d'une méthode résistante au phishing ; vérifiez-le avec scripts/Test-EntraPasskeyReadiness.ps1. Un appareil conforme n'est pas concerné : là, 2050 et la conformité couvrent déjà la connexion."
+        },
+        {
+          "nl": "Wat er in de sessie gebeurt — klembord, schijven, printers, schermopname — regelt deze policy niet. Dat doen de Intune-policies op de sessiehost en de RDP-eigenschappen van de hostpool.",
+          "en": "What happens inside the session — clipboard, drives, printers, screen capture — is not controlled by this policy. The Intune policies on the session host and the host pool RDP properties do that.",
+          "fr": "Ce qui se passe dans la session — presse-papiers, lecteurs, imprimantes, capture d'écran — n'est pas régi par cette stratégie. Ce sont les stratégies Intune sur l'hôte de session et les propriétés RDP du pool d'hôtes qui s'en chargent."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@windowsHello"
+          ],
+          "waarom": {
+            "nl": "Richt Windows Hello for Business in: op Windows de gewone manier om aan phishing-resistente MFA te voldoen. Zonder WHfB blijft daar alleen een losse passkey of beveiligingssleutel over.",
+            "en": "Sets up Windows Hello for Business: on Windows the usual way to meet phishing-resistant MFA. Without WHfB only a separate passkey or security key is left there.",
+            "fr": "Configure Windows Hello for Business : sous Windows, la manière habituelle de satisfaire à une MFA résistante au phishing. Sans WHfB, il ne reste qu'une passkey séparée ou une clé de sécurité."
           }
         }
       ]

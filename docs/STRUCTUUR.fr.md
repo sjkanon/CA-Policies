@@ -8,7 +8,7 @@ quels systèmes le lisent et comment il arrive dans un tenant. Pour le *pourquoi
 
 ## En bref
 
-- **Une seule source :** `CATemplate/` — 44 stratégies Conditional Access au format de template
+- **Une seule source :** `CATemplate/` — 45 stratégies Conditional Access au format de template
   CIPP : 18 BLOCK, 16 GRANT, 7 SESSION.
 - **Un seul dérivé :** `cipp/` — les templates sous forme de fichier d'import et la répartition en
   trois stages pour une baseline CIPP.
@@ -26,7 +26,7 @@ quels systèmes le lisent et comment il arrive dans un tenant. Pour le *pourquoi
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>44 templates · _manifest.json"]
+  T["<b>CATemplate/</b><br/>45 templates · _manifest.json"]
   P["prerequisites/<br/>ca-prerequisites.json"]
   A["authentication-methods/<br/>authentication-methods.json"]
   C["controls/<br/>ca-controls.json"]

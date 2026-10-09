@@ -2,7 +2,7 @@
 
 **Nederlands** · [English](README.en.md) · [Français](README.fr.md)
 
-# CATemplate — 44 policies
+# CATemplate — 45 policies
 
 De bron van deze repo: de afgesproken Conditional Access-policies in CIPP-templateformaat. Alles in
 `cipp/` is hieruit afgeleid. De naam is `CA__<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json`;
@@ -15,9 +15,9 @@ en welke Intune-policies hij raakt. Klik op de naam in de tabel.
 | Type | Stage 1 | Stage 2 | Stage 3 | Totaal |
 |---|---:|---:|---:|---:|
 | [BLOCK](#block--1xxx) | 5 | 7 | 6 | **18** |
-| [GRANT](#grant--2xxx) | 8 | 3 | 8 | **19** |
+| [GRANT](#grant--2xxx) | 8 | 3 | 9 | **20** |
 | [SESSION](#session--3xxx) | 4 | 2 | 1 | **7** |
-| **Totaal** | **17** | **12** | **15** | **44** |
+| **Totaal** | **17** | **12** | **16** | **45** |
 
 Stage 1 staat op `enabled`, stage 2 is voorbereid (report-only of uit), stage 3 is optioneel: een licentie of een besluit per tenant (`*` in de tabellen). De indeling staat in [`cipp/`](../cipp/README.md). De kolom Intune telt de Intune-policies waar een policy van afhangt.
 
@@ -61,7 +61,8 @@ Stage 1 staat op `enabled`, stage 2 is voorbereid (report-only of uit), stage 3 
 | 2120 | [Phishing Resistant MFA for All Users](CA__2120__GRANT__Phishing_Resistant_MFA_for_All_Users.md) | iedereen | alle apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
 | 2125 | [Phishing Resistant MFA for Rollout Groups](CA__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups.md) | `CA-Registered-Phishing-MFA`, `CA-Exception-Authenticator-Phishing-MFA` | alle apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
 | 2130 | [Admins Compliant Device](CA__2130__GRANT__Admins_Compliant_Device.md) | 28 beheerrollen | alle apps | compliant apparaat of hybrid joined apparaat | enabled | 3* | 29 |
-| 2150 | [Cloud PC Mobile Access](CA__2150__GRANT__Cloud_PC_Mobile_Access.md) | iedereen | 2 apps | compliant app of compliant apparaat | enabled | 3* | 13 |
+| 2150 | [Cloud PC Mobile Access](CA__2150__GRANT__Cloud_PC_Mobile_Access.md) | iedereen | 4 apps | compliant app of compliant apparaat | enabled | 3* | 13 |
+| 2155 | [Virtual Desktop Phishing Resistant MFA](CA__2155__GRANT__Virtual_Desktop_Phishing_Resistant_MFA.md) | iedereen | 3 apps | `Phishing-resistant MFA` | report-only | 3* | 3 |
 | 2160 | [Agent Users Compliant Device](CA__2160__GRANT__Agent_Users_Compliant_Device.md) | agent- en workload-identiteiten | alle apps | compliant apparaat | report-only | 3* | 15 |
 | 2170 | [MFA for Intune Enrollment](CA__2170__GRANT__MFA_For_Intune_Enrollment.md) | iedereen | 1 app | `Multifactor authentication` + elke keer opnieuw aanmelden | enabled | 1 | 2 |
 | 2180 | [Register Security Info TAP Only](CA__2180__GRANT__Register_Security_Info_TAP_Only.md) | iedereen | beveiligingsinfo registreren | `Temporary Access Pass only` | report-only | 3* | — |
@@ -93,7 +94,8 @@ Uit [`_manifest.json`](_manifest.json). Deze templates gaan naar stage 3 en blij
 - **2120** — vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling.
 - **2125** — de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'CA-Registered-Phishing-MFA' of 'CA-Exception-Authenticator-Phishing-MFA' staat die nog geen phishing-bestendige methode heeft.
 - **2130** — eist dat élke beheerder een beheerd apparaat heeft — bij uitbesteed beheer dus ook elke engineer die in de tenant komt. Besluit per tenant.
-- **2150** — alleen relevant in een tenant met Windows 365 / Cloud PC.
+- **2150** — alleen relevant in een tenant met Azure Virtual Desktop of Windows 365.
+- **2155** — vraagt dat elke gebruiker van Azure Virtual Desktop of Windows 365 een passkey, Windows Hello for Business of FIDO2-sleutel heeft. Zinvol waar de virtuele werkplek de route is voor persoonlijke toestellen en derden; daar is het toestel onbekend en is de aanmelding het enige wat je kunt eisen.
 - **2160** — vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
 - **2180** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.
 - **2185** — hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. Naast 2180 op enabled wint de strengste: registreren kan dan alleen met een eenmalige TAP.

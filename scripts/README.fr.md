@@ -8,7 +8,7 @@ relié, en dérive l'export CIPP, ou met en place les prérequis dans un tenant 
 
 ```mermaid
 flowchart TD
-  T["CATemplate/<br/>44 templates"]
+  T["CATemplate/<br/>45 templates"]
   P["prerequisites/"]
   A["authentication-methods/"]
   C["controls/"]

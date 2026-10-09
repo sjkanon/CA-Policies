@@ -4,7 +4,7 @@
 
 # CA - 2150 - GRANT - Cloud PC Mobile Access
 
-Exige une app protection policy ou un appareil conforme pour Windows 365 et Microsoft Remote Desktop sur iOS et Android, afin qu'un Cloud PC ne soit pas accessible depuis n'importe quel téléphone.
+Exige une app protection policy ou un appareil conforme pour Azure Virtual Desktop et Windows 365 sur iOS et Android, afin qu'un poste de travail virtuel ne soit pas accessible depuis n'importe quel téléphone. Les trois apps auxquelles Windows App se connecte y figurent — y compris Windows Cloud Login, la connexion à l'hôte de session lui-même avec l'authentification unique — afin que l'exigence ne puisse pas être contournée par l'une d'elles.
 
 | | |
 |---|---|
@@ -13,14 +13,18 @@ Exige une app protection policy ou un appareil conforme pour Windows 365 et Micr
 | Stage | 3* |
 | Pour qui | tout le monde |
 | Exclus | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts` |
-| Sur | 2 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`) |
+| Sur | 4 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`), Azure Virtual Desktop (`9cdead84-a844-4324-93f2-b2e6bb768d07`), Windows Cloud Login (`270efc09-cd0d-444b-a71f-39af4910ec45`) |
 | Conditions | Clients: apps mobiles et clients de bureau<br>Plateforme: android, iOS |
 | Exigence | app conforme ou appareil conforme |
 | Fichier | [`CA__2150__GRANT__Cloud_PC_Mobile_Access.json`](CA__2150__GRANT__Cloud_PC_Mobile_Access.json) |
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — alleen relevant in een tenant met Windows 365 / Cloud PC.
+> **Optionnel** — alleen relevant in een tenant met Azure Virtual Desktop of Windows 365.
+
+## Points d'attention
+
+- Une app protection policy qui n'inclut pas explicitement Windows App ne compte pas : « toutes les apps Microsoft » ne couvre pas Windows App. Sans une telle stratégie, seul un appareil conforme peut entrer.
 
 ## Touche Intune
 
