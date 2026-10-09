@@ -4,13 +4,13 @@
 
 `CATemplate/` est la source : les stratégies Conditional Access convenues au format de template CIPP
 (ligne Table Storage avec une chaîne `JSON` imbriquée), numérotées `CA__1xxx` BLOCK, `2xxx` GRANT
-et `3xxx` SESSION. 44 templates. La numérotation et l'organisation viennent de la conception CA de
+et `3xxx` SESSION. 45 templates. La numérotation et l'organisation viennent de la conception CA de
 Daniel Chronlund ; pourquoi tout porte un seul préfixe et pourquoi il n'y a pas de personas est
 expliqué dans [`ANALYSE.fr.md`](docs/ANALYSE.fr.md#pourquoi-il-ny-a-pas-de-personas).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>44 templates<br/><i>la source</i>"]
+  T["<b>CATemplate/</b><br/>45 templates<br/><i>la source</i>"]
   P["prerequisites/<br/>groupes · emplacements · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -121,7 +121,7 @@ n'existe pas n'exclut personne**, donc la stratégie devient plus stricte que pr
 l'alerte. Deux cas ne sont pas alors « plus stricts » mais « fermés » :
 
 - `Excluded from Conditional Access` et `SG-U-CA-Exclude-Breakglass` figurent tous deux dans 38 des
-  44 templates — une seule exclusion break-glass sous deux noms, pour qu'un tenant n'ait rien à
+  45 templates — une seule exclusion break-glass sous deux noms, pour qu'un tenant n'ait rien à
   renommer pour suivre la convention qu'il applique déjà. Les six qui ne les ont pas visent des
   identités de workload et d'agent (`includeUsers: "None"`), donc ils n'y touchent rien.
   Les deux vides = pas de break-glass ; l'un des deux vide est plus insidieux, car l'exclusion

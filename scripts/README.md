@@ -8,7 +8,7 @@ leidt er de CIPP-export uit af, of zet de randvoorwaarden in een tenant — niet
 
 ```mermaid
 flowchart TD
-  T["CATemplate/<br/>44 templates"]
+  T["CATemplate/<br/>45 templates"]
   P["prerequisites/"]
   A["authentication-methods/"]
   C["controls/"]

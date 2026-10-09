@@ -8,7 +8,7 @@ derives the CIPP export from it, or puts the prerequisites into a tenant — not
 
 ```mermaid
 flowchart TD
-  T["CATemplate/<br/>44 templates"]
+  T["CATemplate/<br/>45 templates"]
   P["prerequisites/"]
   A["authentication-methods/"]
   C["controls/"]

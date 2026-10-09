@@ -8,7 +8,7 @@ Hand-written. This records where the
 all over again.
 
 Date: 3 September 2026. At that point the set had 33 templates. After the later rounds (below) there
-are 44; the numbers in the rest of this document are those of the round they appear in and have
+are 45; the numbers in the rest of this document are those of the round they appear in and have
 deliberately not been rewritten.
 
 ## The question
@@ -489,7 +489,7 @@ real work had been in the tenant for years, but in no document an auditor reads.
 
 ## What was added
 
-**`controls/ca-controls.json`** — all 44 templates mapped to ISO/IEC 27001:2022 Annex A, NIS2
+**`controls/ca-controls.json`** — all 45 templates mapped to ISO/IEC 27001:2022 Annex A, NIS2
 art. 21(2), CIS Controls v8.1 and NIST CSF 2.0, in exactly the same vocabulary as
 `IntuneTemplate/_controls.json` in the other repo. The phase does not come from a manifest but from
 `state` in the template itself: `enabled` counts as enforced, report-only as prepared,

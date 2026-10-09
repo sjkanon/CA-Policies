@@ -4,7 +4,7 @@
 
 # CA - 2150 - GRANT - Cloud PC Mobile Access
 
-Eist voor Windows 365 en Microsoft Remote Desktop op iOS en Android een app protection policy of een compliant toestel, zodat een Cloud PC niet vanaf een willekeurige telefoon bereikbaar is.
+Eist voor Azure Virtual Desktop en Windows 365 op iOS en Android een app protection policy of een compliant toestel, zodat een virtuele werkplek niet vanaf een willekeurige telefoon bereikbaar is. Alle drie de apps waarlangs Windows App aanmeldt staan erin — ook Windows Cloud Login, de aanmelding op de sessiehost zelf bij single sign-on — zodat de eis niet via één van de drie te omzeilen is.
 
 | | |
 |---|---|
@@ -13,14 +13,18 @@ Eist voor Windows 365 en Microsoft Remote Desktop op iOS en Android een app prot
 | Stage | 3* |
 | Voor wie | iedereen |
 | Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts` |
-| Op | 2 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`) |
+| Op | 4 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`), Azure Virtual Desktop (`9cdead84-a844-4324-93f2-b2e6bb768d07`), Windows Cloud Login (`270efc09-cd0d-444b-a71f-39af4910ec45`) |
 | Voorwaarden | Clients: mobiele apps en desktopclients<br>Platform: android, iOS |
 | Eis | compliant app of compliant apparaat |
 | Bestand | [`CA__2150__GRANT__Cloud_PC_Mobile_Access.json`](CA__2150__GRANT__Cloud_PC_Mobile_Access.json) |
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — alleen relevant in een tenant met Windows 365 / Cloud PC.
+> **Optioneel** — alleen relevant in een tenant met Azure Virtual Desktop of Windows 365.
+
+## Let op
+
+- Een app protection policy die Windows App niet expliciet bevat telt niet: 'alle Microsoft-apps' dekt Windows App niet. Zonder zo'n policy komt alleen een compliant toestel nog binnen.
 
 ## Raakt Intune
 

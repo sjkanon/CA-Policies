@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-10-06",
+  "generatedAt": "2026-10-09",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "CA Baseline v1.0",
   "_comment": [
@@ -531,7 +531,18 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "alleen relevant in een tenant met Windows 365 / Cloud PC."
+          "optionalReason": "alleen relevant in een tenant met Azure Virtual Desktop of Windows 365."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "fe171284-e2ef-47c7-bc6b-8e051cca0f76",
+          "templateFile": "CA__2155__GRANT__Virtual_Desktop_Phishing_Resistant_MFA",
+          "displayName": "CA - 2155 - GRANT - Virtual Desktop Phishing Resistant MFA",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "vraagt dat elke gebruiker van Azure Virtual Desktop of Windows 365 een passkey, Windows Hello for Business of FIDO2-sleutel heeft. Zinvol waar de virtuele werkplek de route is voor persoonlijke toestellen en derden; daar is het toestel onbekend en is de aanmelding het enige wat je kunt eisen."
         },
         {
           "standard": "ConditionalAccessTemplate",

@@ -4,7 +4,7 @@
 
 # CA - 2150 - GRANT - Cloud PC Mobile Access
 
-Requires an app protection policy or a compliant device for Windows 365 and Microsoft Remote Desktop on iOS and Android, so that a Cloud PC cannot be reached from just any phone.
+Requires an app protection policy or a compliant device for Azure Virtual Desktop and Windows 365 on iOS and Android, so that a virtual desktop cannot be reached from just any phone. All three apps Windows App signs in to are included — also Windows Cloud Login, the sign-in to the session host itself with single sign-on — so the requirement cannot be bypassed through one of them.
 
 | | |
 |---|---|
@@ -13,14 +13,18 @@ Requires an app protection policy or a compliant device for Windows 365 and Micr
 | Stage | 3* |
 | Who | everyone |
 | Excluded | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts` |
-| On | 2 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`) |
+| On | 4 apps: Windows 365 (`0af06dc6-e4b5-4f28-818e-e78e62d137a5`), Microsoft Remote Desktop (`a4a365df-50f1-4397-bc59-1a1564b8bb9c`), Azure Virtual Desktop (`9cdead84-a844-4324-93f2-b2e6bb768d07`), Windows Cloud Login (`270efc09-cd0d-444b-a71f-39af4910ec45`) |
 | Conditions | Clients: mobile apps and desktop clients<br>Platform: android, iOS |
 | Requirement | compliant app or compliant device |
 | File | [`CA__2150__GRANT__Cloud_PC_Mobile_Access.json`](CA__2150__GRANT__Cloud_PC_Mobile_Access.json) |
 
 Groups, named locations and authentication strengths in the table must exist in the tenant: see [`prerequisites/`](../prerequisites/README.en.md). An exclusion group that does not exist excludes nobody.
 
-> **Optional** — alleen relevant in een tenant met Windows 365 / Cloud PC.
+> **Optional** — alleen relevant in een tenant met Azure Virtual Desktop of Windows 365.
+
+## Watch out
+
+- An app protection policy that does not explicitly include Windows App does not count: 'all Microsoft apps' does not cover Windows App. Without such a policy only a compliant device gets in.
 
 ## Touches Intune
 

@@ -7,7 +7,7 @@ Rédigé à la main. Ce document consigne d'où viennent les
 **pas** et pourquoi. Sans ce dernier point, la prochaine itération réévalue les mêmes stratégies.
 
 Date : 3 septembre 2026. L'ensemble comptait alors 33 modèles. Après les itérations suivantes (en bas),
-il y en a 44 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
+il y en a 45 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
 n'ont délibérément pas été réécrits.
 
 ## La question
