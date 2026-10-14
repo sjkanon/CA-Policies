@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-10-09",
+  "generatedAt": "2026-10-14",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "CA Baseline v1.0",
   "_comment": [
@@ -54,17 +54,42 @@
         "requiresMembers": true
       },
       {
-        "displayName": "CA-Rollout-Phishing-MFA",
+        "displayName": "SG-U-CA-Onboarding-Passkey",
         "danger": "low",
         "requiresMembers": false
       },
       {
-        "displayName": "CA-Registered-Phishing-MFA",
+        "displayName": "SG-U-IAM-Register-Temporary-Access-Pass",
+        "danger": "medium",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Passkey-Forced",
         "danger": "high",
         "requiresMembers": false
       },
       {
-        "displayName": "CA-Exception-Authenticator-Phishing-MFA",
+        "displayName": "SG-U-CA-Exception-Passkey-WHfB",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Exception-Passkey-FIDO2",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Exception-Passkey-Synced-iCloud",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Exception-Passkey-Synced-Google",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Exception-Passkey-Authenticator",
         "danger": "high",
         "requiresMembers": false
       },
@@ -509,7 +534,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'CA-Registered-Phishing-MFA' of 'CA-Exception-Authenticator-Phishing-MFA' staat die nog geen phishing-bestendige methode heeft."
+          "optionalReason": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -564,7 +589,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste."
+          "optionalReason": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -575,7 +600,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. Naast 2180 op enabled wint de strengste: registreren kan dan alleen met een eenmalige TAP."
+          "optionalReason": "hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. De onboardinggroep is uitgesloten van 2180, zodat die er niet alsnog een eenmalige TAP bovenop eist."
         },
         {
           "standard": "ConditionalAccessTemplate",

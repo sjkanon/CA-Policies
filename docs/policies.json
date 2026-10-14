@@ -472,15 +472,15 @@
     },
     "CA__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups": {
       "doel": {
-        "nl": "Eist phishing-resistente MFA voor de uitrolgroepen `CA-Registered-Phishing-MFA` en `CA-Exception-Authenticator-Phishing-MFA`: de groepsgewijze weg naar `2120`.",
-        "en": "Requires phishing-resistant MFA for the rollout groups `CA-Registered-Phishing-MFA` and `CA-Exception-Authenticator-Phishing-MFA`: the group-by-group route to `2120`.",
-        "fr": "Exige une MFA résistante au phishing pour les groupes de déploiement `CA-Registered-Phishing-MFA` et `CA-Exception-Authenticator-Phishing-MFA` : la voie groupe par groupe vers `2120`."
+        "nl": "Eist phishing-resistente MFA voor `SG-U-CA-Passkey-Forced` en de uitzonderingsgroepen `SG-U-CA-Exception-Passkey-*` (WHfB, FIDO2, Synced-iCloud, Synced-Google, Authenticator): de groepsgewijze weg naar `2120`. `SG-U-CA-Onboarding-Passkey` is uitgesloten.",
+        "en": "Requires phishing-resistant MFA for `SG-U-CA-Passkey-Forced` and the exception groups `SG-U-CA-Exception-Passkey-*` (WHfB, FIDO2, Synced-iCloud, Synced-Google, Authenticator): the group-by-group route to `2120`. `SG-U-CA-Onboarding-Passkey` is excluded.",
+        "fr": "Exige une MFA résistante au phishing pour `SG-U-CA-Passkey-Forced` et les groupes d'exception `SG-U-CA-Exception-Passkey-*` (WHfB, FIDO2, Synced-iCloud, Synced-Google, Authenticator) : la voie groupe par groupe vers `2120`. `SG-U-CA-Onboarding-Passkey` est exclu."
       },
       "letOp": [
         {
-          "nl": "De groepen dragen de namen uit de brontenant (`CA-…`), niet de SG-U-conventie. Hernoemen breekt de koppeling met die tenant.",
-          "en": "The groups carry the names from the source tenant (`CA-…`), not the SG-U convention. Renaming breaks the link with that tenant.",
-          "fr": "Les groupes portent les noms du tenant source (`CA-…`), pas la convention SG-U. Les renommer rompt le lien avec ce tenant."
+          "nl": "Wie in `SG-U-CA-Onboarding-Passkey` staat valt buiten 2125, ook als hij al in een doelgroep zit: hij moet eerst via `2185` zijn passkey kunnen registreren, en 2125 geldt voor alle apps, dus ook voor de registratiepagina. Haal hem na de registratie uit de onboardinggroep, anders blijft de eis voor hem uit.",
+          "en": "Members of `SG-U-CA-Onboarding-Passkey` fall outside 2125, even if they are already in a target group: they first need to register their passkey via `2185`, and 2125 applies to all apps, the registration page included. Remove them from the onboarding group after registration, or the requirement stays off for them.",
+          "fr": "Les membres de `SG-U-CA-Onboarding-Passkey` sont hors de 2125, même s'ils figurent déjà dans un groupe cible : ils doivent d'abord pouvoir enregistrer leur passkey via `2185`, et 2125 s'applique à toutes les apps, page d'enregistrement comprise. Retirez-les du groupe d'onboarding après l'enregistrement, sinon l'exigence reste désactivée pour eux."
         }
       ],
       "intune": [
@@ -652,11 +652,16 @@
     },
     "CA__2180__GRANT__Register_Security_Info_TAP_Only": {
       "doel": {
-        "nl": "Laat beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.",
-        "en": "Only allows security info (MFA methods, passkeys) to be registered with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.",
-        "fr": "N'autorise l'enregistrement des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk."
+        "nl": "Laat leden van `SG-U-IAM-Register-Temporary-Access-Pass` beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.",
+        "en": "Only allows members of `SG-U-IAM-Register-Temporary-Access-Pass` to register security info (MFA methods, passkeys) with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.",
+        "fr": "N'autorise les membres de `SG-U-IAM-Register-Temporary-Access-Pass` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk."
       },
       "letOp": [
+        {
+          "nl": "`SG-U-CA-Onboarding-Passkey` is uitgesloten. Grant controls van policies tellen samen op: zonder die uitsluiting voldoet voor een lid van beide groepen alleen een TAP, en kan hij via `2185` niet met zijn eigen MFA registreren.",
+          "en": "`SG-U-CA-Onboarding-Passkey` is excluded. Grant controls of separate policies add up: without that exclusion only a TAP satisfies a member of both groups, and they cannot register with their own MFA via `2185`.",
+          "fr": "`SG-U-CA-Onboarding-Passkey` est exclu. Les contrôles d'octroi de stratégies distinctes s'additionnent : sans cette exclusion, seul un TAP convient à un membre des deux groupes, qui ne peut pas s'enregistrer avec sa propre MFA via `2185`."
+        },
         {
           "nl": "Het strength-id in het template is een placeholder (nul-GUID); bij uitrol moet het id van de aangemaakte strength erin. Controleer ook dat CIPP de custom strength meestuurt, anders rolt een lege policy uit.",
           "en": "The strength id in the template is a placeholder (zero GUID); on deployment the id of the created strength must go in. Also check that CIPP sends the custom strength, or an empty policy is deployed.",
@@ -671,9 +676,9 @@
     },
     "CA__2185__GRANT__Register_Security_Info_Passkey_Rollout": {
       "doel": {
-        "nl": "Eist voor de uitrolgroep `CA-Rollout-Phishing-MFA` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. Staan zowel deze als `2180` aan, dan voldoet alleen nog een TAP.",
-        "en": "Requires the `Passkey Rollout` strength for the rollout group `CA-Rollout-Phishing-MFA` when registering security info, and signing in again every seven days. With both this and `2180` on, only a TAP still qualifies.",
-        "fr": "Exige la strength `Passkey Rollout` pour le groupe de déploiement `CA-Rollout-Phishing-MFA` lors de l'enregistrement des infos de sécurité, avec une reconnexion tous les sept jours. Si celle-ci et `2180` sont actives, seul un TAP convient encore."
+        "nl": "Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-Temporary-Access-Pass` registreert hier met zijn eigen MFA.",
+        "en": "Requires the `Passkey Rollout` strength for the onboarding group `SG-U-CA-Onboarding-Passkey` when registering security info, and signing in again every seven days. The group is excluded from `2180`, so a member of `SG-U-IAM-Register-Temporary-Access-Pass` also registers here with their own MFA.",
+        "fr": "Exige la strength `Passkey Rollout` pour le groupe d'onboarding `SG-U-CA-Onboarding-Passkey` lors de l'enregistrement des infos de sécurité, avec une reconnexion tous les sept jours. Le groupe est exclu de `2180` : un membre de `SG-U-IAM-Register-Temporary-Access-Pass` s'enregistre donc ici aussi avec sa propre MFA."
       },
       "letOp": [
         {

@@ -4,15 +4,15 @@
 
 # CA - 2180 - GRANT - Register Security Info TAP Only
 
-N'autorise l'enregistrement des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk.
+N'autorise les membres de `SG-U-IAM-Register-Temporary-Access-Pass` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | report-only |
 | Stage | 3* |
-| Pour qui | tout le monde |
-| Exclus | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass` |
+| Pour qui | `SG-U-IAM-Register-Temporary-Access-Pass` |
+| Exclus | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `SG-U-CA-Onboarding-Passkey` |
 | Sur | enregistrer les infos de sécurité |
 | Conditions | aucune — seulement qui, sur quelle app |
 | Exigence | `Temporary Access Pass only` |
@@ -20,10 +20,11 @@ N'autorise l'enregistrement des infos de sécurité (méthodes MFA, passkeys) qu
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste.
+> **Optionnel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste.
 
 ## Points d'attention
 
+- `SG-U-CA-Onboarding-Passkey` est exclu. Les contrôles d'octroi de stratégies distinctes s'additionnent : sans cette exclusion, seul un TAP convient à un membre des deux groupes, qui ne peut pas s'enregistrer avec sa propre MFA via `2185`.
 - L'id de strength du template est un placeholder (GUID nul) ; au déploiement, l'id de la strength créée doit y figurer. Vérifiez aussi que CIPP transmet la strength personnalisée, sinon une stratégie vide est déployée.
 - Déplace la surface d'attaque vers le service desk : sans vérification d'identité lors de la demande de TAP, le gain est plus faible qu'il n'y paraît.
 
