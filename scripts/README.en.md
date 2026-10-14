@@ -130,7 +130,7 @@ tenant-specific values that leaks to a second remote can never be got out of the
 Deleted is deleted, but only for files that are in git on the other side; what was
 created locally there is left alone. Whatever belongs to the mirror only (its own documents,
 workflows) goes in `.mirror-keep` there: one path per line, a trailing `/` for a directory, `*` as a
-wildcard. The mirror never removes those.
+wildcard. The mirror never removes or overwrites those.
 
 The target clone keeps its own history. No `push --force`, so the commits, workflow runs and
 branches on that side stay — and that is also why it is a script and not a remote: a

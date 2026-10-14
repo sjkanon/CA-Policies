@@ -15,7 +15,7 @@
  *
  * Files that belong to the mirror only (its own documents, workflows) are listed in `.mirror-keep`
  * in the target: one path per line, a trailing `/` for a whole directory, `*` as a wildcard, `#` for
- * comments. Those are never removed there. The list itself is kept too.
+ * comments. Those are never removed or overwritten there. The list itself is kept too.
  *
  * The target clone is not pushed without `--push`, and the source working tree does not have
  * to be clean — but a mirror of uncommitted changes is a mirror of something that can still
@@ -143,9 +143,14 @@ const source = trackedFiles(REPO_ROOT);
 const sourceSet = new Set(source);
 const target = trackedFiles(targetRoot);
 
+// Wat alleen in de spiegel hoort (.mirror-keep daar) blijft staan: niet weghalen en niet overschrijven,
+// ook als hier een bestand met dezelfde naam is (bv. een CLAUDE.md met een eigen regelboek).
+const keep = mirrorKeep(targetRoot);
+
 const added = [];
 const changed = [];
 for (const rel of source) {
+  if (keep(rel)) continue;
   const from = path.join(REPO_ROOT, rel);
   const to = path.join(targetRoot, rel);
   if (!fs.existsSync(to)) {
@@ -161,8 +166,6 @@ for (const rel of source) {
   }
 }
 
-// Wat alleen in de spiegel hoort (.mirror-keep daar) blijft staan.
-const keep = mirrorKeep(targetRoot);
 const kept = target.filter((rel) => !sourceSet.has(rel) && keep(rel));
 const removed = target.filter((rel) => !sourceSet.has(rel) && !keep(rel));
 if (kept.length) console.log(`${kept.length} bestand(en) alleen in de spiegel blijven staan (.mirror-keep).\n`);

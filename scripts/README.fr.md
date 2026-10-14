@@ -130,7 +130,7 @@ seule copie de travail contenant des valeurs propres au tenant qui fuit vers un 
 plus jamais en être retirée. Supprimé veut dire supprimé, mais uniquement pour les fichiers qui sont
 dans git de l'autre côté ; ce qui y a été créé localement n'est pas touché. Ce qui n'appartient qu'au miroir (ses propres
 documents, workflows) se met là-bas dans `.mirror-keep` : un chemin par ligne, un `/` final pour un dossier,
-`*` comme joker. Le miroir ne les supprime jamais.
+`*` comme joker. Le miroir ne les supprime ni ne les écrase jamais.
 
 Le clone cible conserve son propre historique. Pas de `push --force`, donc les commits, les
 exécutions de workflow et les branches de ce côté restent en place — et c'est aussi pourquoi c'est un
