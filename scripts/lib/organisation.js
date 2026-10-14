@@ -9,6 +9,25 @@ const path = require("path");
 
 const ORGANISATION_PATH = path.resolve(__dirname, "..", "..", "CATemplate", "_organisation.json");
 
+/**
+ * Paden uit .mirror-keep in een clone: wat alleen in een spiegel hoort (eigen documenten, workflows).
+ * Eén pad per regel, `/` aan het eind voor een map, `*` als joker, `#` voor commentaar. sync-mirror.js
+ * haalt ze daar niet weg en set-organisation.js laat ze ongemoeid. Geeft een functie rel -> bool.
+ */
+function mirrorKeep(root) {
+  const file = path.join(root, ".mirror-keep");
+  const rules = [/^\.mirror-keep$/];
+  if (fs.existsSync(file)) {
+    for (const line of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
+      const p = line.replace(/#.*/, "").trim();
+      if (!p) continue;
+      const re = p.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*");
+      rules.push(new RegExp("^" + re + (p.endsWith("/") ? "" : "$")));
+    }
+  }
+  return (rel) => rules.some((r) => r.test(rel));
+}
+
 /** In bestandsnamen op Windows, en in de JSON-strings en regexen die de scripts bouwen, breekt dit. */
 const FORBIDDEN = /["\\/:*?<>|_]/;
 
@@ -86,6 +105,7 @@ const FILE_PREFIX = filePrefixOf(PREFIX);
 const DISPLAY_NAME_RE = new RegExp(`^${escapeRegExp(PREFIX)}(\\d+) - (\\w+) - (.+)$`);
 
 module.exports = {
+  mirrorKeep,
   ORGANISATION_PATH,
   PREFIX,
   FILE_PREFIX,

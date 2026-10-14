@@ -54,6 +54,7 @@ const {
   serviceProviderExclusion,
   serviceProviderTenantsOf,
   wantsServiceProviderExclusion,
+  mirrorKeep,
 } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
@@ -94,12 +95,16 @@ const sameList = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 const git = (args) => execFileSync("git", ["-C", REPO_ROOT, ...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 
-/** Wat in git zit plus wat nieuw is en niet genegeerd wordt — een verse wijziging gaat ook mee. */
+/**
+ * Wat in git zit plus wat nieuw is en niet genegeerd wordt — een verse wijziging gaat ook mee. Zonder
+ * wat in .mirror-keep staat: dat hoort alleen bij deze spiegel en staat al in zijn eigen organisatie.
+ */
 function repoFiles() {
+  const keep = mirrorKeep(REPO_ROOT);
   return git(["ls-files", "-z", "--cached", "--others", "--exclude-standard"])
     .split("\0")
     .filter(Boolean)
-    .filter((rel, i, all) => all.indexOf(rel) === i && fs.existsSync(path.join(REPO_ROOT, rel)));
+    .filter((rel, i, all) => all.indexOf(rel) === i && fs.existsSync(path.join(REPO_ROOT, rel)) && !keep(rel));
 }
 
 const isText = (buf) => !buf.includes(0);
