@@ -130,7 +130,7 @@ tenant-specifieke waarden die naar een tweede remote lekt krijg je daar nooit me
 Verwijderd is verwijderd, maar alleen voor bestanden die aan de andere kant in git staan; wat
 daar lokaal is aangemaakt blijft met rust. Wat alleen in de spiegel hoort (eigen documenten,
 workflows) zet je daar in `.mirror-keep`: één pad per regel, `/` aan het eind voor een map, `*` als joker.
-Dat haalt de spiegel nooit weg.
+Dat haalt de spiegel nooit weg en overschrijft het niet.
 
 De doelclone houdt zijn eigen geschiedenis. Geen `push --force`, dus de commits, workflowruns en
 branches aan die kant blijven staan — en dat is ook waarom het een script is en geen remote: een
