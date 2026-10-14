@@ -102,32 +102,82 @@
       "requiresEntraIdP1": true
     },
     {
-      "displayName": "CA-Rollout-Phishing-MFA",
-      "mailNickname": "ca-rollout-phishing-mfa",
+      "displayName": "SG-U-CA-Onboarding-Passkey",
+      "mailNickname": "sg-u-ca-onboarding-passkey",
       "membershipType": "assigned",
-      "purpose": "Stap 1 van de passkey-uitrol per groep: wie hierin zit mag via 2185 zijn passkey registreren met de MFA die hij al heeft, zolang die aanmelding niet ouder is dan zeven dagen. Na de registratie gaat de gebruiker naar 'CA-Registered-Phishing-MFA'.",
-      "description": "Passkey rollout, step 1: members may register a passkey with their existing MFA (CA 2185). Move them to 'CA-Registered-Phishing-MFA' once registered.",
+      "purpose": "Stap 1 van de passkey-uitrol per groep: wie hierin zit mag via 2185 zijn passkey registreren met de MFA die hij al heeft, zolang die aanmelding niet ouder is dan zeven dagen. Uitgesloten van 2125, zodat een lid dat ook al in een doelgroep van 2125 staat niet wordt buitengesloten voordat hij heeft geregistreerd. Na de registratie gaat de gebruiker naar 'SG-U-CA-Passkey-Forced' (of een 'SG-U-CA-Exception-Passkey-*'-groep) en uit deze groep.",
+      "description": "Passkey rollout, step 1: members may register a passkey with their existing MFA (CA 2185) and are excluded from CA 2125. Move them to 'SG-U-CA-Passkey-Forced' (or an 'SG-U-CA-Exception-Passkey-*' group) once registered.",
       "danger": "low",
       "requiresMembers": false
     },
     {
-      "displayName": "CA-Registered-Phishing-MFA",
-      "mailNickname": "ca-registered-phishing-mfa",
+      "displayName": "SG-U-IAM-Register-TAP-Key",
+      "mailNickname": "sg-u-iam-register-tap-key",
       "membershipType": "assigned",
-      "purpose": "Stap 2 van de passkey-uitrol per groep: wie hierin zit heeft een phishing-bestendige methode geregistreerd en moet die via 2125 voor elke app gebruiken. De groepsgewijze voorloper van 2120, dat hetzelfde voor iedereen eist.",
-      "description": "Passkey rollout, step 2: members have registered a phishing-resistant method and must use it for every app (CA 2125).",
-      "danger": "high",
-      "dangerReason": "Wie hier staat zonder phishing-bestendige methode komt nergens meer in: 2125 eist hem voor alle apps en de gebruiker kan hem niet meer registreren zonder TAP. Alleen toevoegen ná een geslaagde registratie — Test-EntraPasskeyReadiness.ps1 zegt of die kan.",
+      "purpose": "De doelgroep van 2180: wie hierin zit kan beveiligingsinfo alleen nog registreren met een eenmalige Temporary Access Pass van de servicedesk. Wie ook in 'SG-U-CA-Onboarding-Passkey' staat valt buiten 2180 en registreert via 2185 met zijn eigen MFA.",
+      "description": "Members can only register security info with a one-time Temporary Access Pass (CA 2180). Members of 'SG-U-CA-Onboarding-Passkey' are excluded from CA 2180.",
+      "danger": "medium",
+      "dangerReason": "Wie hier staat kan zonder TAP geen enkele methode meer toevoegen of vervangen, ook niet na een nieuwe telefoon. Alleen gebruiken waar de servicedesk TAPs uitgeeft en de aanvrager verifieert.",
       "requiresMembers": false
     },
     {
-      "displayName": "CA-Exception-Authenticator-Phishing-MFA",
-      "mailNickname": "ca-exception-authenticator-phishing-mfa",
+      "displayName": "SG-U-CA-Passkey-Forced",
+      "mailNickname": "sg-u-ca-passkey-forced",
       "membershipType": "assigned",
-      "purpose": "Tweede doelgroep van 2125, naast 'CA-Registered-Phishing-MFA': gebruikers voor wie de passkey in Microsoft Authenticator de phishing-bestendige methode is, in plaats van Windows Hello of een sleutel. Voor 2125 maakt het geen verschil — beide groepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie de uitzondering op het standaardapparaat is.",
-      "description": "Passkey rollout: users whose phishing-resistant method is a passkey in Microsoft Authenticator. Same requirement as 'CA-Registered-Phishing-MFA' (CA 2125).",
+      "purpose": "Stap 2 van de passkey-uitrol per groep, en de standaarddoelgroep van 2125: wie hierin zit heeft een phishing-bestendige methode geregistreerd en moet die voor elke app gebruiken. Wie een afwijkende methode gebruikt (onder meer een passkey in Microsoft Authenticator), staat in een 'SG-U-CA-Exception-Passkey-*'-groep. De groepsgewijze voorloper van 2120, dat hetzelfde voor iedereen eist.",
+      "description": "Passkey rollout, step 2: members have registered a phishing-resistant method and must use it for every app (CA 2125).",
       "danger": "high",
-      "dangerReason": "Zelfde risico als 'CA-Registered-Phishing-MFA': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "dangerReason": "Wie hier staat zonder phishing-bestendige methode komt nergens meer in: 2125 eist hem voor alle apps en de gebruiker kan hem niet meer registreren zonder TAP, tenzij hij ook in 'SG-U-CA-Onboarding-Passkey' staat. Alleen toevoegen ná een geslaagde registratie — Test-EntraPasskeyReadiness.ps1 zegt of die kan.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Exception-Passkey-WHfB",
+      "mailNickname": "sg-u-ca-exception-passkey-whfb",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 'SG-U-CA-Passkey-Forced': gebruikers voor wie Windows Hello for Business de phishing-bestendige methode is. Voor 2125 maakt het geen verschil — alle doelgroepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie van de standaardmethode afwijkt en met welke.",
+      "description": "Passkey rollout: exception to 'SG-U-CA-Passkey-Forced' for users whose phishing-resistant method is Windows Hello for Business. Same requirement in CA 2125.",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'SG-U-CA-Passkey-Forced': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Exception-Passkey-FIDO2",
+      "mailNickname": "sg-u-ca-exception-passkey-fido2",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 'SG-U-CA-Passkey-Forced': gebruikers voor wie een FIDO2-beveiligingssleutel de phishing-bestendige methode is. Voor 2125 maakt het geen verschil — alle doelgroepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie van de standaardmethode afwijkt en met welke.",
+      "description": "Passkey rollout: exception to 'SG-U-CA-Passkey-Forced' for users whose phishing-resistant method is a FIDO2 security key. Same requirement in CA 2125.",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'SG-U-CA-Passkey-Forced': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Exception-Passkey-Synced-iCloud",
+      "mailNickname": "sg-u-ca-exception-passkey-synced-icloud",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 'SG-U-CA-Passkey-Forced': gebruikers voor wie een gesynchroniseerde passkey in iCloud-sleutelhanger de phishing-bestendige methode is. Voor 2125 maakt het geen verschil — alle doelgroepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie van de standaardmethode afwijkt en met welke.",
+      "description": "Passkey rollout: exception to 'SG-U-CA-Passkey-Forced' for users whose phishing-resistant method is a synced passkey in iCloud Keychain. Same requirement in CA 2125.",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'SG-U-CA-Passkey-Forced': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Exception-Passkey-Synced-Google",
+      "mailNickname": "sg-u-ca-exception-passkey-synced-google",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 'SG-U-CA-Passkey-Forced': gebruikers voor wie een gesynchroniseerde passkey in Google Password Manager de phishing-bestendige methode is. Voor 2125 maakt het geen verschil — alle doelgroepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie van de standaardmethode afwijkt en met welke.",
+      "description": "Passkey rollout: exception to 'SG-U-CA-Passkey-Forced' for users whose phishing-resistant method is a synced passkey in Google Password Manager. Same requirement in CA 2125.",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'SG-U-CA-Passkey-Forced': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Exception-Passkey-Authenticator",
+      "mailNickname": "sg-u-ca-exception-passkey-authenticator",
+      "membershipType": "assigned",
+      "purpose": "Uitzondering op 'SG-U-CA-Passkey-Forced': gebruikers voor wie een passkey in Microsoft Authenticator de phishing-bestendige methode is. Voor 2125 maakt het geen verschil — alle doelgroepen krijgen dezelfde eis — maar de aparte groep houdt zichtbaar wie van de standaardmethode afwijkt en met welke.",
+      "description": "Passkey rollout: exception to 'SG-U-CA-Passkey-Forced' for users whose phishing-resistant method is a passkey in Microsoft Authenticator. Same requirement in CA 2125.",
+      "danger": "high",
+      "dangerReason": "Zelfde risico als 'SG-U-CA-Passkey-Forced': lidmaatschap zonder geregistreerde passkey sluit de gebruiker buiten.",
       "requiresMembers": false
     },
     {

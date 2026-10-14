@@ -49,7 +49,7 @@
   },
   "CA__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups": {
     "optional": true,
-    "reden": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'CA-Registered-Phishing-MFA' of 'CA-Exception-Authenticator-Phishing-MFA' staat die nog geen phishing-bestendige methode heeft."
+    "reden": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten."
   },
   "CA__2130__GRANT__Admins_Compliant_Device": {
     "optional": true,
@@ -65,11 +65,11 @@
   },
   "CA__2180__GRANT__Register_Security_Info_TAP_Only": {
     "optional": true,
-    "reden": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand nog zelf een methode registreren, ook niet zijn eerste."
+    "reden": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-TAP-Key' nog zelf een methode registreren, ook niet zijn eerste."
   },
   "CA__2185__GRANT__Register_Security_Info_Passkey_Rollout": {
     "optional": true,
-    "reden": "hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. Naast 2180 op enabled wint de strengste: registreren kan dan alleen met een eenmalige TAP."
+    "reden": "hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. De onboardinggroep is uitgesloten van 2180, zodat die er niet alsnog een eenmalige TAP bovenop eist."
   },
   "CA__2190__GRANT__Windows_Hello_Passkeys": {
     "optional": true,

@@ -128,7 +128,9 @@ Wat meegaat is `git ls-files`, niet wat er op de schijf ligt — daarmee blijft 
 spiegel, en dat is precies de reden om het niet met een kopieeropdracht te doen: één werkkopie met
 tenant-specifieke waarden die naar een tweede remote lekt krijg je daar nooit meer uit.
 Verwijderd is verwijderd, maar alleen voor bestanden die aan de andere kant in git staan; wat
-daar lokaal is aangemaakt blijft met rust.
+daar lokaal is aangemaakt blijft met rust. Wat alleen in de spiegel hoort (eigen documenten,
+workflows) zet je daar in `.mirror-keep`: één pad per regel, `/` aan het eind voor een map, `*` als joker.
+Dat haalt de spiegel nooit weg.
 
 De doelclone houdt zijn eigen geschiedenis. Geen `push --force`, dus de commits, workflowruns en
 branches aan die kant blijven staan — en dat is ook waarom het een script is en geen remote: een

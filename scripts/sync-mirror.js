@@ -13,6 +13,10 @@
  * remote. Files that are *gone* here are removed there too — but only if they are in git on
  * the other side; whatever was created locally there is left alone.
  *
+ * Files that belong to the mirror only (its own documents, workflows) are listed in `.mirror-keep`
+ * in the target: one path per line, a trailing `/` for a whole directory, `*` as a wildcard, `#` for
+ * comments. Those are never removed there. The list itself is kept too.
+ *
  * The target clone is not pushed without `--push`, and the source working tree does not have
  * to be clean — but a mirror of uncommitted changes is a mirror of something that can still
  * change here, so it warns about that.
@@ -157,7 +161,17 @@ for (const rel of source) {
   }
 }
 
-const removed = target.filter((rel) => !sourceSet.has(rel));
+/** Paden uit .mirror-keep in de doelclone: wat alleen in de spiegel hoort en nooit weg mag. */
+function keepRules(root) {
+  const file = path.join(root, ".mirror-keep");
+  if (!fs.existsSync(file)) return [];
+  return fs.readFileSync(file, "utf8").split(/\r?\n/).map((l) => l.replace(/#.*/, "").trim()).filter(Boolean)
+    .map((p) => new RegExp("^" + p.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*") + (p.endsWith("/") ? "" : "$")));
+}
+const keep = [/^\.mirror-keep$/, ...keepRules(targetRoot)];
+const kept = target.filter((rel) => !sourceSet.has(rel) && keep.some((re) => re.test(rel)));
+const removed = target.filter((rel) => !sourceSet.has(rel) && !keep.some((re) => re.test(rel)));
+if (kept.length) console.log(`${kept.length} bestand(en) alleen in de spiegel blijven staan (.mirror-keep).\n`);
 for (const rel of removed) {
   const victim = path.join(targetRoot, rel);
   if (opts.dryRun || !fs.existsSync(victim)) continue;

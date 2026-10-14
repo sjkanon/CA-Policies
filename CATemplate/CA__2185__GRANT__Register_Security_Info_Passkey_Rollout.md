@@ -4,14 +4,14 @@
 
 # CA - 2185 - GRANT - Register Security Info Passkey Rollout
 
-Eist voor de uitrolgroep `CA-Rollout-Phishing-MFA` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. Staan zowel deze als `2180` aan, dan voldoet alleen nog een TAP.
+Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-TAP-Key` registreert hier met zijn eigen MFA.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | enabled |
 | Stage | 3* |
-| Voor wie | `CA-Rollout-Phishing-MFA` |
+| Voor wie | `SG-U-CA-Onboarding-Passkey` |
 | Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts` |
 | Op | beveiligingsinfo registreren |
 | Voorwaarden | geen — alleen wie, op welke app |
@@ -20,7 +20,7 @@ Eist voor de uitrolgroep `CA-Rollout-Phishing-MFA` de strength `Passkey Rollout`
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. Naast 2180 op enabled wint de strengste: registreren kan dan alleen met een eenmalige TAP.
+> **Optioneel** — hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. De onboardinggroep is uitgesloten van 2180, zodat die er niet alsnog een eenmalige TAP bovenop eist.
 
 ## Let op
 

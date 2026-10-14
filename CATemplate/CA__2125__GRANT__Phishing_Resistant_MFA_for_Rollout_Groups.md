@@ -4,15 +4,15 @@
 
 # CA - 2125 - GRANT - Phishing Resistant MFA for Rollout Groups
 
-Eist phishing-resistente MFA voor de uitrolgroepen `CA-Registered-Phishing-MFA` en `CA-Exception-Authenticator-Phishing-MFA`: de groepsgewijze weg naar `2120`.
+Eist phishing-resistente MFA voor `SG-U-CA-Passkey-Forced` en de uitzonderingsgroepen `SG-U-CA-Exception-Passkey-*` (WHfB, FIDO2, Synced-iCloud, Synced-Google, Authenticator): de groepsgewijze weg naar `2120`. `SG-U-CA-Onboarding-Passkey` is uitgesloten.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | enabled |
 | Stage | 3* |
-| Voor wie | `CA-Registered-Phishing-MFA`, `CA-Exception-Authenticator-Phishing-MFA` |
-| Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts`, gasten |
+| Voor wie | `SG-U-CA-Passkey-Forced`, `SG-U-CA-Exception-Passkey-WHfB`, `SG-U-CA-Exception-Passkey-FIDO2`, `SG-U-CA-Exception-Passkey-Synced-iCloud`, `SG-U-CA-Exception-Passkey-Synced-Google`, `SG-U-CA-Exception-Passkey-Authenticator` |
+| Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `Conditional Access Service Accounts`, `SG-U-CA-Onboarding-Passkey`, gasten |
 | Op | alle apps |
 | Voorwaarden | geen — alleen wie, op welke app |
 | Eis | `Phishing-resistant MFA` |
@@ -20,11 +20,11 @@ Eist phishing-resistente MFA voor de uitrolgroepen `CA-Registered-Phishing-MFA` 
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'CA-Registered-Phishing-MFA' of 'CA-Exception-Authenticator-Phishing-MFA' staat die nog geen phishing-bestendige methode heeft.
+> **Optioneel** — de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten.
 
 ## Let op
 
-- De groepen dragen de namen uit de brontenant (`CA-…`), niet de SG-U-conventie. Hernoemen breekt de koppeling met die tenant.
+- Wie in `SG-U-CA-Onboarding-Passkey` staat valt buiten 2125, ook als hij al in een doelgroep zit: hij moet eerst via `2185` zijn passkey kunnen registreren, en 2125 geldt voor alle apps, dus ook voor de registratiepagina. Haal hem na de registratie uit de onboardinggroep, anders blijft de eis voor hem uit.
 
 ## Raakt Intune
 
