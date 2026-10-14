@@ -40,7 +40,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
-const { validPrefix, GUID_RE, tenantIdsOf } = require("./lib/organisation");
+const { validPrefix, GUID_RE, tenantIdsOf, mirrorKeep } = require("./lib/organisation");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const ORGANISATION_REL = "CATemplate/_organisation.json";
@@ -161,16 +161,10 @@ for (const rel of source) {
   }
 }
 
-/** Paden uit .mirror-keep in de doelclone: wat alleen in de spiegel hoort en nooit weg mag. */
-function keepRules(root) {
-  const file = path.join(root, ".mirror-keep");
-  if (!fs.existsSync(file)) return [];
-  return fs.readFileSync(file, "utf8").split(/\r?\n/).map((l) => l.replace(/#.*/, "").trim()).filter(Boolean)
-    .map((p) => new RegExp("^" + p.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*") + (p.endsWith("/") ? "" : "$")));
-}
-const keep = [/^\.mirror-keep$/, ...keepRules(targetRoot)];
-const kept = target.filter((rel) => !sourceSet.has(rel) && keep.some((re) => re.test(rel)));
-const removed = target.filter((rel) => !sourceSet.has(rel) && !keep.some((re) => re.test(rel)));
+// Wat alleen in de spiegel hoort (.mirror-keep daar) blijft staan.
+const keep = mirrorKeep(targetRoot);
+const kept = target.filter((rel) => !sourceSet.has(rel) && keep(rel));
+const removed = target.filter((rel) => !sourceSet.has(rel) && !keep(rel));
 if (kept.length) console.log(`${kept.length} bestand(en) alleen in de spiegel blijven staan (.mirror-keep).\n`);
 for (const rel of removed) {
   const victim = path.join(targetRoot, rel);
