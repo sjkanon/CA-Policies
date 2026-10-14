@@ -59,7 +59,7 @@
         "requiresMembers": false
       },
       {
-        "displayName": "SG-U-IAM-Register-TAP-Key",
+        "displayName": "SG-U-IAM-Register-Temporary-Access-Pass",
         "danger": "medium",
         "requiresMembers": false
       },
@@ -589,7 +589,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-TAP-Key' nog zelf een methode registreren, ook niet zijn eerste."
+          "optionalReason": "vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste."
         },
         {
           "standard": "ConditionalAccessTemplate",

@@ -4,14 +4,14 @@
 
 # CA - 2180 - GRANT - Register Security Info TAP Only
 
-Laat leden van `SG-U-IAM-Register-TAP-Key` beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.
+Laat leden van `SG-U-IAM-Register-Temporary-Access-Pass` beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | report-only |
 | Stage | 3* |
-| Voor wie | `SG-U-IAM-Register-TAP-Key` |
+| Voor wie | `SG-U-IAM-Register-Temporary-Access-Pass` |
 | Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `SG-U-CA-Onboarding-Passkey` |
 | Op | beveiligingsinfo registreren |
 | Voorwaarden | geen — alleen wie, op welke app |
@@ -20,7 +20,7 @@ Laat leden van `SG-U-IAM-Register-TAP-Key` beveiligingsinfo (MFA-methodes, passk
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-TAP-Key' nog zelf een methode registreren, ook niet zijn eerste.
+> **Optioneel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste.
 
 ## Let op
 

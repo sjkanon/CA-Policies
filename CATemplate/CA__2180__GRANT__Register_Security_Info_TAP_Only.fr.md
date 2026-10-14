@@ -4,14 +4,14 @@
 
 # CA - 2180 - GRANT - Register Security Info TAP Only
 
-N'autorise les membres de `SG-U-IAM-Register-TAP-Key` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk.
+N'autorise les membres de `SG-U-IAM-Register-Temporary-Access-Pass` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | report-only |
 | Stage | 3* |
-| Pour qui | `SG-U-IAM-Register-TAP-Key` |
+| Pour qui | `SG-U-IAM-Register-Temporary-Access-Pass` |
 | Exclus | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `SG-U-CA-Onboarding-Passkey` |
 | Sur | enregistrer les infos de sécurité |
 | Conditions | aucune — seulement qui, sur quelle app |
@@ -20,7 +20,7 @@ N'autorise les membres de `SG-U-IAM-Register-TAP-Key` à enregistrer des infos d
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-TAP-Key' nog zelf een methode registreren, ook niet zijn eerste.
+> **Optionnel** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste.
 
 ## Points d'attention
 

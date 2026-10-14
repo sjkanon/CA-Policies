@@ -4,7 +4,7 @@
 
 # CA - 2185 - GRANT - Register Security Info Passkey Rollout
 
-Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-TAP-Key` registreert hier met zijn eigen MFA.
+Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-Temporary-Access-Pass` registreert hier met zijn eigen MFA.
 
 | | |
 |---|---|

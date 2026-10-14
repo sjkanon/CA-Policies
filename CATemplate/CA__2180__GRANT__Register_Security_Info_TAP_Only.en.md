@@ -4,14 +4,14 @@
 
 # CA - 2180 - GRANT - Register Security Info TAP Only
 
-Only allows members of `SG-U-IAM-Register-TAP-Key` to register security info (MFA methods, passkeys) with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.
+Only allows members of `SG-U-IAM-Register-Temporary-Access-Pass` to register security info (MFA methods, passkeys) with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.
 
 | | |
 |---|---|
 | Type | GRANT |
 | State | report-only |
 | Stage | 3* |
-| Who | `SG-U-IAM-Register-TAP-Key` |
+| Who | `SG-U-IAM-Register-Temporary-Access-Pass` |
 | Excluded | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, `SG-U-CA-Onboarding-Passkey` |
 | On | register security info |
 | Conditions | none — only who, on which app |
@@ -20,7 +20,7 @@ Only allows members of `SG-U-IAM-Register-TAP-Key` to register security info (MF
 
 Groups, named locations and authentication strengths in the table must exist in the tenant: see [`prerequisites/`](../prerequisites/README.en.md). An exclusion group that does not exist excludes nobody.
 
-> **Optional** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-TAP-Key' nog zelf een methode registreren, ook niet zijn eerste.
+> **Optional** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste.
 
 ## Watch out
 

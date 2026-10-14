@@ -111,8 +111,8 @@
       "requiresMembers": false
     },
     {
-      "displayName": "SG-U-IAM-Register-TAP-Key",
-      "mailNickname": "sg-u-iam-register-tap-key",
+      "displayName": "SG-U-IAM-Register-Temporary-Access-Pass",
+      "mailNickname": "sg-u-iam-register-temporary-access-pass",
       "membershipType": "assigned",
       "purpose": "De doelgroep van 2180: wie hierin zit kan beveiligingsinfo alleen nog registreren met een eenmalige Temporary Access Pass van de servicedesk. Wie ook in 'SG-U-CA-Onboarding-Passkey' staat valt buiten 2180 en registreert via 2185 met zijn eigen MFA.",
       "description": "Members can only register security info with a one-time Temporary Access Pass (CA 2180). Members of 'SG-U-CA-Onboarding-Passkey' are excluded from CA 2180.",

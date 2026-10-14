@@ -4,7 +4,7 @@
 
 # CA - 2185 - GRANT - Register Security Info Passkey Rollout
 
-Requires the `Passkey Rollout` strength for the onboarding group `SG-U-CA-Onboarding-Passkey` when registering security info, and signing in again every seven days. The group is excluded from `2180`, so a member of `SG-U-IAM-Register-TAP-Key` also registers here with their own MFA.
+Requires the `Passkey Rollout` strength for the onboarding group `SG-U-CA-Onboarding-Passkey` when registering security info, and signing in again every seven days. The group is excluded from `2180`, so a member of `SG-U-IAM-Register-Temporary-Access-Pass` also registers here with their own MFA.
 
 | | |
 |---|---|

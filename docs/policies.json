@@ -652,9 +652,9 @@
     },
     "CA__2180__GRANT__Register_Security_Info_TAP_Only": {
       "doel": {
-        "nl": "Laat leden van `SG-U-IAM-Register-TAP-Key` beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.",
-        "en": "Only allows members of `SG-U-IAM-Register-TAP-Key` to register security info (MFA methods, passkeys) with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.",
-        "fr": "N'autorise les membres de `SG-U-IAM-Register-TAP-Key` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk."
+        "nl": "Laat leden van `SG-U-IAM-Register-Temporary-Access-Pass` beveiligingsinfo (MFA-methodes, passkeys) alleen registreren met een Temporary Access Pass. Een overgenomen sessie kan er dan geen eigen methode bij zetten. Report-only: vraagt een TAP-proces bij de servicedesk.",
+        "en": "Only allows members of `SG-U-IAM-Register-Temporary-Access-Pass` to register security info (MFA methods, passkeys) with a Temporary Access Pass. A hijacked session can then not add its own method. Report-only: requires a TAP process at the service desk.",
+        "fr": "N'autorise les membres de `SG-U-IAM-Register-Temporary-Access-Pass` à enregistrer des infos de sécurité (méthodes MFA, passkeys) qu'avec un Temporary Access Pass. Une session détournée ne peut alors pas ajouter sa propre méthode. Report-only : requiert un processus TAP au service desk."
       },
       "letOp": [
         {
@@ -676,9 +676,9 @@
     },
     "CA__2185__GRANT__Register_Security_Info_Passkey_Rollout": {
       "doel": {
-        "nl": "Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-TAP-Key` registreert hier met zijn eigen MFA.",
-        "en": "Requires the `Passkey Rollout` strength for the onboarding group `SG-U-CA-Onboarding-Passkey` when registering security info, and signing in again every seven days. The group is excluded from `2180`, so a member of `SG-U-IAM-Register-TAP-Key` also registers here with their own MFA.",
-        "fr": "Exige la strength `Passkey Rollout` pour le groupe d'onboarding `SG-U-CA-Onboarding-Passkey` lors de l'enregistrement des infos de sécurité, avec une reconnexion tous les sept jours. Le groupe est exclu de `2180` : un membre de `SG-U-IAM-Register-TAP-Key` s'enregistre donc ici aussi avec sa propre MFA."
+        "nl": "Eist voor de onboardinggroep `SG-U-CA-Onboarding-Passkey` de strength `Passkey Rollout` bij het registreren van beveiligingsinfo, en elke zeven dagen opnieuw aanmelden. De groep is uitgesloten van `2180`, dus ook een lid van `SG-U-IAM-Register-Temporary-Access-Pass` registreert hier met zijn eigen MFA.",
+        "en": "Requires the `Passkey Rollout` strength for the onboarding group `SG-U-CA-Onboarding-Passkey` when registering security info, and signing in again every seven days. The group is excluded from `2180`, so a member of `SG-U-IAM-Register-Temporary-Access-Pass` also registers here with their own MFA.",
+        "fr": "Exige la strength `Passkey Rollout` pour le groupe d'onboarding `SG-U-CA-Onboarding-Passkey` lors de l'enregistrement des infos de sécurité, avec une reconnexion tous les sept jours. Le groupe est exclu de `2180` : un membre de `SG-U-IAM-Register-Temporary-Access-Pass` s'enregistre donc ici aussi avec sa propre MFA."
       },
       "letOp": [
         {
