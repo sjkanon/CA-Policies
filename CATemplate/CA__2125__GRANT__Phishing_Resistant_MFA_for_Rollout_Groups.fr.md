@@ -24,7 +24,7 @@ Les groupes, named locations et authentication strengths du tableau doivent exis
 
 ## Points d'attention
 
-- Les membres de `SG-U-CA-Onboarding-Passkey` sont hors de 2125, même s'ils figurent déjà dans un groupe cible : ils doivent d'abord pouvoir enregistrer leur passkey via `2185`, et 2125 s'applique à toutes les apps, page d'enregistrement comprise. Retirez-les du groupe d'onboarding après l'enregistrement, sinon l'exigence reste désactivée pour eux.
+- Les membres de `SG-U-CA-Onboarding-Passkey` sont hors de 2125, même s'ils figurent déjà dans un groupe cible : ils y enregistrent leur passkey avec leur propre MFA (`2185`). Qui est dans un groupe cible sans passkey doit en enregistrer une immédiatement à la connexion suivante. Cela ne fonctionne que si la passkey (FIDO2) est activée pour ce groupe dans le profil de passkey ; sinon l'erreur 53003 (*Additional sign-in methods are required*) s'affiche. Retirez l'utilisateur du groupe d'onboarding après l'enregistrement, sinon l'exigence reste désactivée pour lui.
 
 ## Touche Intune
 

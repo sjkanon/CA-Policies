@@ -20,11 +20,11 @@ Exige une MFA résistante au phishing pour `SG-U-CA-Campaign-Passkey` : l'éché
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in tot de servicedesk hem in 'SG-U-CA-Onboarding-Passkey' zet en hij via 2185 registreert.
+> **Optionnel** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, moet bij de volgende aanmelding meteen een passkey registreren. Passkey (FIDO2) moet daarvoor ook voor de campagnegroep aan staan in het passkeyprofiel.
 
 ## Points d'attention
 
-- Ne l'activez qu'une fois la campagne suffisamment longue et les utilisateurs informés. Qui n'a alors pas de méthode résistante au phishing n'accède plus à rien : 2126 s'applique à toutes les apps, page d'enregistrement comprise. Le service desk place cet utilisateur temporairement dans `SG-U-CA-Onboarding-Passkey` (enregistrement avec sa propre MFA via `2185`) et l'en retire après l'enregistrement.
+- Ne l'activez qu'une fois la campagne suffisamment longue et les utilisateurs informés. Qui n'a alors pas de méthode résistante au phishing doit enregistrer une passkey immédiatement à la connexion suivante, sans report. Cela ne fonctionne que si la passkey (FIDO2) est aussi activée pour `SG-U-CA-Campaign-Passkey` dans le profil de passkey ; sinon l'erreur 53003 (*Additional sign-in methods are required*) s'affiche et il n'accède à rien. Si l'enregistrement échoue (par exemple un téléphone sans verrouillage d'écran), le service desk le place temporairement dans `SG-U-CA-Onboarding-Passkey` (`2185`).
 - Même exigence que `2125` ; la différence est le groupe et le moment. Les membres du groupe de campagne n'ont plus besoin d'être déplacés à la main vers `SG-U-CA-Passkey-Forced` : dès que 2126 est active, l'exigence s'applique à tout le groupe de campagne.
 
 ## Touche Intune

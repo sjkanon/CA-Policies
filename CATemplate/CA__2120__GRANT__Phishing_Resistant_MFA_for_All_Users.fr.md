@@ -24,7 +24,7 @@ Les groupes, named locations et authentication strengths du tableau doivent exis
 
 ## Points d'attention
 
-- Active pour tous : un utilisateur sans passkey, Windows Hello ou certificat n'accède plus à rien. Assurez-vous que l'enregistrement est possible (TAP, `2185`) avant qu'un nouveau tenant reçoive cette stratégie.
+- Active pour tous : qui n'a pas encore de passkey, de Windows Hello ou de certificat doit d'abord enregistrer une passkey à la connexion suivante. Cela ne fonctionne que si la passkey (FIDO2) est activée pour cet utilisateur dans la stratégie des méthodes d'authentification (profil de passkey) ; sinon l'erreur 53003 (*Additional sign-in methods are required*) s'affiche et il n'accède à rien. Windows Hello et les certificats ne peuvent pas être enregistrés ainsi. Prévoyez une issue (TAP, `2185`) avant qu'un nouveau tenant reçoive cette stratégie.
 
 ## Touche Intune
 

@@ -20,11 +20,11 @@ Requires phishing-resistant MFA for `SG-U-CA-Campaign-Passkey`: the hard deadlin
 
 Groups, named locations and authentication strengths in the table must exist in the tenant: see [`prerequisites/`](../prerequisites/README.en.md). An exclusion group that does not exist excludes nobody.
 
-> **Optional** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in tot de servicedesk hem in 'SG-U-CA-Onboarding-Passkey' zet en hij via 2185 registreert.
+> **Optional** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, moet bij de volgende aanmelding meteen een passkey registreren. Passkey (FIDO2) moet daarvoor ook voor de campagnegroep aan staan in het passkeyprofiel.
 
 ## Watch out
 
-- Only turn it on once the campaign has run long enough and users have been told. Anyone without a phishing-resistant method by then cannot get in anywhere: 2126 applies to all apps, the registration page included. The service desk puts such a user in `SG-U-CA-Onboarding-Passkey` for a while (register with their own MFA via `2185`) and removes them after registration.
+- Only turn it on once the campaign has run long enough and users have been told. Anyone without a phishing-resistant method by then must register a passkey straight away at the next sign-in, without skipping. That only works if passkey (FIDO2) is also enabled for `SG-U-CA-Campaign-Passkey` in the passkey profile; otherwise error 53003 (*Additional sign-in methods are required*) follows and they cannot get in anywhere. If registering fails (for example a phone without screen lock), the service desk puts them in `SG-U-CA-Onboarding-Passkey` for a while (`2185`).
 - Same requirement as `2125`; the difference is the group and the timing. Members of the campaign group no longer need to be moved to `SG-U-CA-Passkey-Forced` by hand: once 2126 is on, the requirement applies to the whole campaign group.
 
 ## Touches Intune
