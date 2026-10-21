@@ -33,7 +33,7 @@
       "displayName": "Excluded from Conditional Access",
       "mailNickname": "excluded-from-conditional-access",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 38 van de 44 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 38 ernaast.",
+      "purpose": "De break-glass-uitsluiting onder de prose-naam die deze repo aanhoudt. Staat in de excludeGroups van 40 van de 46 templates; de zes zonder (1140, 1150, 1160, 1170, 1180, 2160) richten zich op workload- en agent-identiteiten met includeUsers 'None'. Sinds 25 september staat 'SG-U-CA-Exclude-Breakglass' in diezelfde 40 ernaast.",
       "description": "Break-glass exclusion for the Conditional Access baseline. Emergency access accounts only; must not be empty.",
       "danger": "critical",
       "dangerReason": "Deze groep leeg laten betekent: tientallen policies actief en geen enkel account dat er buiten valt — geen break-glass. Vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
@@ -44,7 +44,7 @@
       "displayName": "SG-U-CA-Exclude-Breakglass",
       "mailNickname": "sg-u-ca-exclude-breakglass",
       "membershipType": "assigned",
-      "purpose": "De break-glass-uitsluiting onder de SG-U-naamconventie, naast 'Excluded from Conditional Access' en in exact dezelfde 38 templates. Twee namen voor één mechanisme is hier bewust: een tenant die de eerste naam al in gebruik heeft hoeft niets te hernoemen, en een tenant die alleen de SG-U-conventie kent hoeft geen prose-groep te introduceren. Beide moeten bestaan — een excludeGroup die de tenant niet heeft sluit niemand uit.",
+      "purpose": "De break-glass-uitsluiting onder de SG-U-naamconventie, naast 'Excluded from Conditional Access' en in exact dezelfde 40 templates. Twee namen voor één mechanisme is hier bewust: een tenant die de eerste naam al in gebruik heeft hoeft niets te hernoemen, en een tenant die alleen de SG-U-conventie kent hoeft geen prose-groep te introduceren. Beide moeten bestaan — een excludeGroup die de tenant niet heeft sluit niemand uit.",
       "description": "Break-glass exclusion for the Conditional Access baseline (SG-U naming). Same members as 'Excluded from Conditional Access'; must not be empty.",
       "danger": "critical",
       "dangerReason": "Leeg is hier net zo gevaarlijk als bij 'Excluded from Conditional Access', en makkelijker te missen: de andere groep hééft leden, dus de uitsluiting líjkt geregeld. New-CaPrerequisites.ps1 vult daarom beide groepen uit -BreakGlassUserId; vul hem met de noodaccounts vóór stage 1 op Remediate gaat.",
@@ -128,6 +128,16 @@
       "description": "Passkey rollout, step 2: members have registered a phishing-resistant method and must use it for every app (CA 2125).",
       "danger": "high",
       "dangerReason": "Wie hier staat zonder phishing-bestendige methode komt nergens meer in: 2125 eist hem voor alle apps en de gebruiker kan hem niet meer registreren zonder TAP, tenzij hij ook in 'SG-U-CA-Onboarding-Passkey' staat. Alleen toevoegen ná een geslaagde registratie — Test-EntraPasskeyReadiness.ps1 zegt of die kan.",
+      "requiresMembers": false
+    },
+    {
+      "displayName": "SG-U-CA-Campaign-Passkey",
+      "mailNickname": "sg-u-ca-campaign-passkey",
+      "membershipType": "assigned",
+      "purpose": "De doelgroep van de registratiecampagne (NudgeMFA): wie hierin zit krijgt bij het aanmelden de vraag een passkey te registreren. Zodra 2126 aan staat (de deadline) moet hij voor elke app een phishing-bestendige methode gebruiken. Wie dan nog geen passkey heeft, zet de servicedesk tijdelijk in 'SG-U-CA-Onboarding-Passkey'.",
+      "description": "Users targeted by the passkey registration campaign (NudgeMFA): asked at sign-in to register a passkey. Once CA 2126 is on, they must use a phishing-resistant method for every app.",
+      "danger": "high",
+      "dangerReason": "Zodra 2126 aan staat: wie hier staat zonder phishing-bestendige methode komt nergens meer in, tenzij hij ook in 'SG-U-CA-Onboarding-Passkey' staat. Loop de registratiedetails na vóór 2126 aan gaat (Test-EntraPasskeyReadiness.ps1).",
       "requiresMembers": false
     },
     {

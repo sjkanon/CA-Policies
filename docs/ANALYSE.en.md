@@ -8,7 +8,7 @@ Hand-written. This records where the
 all over again.
 
 Date: 3 September 2026. At that point the set had 33 templates. After the later rounds (below) there
-are 45; the numbers in the rest of this document are those of the round they appear in and have
+are 46; the numbers in the rest of this document are those of the round they appear in and have
 deliberately not been rewritten.
 
 ## The question
