@@ -20,11 +20,11 @@ Eist phishing-resistente MFA voor `SG-U-CA-Campaign-Passkey`: de harde deadline 
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in tot de servicedesk hem in 'SG-U-CA-Onboarding-Passkey' zet en hij via 2185 registreert.
+> **Optioneel** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, moet bij de volgende aanmelding meteen een passkey registreren. Passkey (FIDO2) moet daarvoor ook voor de campagnegroep aan staan in het passkeyprofiel.
 
 ## Let op
 
-- Zet hem pas aan als de campagne lang genoeg heeft gelopen en de gebruikers zijn ingelicht. Wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in: 2126 geldt voor alle apps, dus ook voor de registratiepagina. De servicedesk zet zo iemand tijdelijk in `SG-U-CA-Onboarding-Passkey` (registreren met eigen MFA via `2185`) en haalt hem er na de registratie weer uit.
+- Zet hem pas aan als de campagne lang genoeg heeft gelopen en de gebruikers zijn ingelicht. Wie dan nog geen phishing-bestendige methode heeft, moet bij de volgende aanmelding meteen een passkey registreren, zonder overslaan. Dat lukt alleen als passkey (FIDO2) ook voor `SG-U-CA-Campaign-Passkey` aan staat in het passkeyprofiel; anders volgt fout 53003 (*Additional sign-in methods are required*) en komt hij nergens in. Lukt registreren niet (bijvoorbeeld een telefoon zonder schermvergrendeling), dan zet de servicedesk hem tijdelijk in `SG-U-CA-Onboarding-Passkey` (`2185`).
 - Zelfde eis als `2125`; het verschil is de groep en het moment. Leden van de campagnegroep hoeven niet meer met de hand naar `SG-U-CA-Passkey-Forced`: zodra 2126 aan staat, geldt de eis voor de hele campagnegroep.
 
 ## Raakt Intune

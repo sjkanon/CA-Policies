@@ -24,7 +24,7 @@ Groups, named locations and authentication strengths in the table must exist in 
 
 ## Watch out
 
-- Members of `SG-U-CA-Onboarding-Passkey` fall outside 2125, even if they are already in a target group: they first need to register their passkey via `2185`, and 2125 applies to all apps, the registration page included. Remove them from the onboarding group after registration, or the requirement stays off for them.
+- Members of `SG-U-CA-Onboarding-Passkey` fall outside 2125, even if they are already in a target group: there they register their passkey with their own MFA (`2185`). Anyone in a target group without a passkey must register one straight away at the next sign-in. That only works if passkey (FIDO2) is enabled for that group in the passkey profile; otherwise error 53003 (*Additional sign-in methods are required*) follows. Remove a user from the onboarding group after registration, or the requirement stays off for them.
 
 ## Touches Intune
 

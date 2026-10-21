@@ -24,7 +24,7 @@ Groepen, named locations en authentication strengths in de tabel moeten in de te
 
 ## Let op
 
-- Staat aan voor iedereen: een gebruiker zonder passkey, Windows Hello of certificaat komt nergens meer in. Zorg dat registreren mogelijk is (TAP, `2185`) vóór een nieuwe tenant deze policy krijgt.
+- Staat aan voor iedereen: wie nog geen passkey, Windows Hello of certificaat heeft, moet bij de volgende aanmelding eerst een passkey registreren. Dat lukt alleen als passkey (FIDO2) voor die gebruiker aan staat in het beleid voor aanmeldmethodes (passkeyprofiel); anders volgt fout 53003 (*Additional sign-in methods are required*) en komt hij nergens in. Windows Hello en certificaten kunnen niet zo worden geregistreerd. Zorg voor een uitweg (TAP, `2185`) vóór een nieuwe tenant deze policy krijgt.
 
 ## Raakt Intune
 

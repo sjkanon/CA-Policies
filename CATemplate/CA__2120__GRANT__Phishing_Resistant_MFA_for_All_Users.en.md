@@ -24,7 +24,7 @@ Groups, named locations and authentication strengths in the table must exist in 
 
 ## Watch out
 
-- On for everyone: a user without a passkey, Windows Hello or certificate cannot get in anywhere. Make sure registering is possible (TAP, `2185`) before a new tenant gets this policy.
+- On for everyone: anyone without a passkey, Windows Hello or certificate must first register a passkey at the next sign-in. That only works if passkey (FIDO2) is enabled for that user in the authentication methods policy (passkey profile); otherwise error 53003 (*Additional sign-in methods are required*) follows and they cannot get in anywhere. Windows Hello and certificates cannot be registered that way. Make sure there is a way out (TAP, `2185`) before a new tenant gets this policy.
 
 ## Touches Intune
 

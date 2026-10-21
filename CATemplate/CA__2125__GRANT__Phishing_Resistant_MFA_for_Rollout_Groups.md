@@ -24,7 +24,7 @@ Groepen, named locations en authentication strengths in de tabel moeten in de te
 
 ## Let op
 
-- Wie in `SG-U-CA-Onboarding-Passkey` staat valt buiten 2125, ook als hij al in een doelgroep zit: hij moet eerst via `2185` zijn passkey kunnen registreren, en 2125 geldt voor alle apps, dus ook voor de registratiepagina. Haal hem na de registratie uit de onboardinggroep, anders blijft de eis voor hem uit.
+- Wie in `SG-U-CA-Onboarding-Passkey` staat valt buiten 2125, ook als hij al in een doelgroep zit: daar registreert hij zijn passkey met zijn eigen MFA (`2185`). Wie in een doelgroep staat zonder passkey, moet bij de volgende aanmelding meteen een passkey registreren. Dat lukt alleen als passkey (FIDO2) voor die groep aan staat in het passkeyprofiel; anders volgt fout 53003 (*Additional sign-in methods are required*). Haal een gebruiker na de registratie uit de onboardinggroep, anders blijft de eis voor hem uit.
 
 ## Raakt Intune
 
