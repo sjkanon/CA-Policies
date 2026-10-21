@@ -496,6 +496,37 @@
         }
       ]
     },
+    "CA__2126__GRANT__Phishing_Resistant_MFA_for_Passkey_Campaign": {
+      "doel": {
+        "nl": "Eist phishing-resistente MFA voor `SG-U-CA-Campaign-Passkey`: de harde deadline van de registratiecampagne. De campagne vraagt bij het aanmelden om een passkey en laat na drie keer overslaan niet meer door, maar alleen bij een interactieve aanmelding met MFA; deze policy laat geen gat. `SG-U-CA-Onboarding-Passkey` is uitgesloten.",
+        "en": "Requires phishing-resistant MFA for `SG-U-CA-Campaign-Passkey`: the hard deadline of the registration campaign. The campaign asks for a passkey at sign-in and stops allowing skips after three, but only on an interactive sign-in with MFA; this policy leaves no gap. `SG-U-CA-Onboarding-Passkey` is excluded.",
+        "fr": "Exige une MFA résistante au phishing pour `SG-U-CA-Campaign-Passkey` : l'échéance ferme de la campagne d'enregistrement. La campagne demande une passkey à la connexion et n'autorise plus de report après trois fois, mais seulement lors d'une connexion interactive avec MFA ; cette stratégie ne laisse aucune faille. `SG-U-CA-Onboarding-Passkey` est exclu."
+      },
+      "letOp": [
+        {
+          "nl": "Zet hem pas aan als de campagne lang genoeg heeft gelopen en de gebruikers zijn ingelicht. Wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in: 2126 geldt voor alle apps, dus ook voor de registratiepagina. De servicedesk zet zo iemand tijdelijk in `SG-U-CA-Onboarding-Passkey` (registreren met eigen MFA via `2185`) en haalt hem er na de registratie weer uit.",
+          "en": "Only turn it on once the campaign has run long enough and users have been told. Anyone without a phishing-resistant method by then cannot get in anywhere: 2126 applies to all apps, the registration page included. The service desk puts such a user in `SG-U-CA-Onboarding-Passkey` for a while (register with their own MFA via `2185`) and removes them after registration.",
+          "fr": "Ne l'activez qu'une fois la campagne suffisamment longue et les utilisateurs informés. Qui n'a alors pas de méthode résistante au phishing n'accède plus à rien : 2126 s'applique à toutes les apps, page d'enregistrement comprise. Le service desk place cet utilisateur temporairement dans `SG-U-CA-Onboarding-Passkey` (enregistrement avec sa propre MFA via `2185`) et l'en retire après l'enregistrement."
+        },
+        {
+          "nl": "Zelfde eis als `2125`; het verschil is de groep en het moment. Leden van de campagnegroep hoeven niet meer met de hand naar `SG-U-CA-Passkey-Forced`: zodra 2126 aan staat, geldt de eis voor de hele campagnegroep.",
+          "en": "Same requirement as `2125`; the difference is the group and the timing. Members of the campaign group no longer need to be moved to `SG-U-CA-Passkey-Forced` by hand: once 2126 is on, the requirement applies to the whole campaign group.",
+          "fr": "Même exigence que `2125` ; la différence est le groupe et le moment. Les membres du groupe de campagne n'ont plus besoin d'être déplacés à la main vers `SG-U-CA-Passkey-Forced` : dès que 2126 est active, l'exigence s'applique à tout le groupe de campagne."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "@windowsHello"
+          ],
+          "waarom": {
+            "nl": "Richt Windows Hello for Business in: op Windows de gewone manier om aan phishing-resistente MFA te voldoen. Zonder WHfB blijft daar alleen een losse passkey of beveiligingssleutel over.",
+            "en": "Sets up Windows Hello for Business: on Windows the usual way to meet phishing-resistant MFA. Without WHfB only a separate passkey or security key is left there.",
+            "fr": "Configure Windows Hello for Business : sous Windows, la manière habituelle de satisfaire à une MFA résistante au phishing. Sans WHfB, il ne reste qu'une passkey séparée ou une clé de sécurité."
+          }
+        }
+      ]
+    },
     "CA__2130__GRANT__Admins_Compliant_Device": {
       "doel": {
         "nl": "Eist voor de 28 beheerrollen een compliant of hybrid joined apparaat. Beheren vanaf een privélaptop kan dan niet meer.",

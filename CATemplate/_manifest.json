@@ -51,6 +51,10 @@
     "optional": true,
     "reden": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten."
   },
+  "CA__2126__GRANT__Phishing_Resistant_MFA_for_Passkey_Campaign": {
+    "optional": true,
+    "reden": "de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in tot de servicedesk hem in 'SG-U-CA-Onboarding-Passkey' zet en hij via 2185 registreert."
+  },
   "CA__2130__GRANT__Admins_Compliant_Device": {
     "optional": true,
     "reden": "eist dat élke beheerder een beheerd apparaat heeft — bij uitbesteed beheer dus ook elke engineer die in de tenant komt. Besluit per tenant."

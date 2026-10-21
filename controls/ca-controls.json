@@ -199,6 +199,12 @@
     "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications", "CIS Controls v8.1 6.4 Require MFA for Remote Network Access"],
     "nistcsf": ["PR.AA-03", "PR.AA-01"]
   },
+  "CA__2126__GRANT__Phishing_Resistant_MFA_for_Passkey_Campaign": {
+    "iso": ["A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie", "A.5.15 Toegangsbeveiliging"],
+    "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(g) basispraktijken cyberhygiene en training"],
+    "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications", "CIS Controls v8.1 6.4 Require MFA for Remote Network Access"],
+    "nistcsf": ["PR.AA-03", "PR.AA-01"]
+  },
   "CA__2130__GRANT__Admins_Compliant_Device": {
     "iso": ["A.8.2 Speciale toegangsrechten", "A.8.1 Eindpuntapparatuur van gebruikers"],
     "nis2": ["art. 21(2)(i) personeelsbeveiliging, toegangsbeleid en beheer van bedrijfsmiddelen"],

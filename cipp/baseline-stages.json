@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-10-14",
+  "generatedAt": "2026-10-21",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "CA Baseline v1.0",
   "_comment": [
@@ -65,6 +65,11 @@
       },
       {
         "displayName": "SG-U-CA-Passkey-Forced",
+        "danger": "high",
+        "requiresMembers": false
+      },
+      {
+        "displayName": "SG-U-CA-Campaign-Passkey",
         "danger": "high",
         "requiresMembers": false
       },
@@ -535,6 +540,17 @@
           "action": "Report",
           "optional": true,
           "optionalReason": "de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten."
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "8e45adaf-f0fe-4d71-94ae-36ef617313ba",
+          "templateFile": "CA__2126__GRANT__Phishing_Resistant_MFA_for_Passkey_Campaign",
+          "displayName": "CA - 2126 - GRANT - Phishing Resistant MFA for Passkey Campaign",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, komt nergens meer in tot de servicedesk hem in 'SG-U-CA-Onboarding-Passkey' zet en hij via 2185 registreert."
         },
         {
           "standard": "ConditionalAccessTemplate",

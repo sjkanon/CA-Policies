@@ -8,7 +8,7 @@ Handgeschreven. Dit legt vast waar de
 opnieuw.
 
 Datum: 3 september 2026. De set telde toen 33 templates. Na de latere rondes (onderaan) zijn
-het er 45; de cijfers in de rest van dit document zijn die van de ronde waarin ze staan en zijn
+het er 46; de cijfers in de rest van dit document zijn die van de ronde waarin ze staan en zijn
 bewust niet herschreven.
 
 ## De vraag
