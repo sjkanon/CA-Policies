@@ -4,7 +4,7 @@
 
 # CA - 1150 - BLOCK - Risky Agent Identities
 
-Bloque les identités d'agent à risque élevé. Requiert Microsoft Entra Agent ID ; un tenant sans agents n'a rien à évaluer.
+Bloque les identités d'agent à risque élevé. Requiert Microsoft 365 E7 ou Microsoft Agent 365 ; un tenant sans agents n'a rien à évaluer.
 
 | | |
 |---|---|
@@ -20,7 +20,7 @@ Bloque les identités d'agent à risque élevé. Requiert Microsoft Entra Agent 
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.
+> **Optionnel** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview); een tenant zonder agent-identiteiten heeft niets om te beoordelen.
 
 ## Touche Intune
 

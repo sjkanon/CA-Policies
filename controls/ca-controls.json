@@ -187,6 +187,24 @@
     "cis": ["CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"],
     "nistcsf": ["PR.AA-04", "PR.DS-02"]
   },
+  "CA__2115__GRANT__Token_Protection_Apple": {
+    "iso": [
+      "A.5.17 Authenticatie-informatie",
+      "A.8.5 Veilige authenticatie",
+      "A.8.24 Gebruik van cryptografie"
+    ],
+    "nis2": [
+      "art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie",
+      "art. 21(2)(h) cryptografie en versleuteling"
+    ],
+    "cis": [
+      "CIS Controls v8.1 6.3 Require MFA for Externally-Exposed Applications"
+    ],
+    "nistcsf": [
+      "PR.AA-04",
+      "PR.DS-02"
+    ]
+  },
   "CA__2120__GRANT__Phishing_Resistant_MFA_for_All_Users": {
     "iso": ["A.5.17 Authenticatie-informatie", "A.8.5 Veilige authenticatie", "A.5.15 Toegangsbeveiliging"],
     "nis2": ["art. 21(2)(j) multifactorauthenticatie en beveiligde communicatie", "art. 21(2)(g) basispraktijken cyberhygiene en training"],

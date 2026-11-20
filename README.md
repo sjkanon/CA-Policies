@@ -4,12 +4,12 @@
 
 `CATemplate/` is de bron: de afgesproken Conditional Access-policies in CIPP-templateformaat
 (Table Storage-rij met een genestelde `JSON`-string), genummerd `CA__1xxx` BLOCK, `2xxx` GRANT
-en `3xxx` SESSION. 46 templates. De nummering en de indeling komen uit Daniel Chronlunds CA-ontwerp;
+en `3xxx` SESSION. 47 templates. De nummering en de indeling komen uit Daniel Chronlunds CA-ontwerp;
 waarom alles één voorvoegsel draagt en er geen persona's zijn staat in [`ANALYSE.md`](docs/ANALYSE.md#waarom-er-geen-personas-zijn).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>46 templates<br/><i>de bron</i>"]
+  T["<b>CATemplate/</b><br/>47 templates<br/><i>de bron</i>"]
   P["prerequisites/<br/>groepen · locaties · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -118,7 +118,7 @@ die niet bestaat sluit niemand uit**, dus de policy wordt strenger dan bedoeld e
 alarm. Twee gevallen zijn daarbij geen "strenger" maar "gesloten":
 
 - `Excluded from Conditional Access` en `SG-U-CA-Exclude-Breakglass` staan allebei in 40 van
-  de 46 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
+  de 47 templates — één break-glass-uitsluiting onder twee namen, zodat een tenant niets hoeft
   te hernoemen om de conventie te volgen die hij al voert. De zes zonder richten zich op
   workload- en agent-identiteiten (`includeUsers: "None"`), dus daar raken ze niets.
   Allebei leeg = geen break-glass; één van de twee leeg is verraderlijker, want dan líjkt de

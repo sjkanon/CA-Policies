@@ -8,7 +8,7 @@ Hand-written. This records where the
 all over again.
 
 Date: 3 September 2026. At that point the set had 33 templates. After the later rounds (below) there
-are 46; the numbers in the rest of this document are those of the round they appear in and have
+are 47; the numbers in the rest of this document are those of the round they appear in and have
 deliberately not been rewritten.
 
 ## The question
@@ -570,3 +570,72 @@ created the strength without the restriction. Then any passkey satisfies. Both h
   shows the old `GLOBAL__` names until it is regenerated. *Resolved on 1 October 2026:* the names
   came from `_licenties.json` there, which now uses `CXNM__STANDARD__`; `generate-compliance.js` now
   reports a CA template in that list that does not exist.
+
+# Round 7 — self-remediating risk, token protection on Apple, licences for agents (20 November 2026)
+
+## The occasion
+
+A pass along the community baselines since round 4:
+
+| Source | Since September | For this set |
+|---|---|---|
+| [`j0eyv/ConditionalAccessBaseline`](https://github.com/j0eyv/ConditionalAccessBaseline) | only README and images; the agent policies get a licence note | licence reason updated |
+| [`Teuftis/ConditionalAccessBaseline-Hardened`](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) v2026.2 | user risk to *Require risk remediation*; token protection also on managed iOS/macOS | `2020` rebuilt; new `2115` |
+| Chronlund (DCToolbox), van Surksum (`cabaseline202510`) | no commits | — |
+
+Everything checked against Microsoft Learn, not only against the community source.
+
+## What was changed
+
+**`2020` remediates the risk instead of leaving it in place.** At medium user risk `2020`
+required MFA, every time. MFA does not remediate user risk: the risk stayed and the prompt came back
+at every sign-in, until an admin dismissed the risk. Now it uses *Require risk remediation*
+(`builtInControls: riskRemediation`, operator AND with the Multifactor authentication strength,
+sign-in frequency every time — both mandatory with this grant). With a password a secure password
+change follows; without one the sessions are revoked and the user signs in again; either way the
+risk is cleared afterwards. Microsoft recommends this itself, and it also works for passwordless
+users — where the old *require password change* could not.
+
+- **B2B guests are excluded.** Their user risk is evaluated in their home tenant and cannot be
+  remediated here; Microsoft states such a guest is then blocked. Sign-in risk (`1090`, `2010`) does
+  apply to them. Internal guests stay in.
+- **`1100` keeps blocking.** Microsoft uses remediation at high risk; we keep the block, so that an
+  admin looks at a probably compromised account first. Teuftis takes medium and high together; we
+  keep the ladder: medium remediates itself, high waits for a human.
+- **Hybrid tenants**: the password change only reaches on-premises AD with password writeback.
+
+**Licence of the agent templates** (`1150`, `1160`, `1170`, `1180`, `2160`). The reason said
+"requires Microsoft Entra Agent ID". Microsoft Learn lists Microsoft 365 E7, or Microsoft Agent 365
+with Entra ID P1 (or M365 E3) — and for the risk policies `1150` and `1170` P2 (or M365 E5). Agent
+risk is still preview. Reason in the manifest and the purpose sentence in `docs/policies.json`
+updated; the templates themselves are unchanged.
+
+## What was added
+
+**`2115` — token protection on iPhone, iPad and Mac** (optional, report-only). The same requirement
+as `2110`, for Exchange Online and SharePoint Online in desktop and mobile apps, but on iOS and macOS.
+Microsoft calls the native apps on both platforms GA in the platform table, but puts the device
+requirements under "Apple (Preview)"; hence report-only.
+
+- **Managed devices only.** Token protection on Apple needs the Microsoft Enterprise SSO plug-in or
+  Platform SSO, and therefore MDM. A personal iPhone with only App Protection would be blocked. Hence
+  a device filter in include mode, `device.isCompliant -eq True`: an unregistered device does not
+  match the filter and so is not covered by the policy.
+- **Apple Mail and Calendar** do not support token protection and are blocked. `2070` currently
+  allows them on a compliant device; the move to Outlook belongs before enabling.
+- The Intune side (`IOS - D - Enterprise SSO`, `MAC - D - Platform SSO`) is listed as a dependency
+  in `docs/policies.json`.
+
+## Looked at, not adopted
+
+- **Teams in `2110`.** Microsoft lists Microsoft Teams as a supported resource, but in both
+  deployment guides (Windows and Apple) selects only Exchange and SharePoint and warns against broader
+  selections. Add it only once Microsoft puts Teams in the guide.
+- **Teuftis: hybrid join removed.** This set already requires a compliant device only.
+
+## What remains open
+
+- **Enable `2115`** once the sign-in logs (status codes 1003/1004 are self-remediable, 1002 and 1008
+  are not) show that the managed devices are ready, and Apple Mail has been phased out.
+- **Watch `2020` in report-only** in a tenant with hybrid identity: without password writeback a
+  user with a password cannot remediate the risk themselves.

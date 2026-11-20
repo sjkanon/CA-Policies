@@ -8,7 +8,7 @@ Handgeschreven. Dit legt vast waar de
 opnieuw.
 
 Datum: 3 september 2026. De set telde toen 33 templates. Na de latere rondes (onderaan) zijn
-het er 46; de cijfers in de rest van dit document zijn die van de ronde waarin ze staan en zijn
+het er 47; de cijfers in de rest van dit document zijn die van de ronde waarin ze staan en zijn
 bewust niet herschreven.
 
 ## De vraag
@@ -569,3 +569,73 @@ maakte de strength zonder beperking aan. Dan voldoet elke passkey. Beide doen he
   toont de oude `GLOBAL__`-namen tot die opnieuw gegenereerd is. *Opgelost op 1 oktober 2026:* de
   namen kwamen uit `_licenties.json` daar, dat nu `CXNM__STANDARD__` gebruikt; `generate-compliance.js`
   meldt voortaan een CA-template in die lijst dat niet bestaat.
+
+# Ronde 7 — risico zelf oplossen, token protection op Apple, licenties voor agents (20 november 2026)
+
+## De aanleiding
+
+Een rondgang langs de community-baselines sinds ronde 4:
+
+| Bron | Sinds september | Voor deze set |
+|---|---|---|
+| [`j0eyv/ConditionalAccessBaseline`](https://github.com/j0eyv/ConditionalAccessBaseline) | alleen README en afbeeldingen; de agent-policies krijgen een licentienotitie | licentiereden bijgewerkt |
+| [`Teuftis/ConditionalAccessBaseline-Hardened`](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) v2026.2 | gebruikersrisico naar *Require risk remediation*; token protection ook op beheerde iOS/macOS | `2020` omgebouwd; nieuw `2115` |
+| Chronlund (DCToolbox), van Surksum (`cabaseline202510`) | geen commits | — |
+
+Alles nagelopen tegen Microsoft Learn, niet alleen tegen de community-bron.
+
+## Wat is aangepast
+
+**`2020` lost het risico op in plaats van het te laten staan.** Bij gemiddeld gebruikersrisico
+eiste `2020` MFA, elke keer opnieuw. MFA lost gebruikersrisico niet op: het risico bleef staan en de
+vraag kwam bij elke aanmelding terug, tot een beheerder het risico afwees. Nu staat er
+*Require risk remediation* (`builtInControls: riskRemediation`, operator AND met de strength
+Multifactor authentication, sign-in frequency elke keer — beide verplicht bij deze eis). Met
+wachtwoord volgt een veilige wachtwoordwijziging, zonder wachtwoord worden de sessies ingetrokken en
+meldt de gebruiker zich opnieuw aan; in beide gevallen is het risico daarna weg. Microsoft adviseert
+dit zelf, en het werkt ook voor gebruikers zonder wachtwoord — waar de oude *require password change*
+niet kon.
+
+- **B2B-gasten zijn uitgesloten.** Hun gebruikersrisico wordt in hun eigen tenant bepaald en kan
+  hier niet worden opgelost; Microsoft schrijft dat zo'n gast dan geblokkeerd wordt. Het
+  aanmeldrisico (`1090`, `2010`) geldt wel voor hen. Interne gasten blijven erin.
+- **`1100` blijft blokkeren.** Microsoft zet bij hoog risico remediation; wij houden de blokkade, zodat
+  een beheerder een vermoedelijk overgenomen account eerst bekijkt. Teuftis neemt medium én hoog
+  samen; wij houden de trap: medium lost zelf op, hoog wacht op een mens.
+- **Hybride tenants**: de wachtwoordwijziging komt alleen in on-premises AD met password writeback.
+
+**Licentie van de agent-templates** (`1150`, `1160`, `1170`, `1180`, `2160`). De reden zei "vraagt
+Microsoft Entra Agent ID". Microsoft Learn noemt als vereiste Microsoft 365 E7, of Microsoft Agent
+365 met Entra ID P1 (of M365 E3) — en voor de risicopolicies `1150` en `1170` P2 (of M365 E5). Agent
+risk is nog preview. Reden in het manifest en de doelzin in `docs/policies.json` bijgewerkt; de
+templates zelf bleven gelijk.
+
+## Wat is toegevoegd
+
+**`2115` — token protection op iPhone, iPad en Mac** (optioneel, report-only). Dezelfde eis als
+`2110`, voor Exchange Online en SharePoint Online in desktop- en mobiele apps, maar op iOS en macOS.
+Microsoft noemt de native apps op beide platforms GA in de platformtabel, maar zet de
+apparaatvereisten onder "Apple (Preview)"; vandaar report-only.
+
+- **Alleen beheerde toestellen.** Token protection op Apple vraagt de Microsoft Enterprise SSO-plug-in
+  of Platform SSO, en dus MDM. Een persoonlijke iPhone met alleen App Protection zou geblokkeerd
+  worden. Daarom een apparaatfilter in include-modus, `device.isCompliant -eq True`: een niet
+  geregistreerd toestel valt niet onder het filter en dus niet onder de policy.
+- **Apple Mail en Agenda** ondersteunen geen token protection en worden geblokkeerd. `2070` laat ze op
+  een compliant toestel nu toe; de overstap naar Outlook hoort vóór het aanzetten.
+- De Intune-kant (`IOS - D - Enterprise SSO`, `MAC - D - Platform SSO`) staat in `docs/policies.json`
+  als afhankelijkheid.
+
+## Bekeken, niet overgenomen
+
+- **Teams in `2110`.** Microsoft noemt Microsoft Teams als ondersteunde resource, maar kiest in beide
+  stappenplannen (Windows en Apple) alleen Exchange en SharePoint en waarschuwt tegen bredere
+  selecties. Pas toevoegen als Microsoft Teams in het stappenplan zet.
+- **Teuftis: hybrid join eruit.** Deze set eist al alleen een compliant apparaat.
+
+## Wat hierna nog openstaat
+
+- **`2115` aanzetten** als de sign-in-logs (statuscodes 1003/1004 zijn zelf op te lossen, 1002 en
+  1008 niet) laten zien dat de beheerde toestellen klaar zijn, en Apple Mail uitgefaseerd is.
+- **`2020` in report-only volgen** in een tenant met hybride identiteit: zonder password writeback kan
+  een gebruiker met wachtwoord het risico niet zelf oplossen.
