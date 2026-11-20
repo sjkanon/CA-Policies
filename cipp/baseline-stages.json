@@ -1,6 +1,6 @@
 {
   "version": "cipp-baseline-v1.0",
-  "generatedAt": "2026-10-21",
+  "generatedAt": "2026-11-20",
   "generatedBy": "scripts/export-cipp-baseline.js",
   "baselineName": "CA Baseline v1.0",
   "_comment": [
@@ -481,7 +481,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen."
+          "optionalReason": "vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview); een tenant zonder agent-identiteiten heeft niets om te beoordelen."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -492,7 +492,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten."
+          "optionalReason": "vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -503,7 +503,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade."
+          "optionalReason": "vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview). Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -514,10 +514,21 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
+          "optionalReason": "vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit, én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.",
           "blockedUntil": [
             "\"All Compliant Network locations\" is niet aan te maken: Entra levert deze named location zelf zodra Global Secure Access in de tenant is ingericht — je maakt hem niet aan. Zonder GSA bestaat hij niet en verwijst 1180 naar een locatie die er niet is; dan is de excludeLocations leeg en blokkeert de policy álle agent-gebruikers."
           ]
+        },
+        {
+          "standard": "ConditionalAccessTemplate",
+          "templateGuid": "fe200862-83e8-46e0-9af5-c065c13ed2d2",
+          "templateFile": "CA__2115__GRANT__Token_Protection_Apple",
+          "displayName": "CA - 2115 - GRANT - Token Protection Apple",
+          "templateState": "enabledForReportingButNotEnforced",
+          "deployState": "enabledForReportingButNotEnforced",
+          "action": "Report",
+          "optional": true,
+          "optionalReason": "token protection op Apple werkt alleen op MDM-beheerde toestellen met de Microsoft Enterprise SSO-plug-in (iOS) of Platform SSO (macOS), en blokkeert de ingebouwde Mail- en Agenda-apps van Apple. Report-only tot de sign-in-logs (statuscodes 1003/1004 zijn zelf op te lossen) laten zien dat de beheerde toestellen klaar zijn, en tot gebruikers van Apple Mail zijn overgestapt op Outlook."
         },
         {
           "standard": "ConditionalAccessTemplate",
@@ -594,7 +605,7 @@
           "deployState": "enabledForReportingButNotEnforced",
           "action": "Report",
           "optional": true,
-          "optionalReason": "vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart."
+          "optionalReason": "vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart."
         },
         {
           "standard": "ConditionalAccessTemplate",

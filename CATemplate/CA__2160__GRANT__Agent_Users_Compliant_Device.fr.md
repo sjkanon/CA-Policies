@@ -4,7 +4,7 @@
 
 # CA - 2160 - GRANT - Agent Users Compliant Device
 
-Exige un appareil conforme pour les agent users qui ouvrent une session depuis un terminal. Report-only ; requiert Microsoft Entra Agent ID.
+Exige un appareil conforme pour les agent users qui ouvrent une session depuis un terminal. Report-only ; requiert Microsoft 365 E7 ou Microsoft Agent 365.
 
 | | |
 |---|---|
@@ -20,7 +20,7 @@ Exige un appareil conforme pour les agent users qui ouvrent une session depuis u
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
+> **Optionnel** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
 
 ## Touche Intune
 

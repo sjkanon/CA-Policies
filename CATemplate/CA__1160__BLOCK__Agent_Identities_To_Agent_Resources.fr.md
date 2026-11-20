@@ -20,7 +20,7 @@ Bloque toute identité d'agent sur les ressources d'agent, sauf celles explicite
 
 Les groupes, named locations et authentication strengths du tableau doivent exister dans le tenant : voir [`prerequisites/`](../prerequisites/README.fr.md). Un groupe d'exclusion qui n'existe pas n'exclut personne.
 
-> **Optionnel** — vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.
+> **Optionnel** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.
 
 ## Points d'attention
 

@@ -4,7 +4,7 @@
 
 # CA - 2020 - GRANT - Medium-Risk Users
 
-Eist MFA, elke keer opnieuw, voor een gebruiker die Entra ID Protection als gemiddeld risico inschat. Vraagt Entra ID P2.
+Laat een gebruiker die Entra ID Protection als gemiddeld risico inschat het risico zelf oplossen (Require risk remediation): na MFA een veilige wachtwoordwijziging, of zonder wachtwoord het intrekken van alle sessies en opnieuw aanmelden. Daarna is het risico weg; met alleen MFA bleef het staan en kwam de vraag bij elke aanmelding terug. Vraagt Entra ID P2.
 
 | | |
 |---|---|
@@ -12,13 +12,18 @@ Eist MFA, elke keer opnieuw, voor een gebruiker die Entra ID Protection als gemi
 | State | enabled |
 | Stage | 1 |
 | Voor wie | iedereen |
-| Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass` |
+| Uitgesloten | `Excluded from Conditional Access`, `SG-U-CA-Exclude-Breakglass`, gasten |
 | Op | alle apps |
 | Voorwaarden | Gebruikersrisico: medium |
-| Eis | `Multifactor authentication` + elke keer opnieuw aanmelden |
+| Eis | riskRemediation + `Multifactor authentication` + elke keer opnieuw aanmelden |
 | Bestand | [`CA__2020__GRANT__MediumRisk_Users.json`](CA__2020__GRANT__MediumRisk_Users.json) |
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
+
+## Let op
+
+- B2B-gasten vallen erbuiten. Hun gebruikersrisico wordt in hun eigen tenant bepaald en kan hier niet worden opgelost; met deze eis zouden ze geblokkeerd raken (Microsoft Learn, ID Protection for B2B users). Het aanmeldrisico (1090, 2010) geldt wel voor hen.
+- Met wachtwoord: de wachtwoordwijziging gaat naar on-premises AD alleen met password writeback. Zonder writeback in een hybride tenant kan een gebruiker het risico niet zelf oplossen.
 
 ## Raakt Intune
 

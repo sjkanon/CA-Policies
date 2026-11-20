@@ -7,7 +7,7 @@ Rédigé à la main. Ce document consigne d'où viennent les
 **pas** et pourquoi. Sans ce dernier point, la prochaine itération réévalue les mêmes stratégies.
 
 Date : 3 septembre 2026. L'ensemble comptait alors 33 modèles. Après les itérations suivantes (en bas),
-il y en a 46 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
+il y en a 47 ; les chiffres dans le reste de ce document sont ceux de l'itération où ils figurent et
 n'ont délibérément pas été réécrits.
 
 ## La question
@@ -571,3 +571,78 @@ alors. Les deux la gèrent désormais.
   affiche les anciens noms `GLOBAL__` jusqu'à sa régénération. *Résolu le 1er octobre 2026 :* les noms
   venaient de `_licenties.json` là-bas, qui utilise désormais `CXNM__STANDARD__` ; `generate-compliance.js`
   signale désormais un template CA de cette liste qui n'existe pas.
+
+# Itération 7 — corriger le risque soi-même, token protection sur Apple, licences pour les agents (20 novembre 2026)
+
+## Le contexte
+
+Un tour des baselines communautaires depuis l'itération 4 :
+
+| Source | Depuis septembre | Pour cet ensemble |
+|---|---|---|
+| [`j0eyv/ConditionalAccessBaseline`](https://github.com/j0eyv/ConditionalAccessBaseline) | uniquement le README et des images ; les stratégies d'agents reçoivent une note de licence | raison de licence mise à jour |
+| [`Teuftis/ConditionalAccessBaseline-Hardened`](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) v2026.2 | risque utilisateur vers *Require risk remediation* ; token protection aussi sur iOS/macOS gérés | `2020` reconstruit ; nouveau `2115` |
+| Chronlund (DCToolbox), van Surksum (`cabaseline202510`) | aucun commit | — |
+
+Tout a été vérifié par rapport à Microsoft Learn, pas seulement par rapport à la source communautaire.
+
+## Ce qui a été modifié
+
+**`2020` corrige le risque au lieu de le laisser en place.** En cas de risque utilisateur moyen,
+`2020` exigeait la MFA, à chaque fois. La MFA ne corrige pas le risque utilisateur : le risque restait
+et la demande revenait à chaque connexion, jusqu'à ce qu'un administrateur ignore le risque. Désormais
+c'est *Require risk remediation* (`builtInControls: riskRemediation`, opérateur AND avec la force
+Multifactor authentication, fréquence de connexion à chaque fois — toutes deux obligatoires avec cette
+exigence). Avec mot de passe, un changement de mot de passe sécurisé suit ; sans mot de passe, les
+sessions sont révoquées et l'utilisateur se reconnecte ; dans les deux cas, le risque est ensuite levé.
+Microsoft le recommande lui-même, et cela fonctionne aussi pour les utilisateurs sans mot de passe — ce
+que l'ancien *require password change* ne permettait pas.
+
+- **Les invités B2B sont exclus.** Leur risque utilisateur est évalué dans leur tenant d'origine et ne
+  peut pas être corrigé ici ; Microsoft indique qu'un tel invité est alors bloqué. Le risque de
+  connexion (`1090`, `2010`) s'applique bien à eux. Les invités internes restent inclus.
+- **`1100` continue de bloquer.** Microsoft utilise la correction en cas de risque élevé ; nous
+  gardons le blocage, pour qu'un administrateur examine d'abord un compte probablement compromis.
+  Teuftis prend moyen et élevé ensemble ; nous gardons l'échelle : moyen se corrige seul, élevé attend
+  un humain.
+- **Tenants hybrides** : le changement de mot de passe n'atteint l'AD local qu'avec la réécriture du
+  mot de passe (password writeback).
+
+**Licence des modèles d'agents** (`1150`, `1160`, `1170`, `1180`, `2160`). La raison indiquait
+« requiert Microsoft Entra Agent ID ». Microsoft Learn exige Microsoft 365 E7, ou Microsoft Agent 365
+avec Entra ID P1 (ou M365 E3) — et pour les stratégies de risque `1150` et `1170` P2 (ou M365 E5). Le
+risque d'agent est encore en préversion. Raison dans le manifeste et phrase d'objectif dans
+`docs/policies.json` mises à jour ; les modèles eux-mêmes sont inchangés.
+
+## Ce qui a été ajouté
+
+**`2115` — token protection sur iPhone, iPad et Mac** (optionnel, report-only). La même exigence que
+`2110`, pour Exchange Online et SharePoint Online dans les applications de bureau et mobiles, mais
+sur iOS et macOS. Microsoft qualifie les applications natives des deux plateformes de GA dans le
+tableau des plateformes, mais place les exigences d'appareil sous « Apple (Preview) » ; d'où le
+report-only.
+
+- **Uniquement les appareils gérés.** La token protection sur Apple exige le plug-in Microsoft
+  Enterprise SSO ou Platform SSO, donc le MDM. Un iPhone personnel avec seulement App Protection serait
+  bloqué. D'où un filtre d'appareil en mode include, `device.isCompliant -eq True` : un appareil non
+  enregistré ne correspond pas au filtre et n'est donc pas couvert par la stratégie.
+- **Apple Mail et Calendrier** ne prennent pas en charge la token protection et sont bloqués. `2070`
+  les autorise actuellement sur un appareil conforme ; le passage à Outlook doit précéder l'activation.
+- Le côté Intune (`IOS - D - Enterprise SSO`, `MAC - D - Platform SSO`) figure comme dépendance dans
+  `docs/policies.json`.
+
+## Examiné, non repris
+
+- **Teams dans `2110`.** Microsoft cite Microsoft Teams comme ressource prise en charge, mais dans les
+  deux guides de déploiement (Windows et Apple) ne sélectionne qu'Exchange et SharePoint et met en
+  garde contre des sélections plus larges. À ajouter seulement quand Microsoft mettra Teams dans le
+  guide.
+- **Teuftis : jointure hybride supprimée.** Cet ensemble exige déjà uniquement un appareil conforme.
+
+## Ce qui reste ouvert
+
+- **Activer `2115`** quand les journaux de connexion (les codes d'état 1003/1004 se corrigent
+  d'eux-mêmes, 1002 et 1008 non) montrent que les appareils gérés sont prêts, et qu'Apple Mail a été
+  abandonné.
+- **Suivre `2020` en report-only** dans un tenant à identité hybride : sans password writeback, un
+  utilisateur avec mot de passe ne peut pas corriger le risque lui-même.

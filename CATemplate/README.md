@@ -2,7 +2,7 @@
 
 **Nederlands** · [English](README.en.md) · [Français](README.fr.md)
 
-# CATemplate — 46 policies
+# CATemplate — 47 policies
 
 De bron van deze repo: de afgesproken Conditional Access-policies in CIPP-templateformaat. Alles in
 `cipp/` is hieruit afgeleid. De naam is `CA__<nummer>__<BLOCK|GRANT|SESSION>__<Naam>.json`;
@@ -15,9 +15,9 @@ en welke Intune-policies hij raakt. Klik op de naam in de tabel.
 | Type | Stage 1 | Stage 2 | Stage 3 | Totaal |
 |---|---:|---:|---:|---:|
 | [BLOCK](#block--1xxx) | 5 | 7 | 6 | **18** |
-| [GRANT](#grant--2xxx) | 8 | 3 | 10 | **21** |
+| [GRANT](#grant--2xxx) | 8 | 3 | 11 | **22** |
 | [SESSION](#session--3xxx) | 4 | 2 | 1 | **7** |
-| **Totaal** | **17** | **12** | **17** | **46** |
+| **Totaal** | **17** | **12** | **18** | **47** |
 
 Stage 1 staat op `enabled`, stage 2 is voorbereid (report-only of uit), stage 3 is optioneel: een licentie of een besluit per tenant (`*` in de tabellen). De indeling staat in [`cipp/`](../cipp/README.md). De kolom Intune telt de Intune-policies waar een policy van afhangt.
 
@@ -49,7 +49,7 @@ Stage 1 staat op `enabled`, stage 2 is voorbereid (report-only of uit), stage 3 
 | Nr | Policy | Voor wie | Op | Eis | State | Stage | Intune |
 |---:|---|---|---|---|---|---|---:|
 | 2010 | [Medium-Risk Sign-ins](CA__2010__GRANT__MediumRisk_Signins.md) | iedereen | alle apps | `Multifactor authentication` + elke keer opnieuw aanmelden | enabled | 1 | — |
-| 2020 | [Medium-Risk Users](CA__2020__GRANT__MediumRisk_Users.md) | iedereen | alle apps | `Multifactor authentication` + elke keer opnieuw aanmelden | enabled | 1 | — |
+| 2020 | [Medium-Risk Users](CA__2020__GRANT__MediumRisk_Users.md) | iedereen | alle apps | riskRemediation + `Multifactor authentication` + elke keer opnieuw aanmelden | enabled | 1 | — |
 | 2050 | [MFA for All Users](CA__2050__GRANT__MFA_for_All_Users.md) | iedereen | alle apps | `Multifactor authentication` | enabled | 1 | — |
 | 2055 | [Phishing Resistant MFA for Admins](CA__2055__GRANT__Phishing_Resistant_MFA_for_Admins.md) | 28 beheerrollen | alle apps | `Phishing-resistant MFA` | disabled | 2 | 3 |
 | 2060 | [Mobile Apps and Desktop Clients](CA__2060__GRANT__Mobile_Apps_and_Desktop_Clients.md) | iedereen | alle apps | compliant apparaat | disabled | 2 | 28 |
@@ -58,6 +58,7 @@ Stage 1 staat op `enabled`, stage 2 is voorbereid (report-only of uit), stage 3 
 | 2090 | [Browser Access On Unmanaged Devices](CA__2090__GRANT__Browser_Access_On_Unmanaged_Devices.md) | iedereen | alle apps | compliant apparaat of hybrid joined apparaat | enabled | 1 | 29 |
 | 2100 | [MFA for Admin Portals](CA__2100__GRANT__MFA_For_Admin_Portals.md) | iedereen | beheerportalen | `Multifactor authentication` | enabled | 1 | — |
 | 2110 | [Token Protection](CA__2110__GRANT__Token_Protection.md) | iedereen | 2 apps | token protection | enabled | 1 | 2 |
+| 2115 | [Token Protection Apple](CA__2115__GRANT__Token_Protection_Apple.md) | iedereen | 2 apps | token protection | report-only | 3* | 2 |
 | 2120 | [Phishing Resistant MFA for All Users](CA__2120__GRANT__Phishing_Resistant_MFA_for_All_Users.md) | iedereen | alle apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
 | 2125 | [Phishing Resistant MFA for Rollout Groups](CA__2125__GRANT__Phishing_Resistant_MFA_for_Rollout_Groups.md) | `SG-U-CA-Passkey-Forced`, `SG-U-CA-Exception-Passkey-WHfB`, `SG-U-CA-Exception-Passkey-FIDO2`, `SG-U-CA-Exception-Passkey-Synced-iCloud`, `SG-U-CA-Exception-Passkey-Synced-Google`, `SG-U-CA-Exception-Passkey-Authenticator` | alle apps | `Phishing-resistant MFA` | enabled | 3* | 3 |
 | 2126 | [Phishing Resistant MFA for Passkey Campaign](CA__2126__GRANT__Phishing_Resistant_MFA_for_Passkey_Campaign.md) | `SG-U-CA-Campaign-Passkey` | alle apps | `Phishing-resistant MFA` | report-only | 3* | 3 |
@@ -88,17 +89,18 @@ Uit [`_manifest.json`](_manifest.json). Deze templates gaan naar stage 3 en blij
 
 - **1130** — beheerders vastzetten op vertrouwde locaties sluit ze buiten zodra ze thuis of onderweg werken. Alleen inschakelen na expliciete afstemming met de organisatie.
 - **1140** — risicodetectie op workload-identiteiten vereist Microsoft Entra Workload ID Premium.
-- **1150** — vraagt Microsoft Entra Agent ID; een tenant zonder agent-identiteiten heeft niets om te beoordelen.
-- **1160** — vraagt Microsoft Entra Agent ID. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.
-- **1170** — vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.
-- **1180** — vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.
+- **1150** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview); een tenant zonder agent-identiteiten heeft niets om te beoordelen.
+- **1160** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Staat bewust op report-only: dit is een allow-list — hij blokkeert élke agent-identiteit op agent-resources behalve de expliciet uitgezonderde, en dat legt bij inschakelen zonder inventarisatie alle bestaande agents stil. Eerst de report-only-uitslag lezen, dan de uitzonderingen invullen, dan aanzetten.
+- **1170** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview). Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.
+- **1180** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit, én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.
+- **2115** — token protection op Apple werkt alleen op MDM-beheerde toestellen met de Microsoft Enterprise SSO-plug-in (iOS) of Platform SSO (macOS), en blokkeert de ingebouwde Mail- en Agenda-apps van Apple. Report-only tot de sign-in-logs (statuscodes 1003/1004 zijn zelf op te lossen) laten zien dat de beheerde toestellen klaar zijn, en tot gebruikers van Apple Mail zijn overgestapt op Outlook.
 - **2120** — vereist dat élke gebruiker een passkey of FIDO2-sleutel heeft. Het einddoel waar de admin-variant (2055) de eerste stap van is, maar een uitrolproject en geen instelling.
 - **2125** — de groepsgewijze uitrol van 2120: alleen zinvol in een tenant die zijn passkey-uitrol per groep doet, en alleen veilig zolang er niemand in 'SG-U-CA-Passkey-Forced' of een 'SG-U-CA-Exception-Passkey-*'-groep staat die nog geen phishing-bestendige methode heeft. Wie nog onboardt staat in 'SG-U-CA-Onboarding-Passkey' en valt erbuiten.
 - **2126** — de deadline van de passkey-campagne: eist phishing-bestendige MFA voor 'SG-U-CA-Campaign-Passkey'. Pas aanzetten als de campagne lang genoeg heeft gelopen; wie dan nog geen phishing-bestendige methode heeft, moet bij de volgende aanmelding meteen een passkey registreren. Passkey (FIDO2) moet daarvoor ook voor de campagnegroep aan staan in het passkeyprofiel.
 - **2130** — eist dat élke beheerder een beheerd apparaat heeft — bij uitbesteed beheer dus ook elke engineer die in de tenant komt. Besluit per tenant.
 - **2150** — alleen relevant in een tenant met Azure Virtual Desktop of Windows 365.
 - **2155** — vraagt dat elke gebruiker van Azure Virtual Desktop of Windows 365 een passkey, Windows Hello for Business of FIDO2-sleutel heeft. Zinvol waar de virtuele werkplek de route is voor persoonlijke toestellen en derden; daar is het toestel onbekend en is de aanmelding het enige wat je kunt eisen.
-- **2160** — vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
+- **2160** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
 - **2180** — vraagt een custom authentication strength ('Temporary Access Pass only') die per tenant wordt aangemaakt: Entra kent daar zelf een id aan toe, dus het id in het template is een placeholder die bij de uitrol per tenant wordt vervangen. En het is een procesbesluit — zonder helpdesk die TAPs uitgeeft en de aanvrager verifieert kan niemand in 'SG-U-IAM-Register-Temporary-Access-Pass' nog zelf een methode registreren, ook niet zijn eerste.
 - **2185** — hoort bij de passkey-uitrol per groep (2125) en vraagt de custom authentication strength 'Passkey Rollout', waarvan het id per tenant wordt vervangen. De onboardinggroep is uitgesloten van 2180, zodat die er niet alsnog een eenmalige TAP bovenop eist.
 - **2190** — vraagt de custom authentication strength 'CA-WHfB-Passkeys' met AAGUID-beperking, per tenant aangemaakt. Staat op report-only: hij laat op álle apps alleen een Windows Hello-passkey toe, dus geen WHfB-credential, geen telefoon en geen beveiligingssleutel. Eerst de report-only-uitslag lezen.

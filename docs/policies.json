@@ -218,9 +218,9 @@
     },
     "CA__1150__BLOCK__Risky_Agent_Identities": {
       "doel": {
-        "nl": "Blokkeert agent-identiteiten met een hoog risico. Vraagt Microsoft Entra Agent ID; een tenant zonder agents heeft niets om te beoordelen.",
-        "en": "Blocks agent identities with high risk. Requires Microsoft Entra Agent ID; a tenant without agents has nothing to evaluate.",
-        "fr": "Bloque les identités d'agent à risque élevé. Requiert Microsoft Entra Agent ID ; un tenant sans agents n'a rien à évaluer."
+        "nl": "Blokkeert agent-identiteiten met een hoog risico. Vraagt Microsoft 365 E7 of Microsoft Agent 365; een tenant zonder agents heeft niets om te beoordelen.",
+        "en": "Blocks agent identities with high risk. Requires Microsoft 365 E7 or Microsoft Agent 365; a tenant without agents has nothing to evaluate.",
+        "fr": "Bloque les identités d'agent à risque élevé. Requiert Microsoft 365 E7 ou Microsoft Agent 365 ; un tenant sans agents n'a rien à évaluer."
       }
     },
     "CA__1160__BLOCK__Agent_Identities_To_Agent_Resources": {
@@ -239,16 +239,16 @@
     },
     "CA__1170__BLOCK__Risky_Agent_Users": {
       "doel": {
-        "nl": "Blokkeert agent-users met een gemiddeld of hoog risico. Report-only; vraagt Microsoft Entra Agent ID.",
-        "en": "Blocks agent users with medium or high risk. Report-only; requires Microsoft Entra Agent ID.",
-        "fr": "Bloque les agent users à risque moyen ou élevé. Report-only ; requiert Microsoft Entra Agent ID."
+        "nl": "Blokkeert agent-users met een gemiddeld of hoog risico. Report-only; vraagt Microsoft 365 E7 of Microsoft Agent 365.",
+        "en": "Blocks agent users with medium or high risk. Report-only; requires Microsoft 365 E7 or Microsoft Agent 365.",
+        "fr": "Bloque les agent users à risque moyen ou élevé. Report-only ; requiert Microsoft 365 E7 ou Microsoft Agent 365."
       }
     },
     "CA__1180__BLOCK__Agent_Users_Outside_Compliant_Network": {
       "doel": {
-        "nl": "Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Report-only; vraagt Microsoft Entra Agent ID en Global Secure Access.",
-        "en": "Blocks agent users outside a Global Secure Access compliant network. Report-only; requires Microsoft Entra Agent ID and Global Secure Access.",
-        "fr": "Bloque les agent users en dehors d'un réseau conforme Global Secure Access. Report-only ; requiert Microsoft Entra Agent ID et Global Secure Access."
+        "nl": "Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Report-only; vraagt Microsoft 365 E7 of Microsoft Agent 365 en Global Secure Access.",
+        "en": "Blocks agent users outside a Global Secure Access compliant network. Report-only; requires Microsoft 365 E7 or Microsoft Agent 365 and Global Secure Access.",
+        "fr": "Bloque les agent users en dehors d'un réseau conforme Global Secure Access. Report-only ; requiert Microsoft 365 E7 ou Microsoft Agent 365 et Global Secure Access."
       }
     },
     "CA__2010__GRANT__MediumRisk_Signins": {
@@ -260,10 +260,22 @@
     },
     "CA__2020__GRANT__MediumRisk_Users": {
       "doel": {
-        "nl": "Eist MFA, elke keer opnieuw, voor een gebruiker die Entra ID Protection als gemiddeld risico inschat. Vraagt Entra ID P2.",
-        "en": "Requires MFA, every time, for a user that Entra ID Protection rates as medium risk. Requires Entra ID P2.",
-        "fr": "Exige la MFA, à chaque fois, pour un utilisateur qu'Entra ID Protection évalue à risque moyen. Requiert Entra ID P2."
-      }
+        "nl": "Laat een gebruiker die Entra ID Protection als gemiddeld risico inschat het risico zelf oplossen (Require risk remediation): na MFA een veilige wachtwoordwijziging, of zonder wachtwoord het intrekken van alle sessies en opnieuw aanmelden. Daarna is het risico weg; met alleen MFA bleef het staan en kwam de vraag bij elke aanmelding terug. Vraagt Entra ID P2.",
+        "en": "Lets a user that Entra ID Protection rates as medium risk remediate the risk themselves (Require risk remediation): a secure password change after MFA, or for passwordless users revocation of all sessions and a fresh sign-in. The risk is then cleared; with MFA alone it stayed and the prompt came back at every sign-in. Requires Entra ID P2.",
+        "fr": "Permet à un utilisateur qu'Entra ID Protection évalue à risque moyen de corriger lui-même le risque (Require risk remediation) : un changement de mot de passe sécurisé après la MFA, ou pour un utilisateur sans mot de passe la révocation de toutes les sessions et une nouvelle connexion. Le risque est ensuite levé ; avec la MFA seule, il restait et la demande revenait à chaque connexion. Requiert Entra ID P2."
+      },
+      "letOp": [
+        {
+          "nl": "B2B-gasten vallen erbuiten. Hun gebruikersrisico wordt in hun eigen tenant bepaald en kan hier niet worden opgelost; met deze eis zouden ze geblokkeerd raken (Microsoft Learn, ID Protection for B2B users). Het aanmeldrisico (1090, 2010) geldt wel voor hen.",
+          "en": "B2B guests are excluded. Their user risk is evaluated in their home tenant and cannot be remediated here; with this grant they would be blocked (Microsoft Learn, ID Protection for B2B users). Sign-in risk (1090, 2010) does apply to them.",
+          "fr": "Les invités B2B sont exclus. Leur risque utilisateur est évalué dans leur tenant d'origine et ne peut pas être corrigé ici ; avec cette exigence, ils seraient bloqués (Microsoft Learn, ID Protection for B2B users). Le risque de connexion (1090, 2010) s'applique bien à eux."
+        },
+        {
+          "nl": "Met wachtwoord: de wachtwoordwijziging gaat naar on-premises AD alleen met password writeback. Zonder writeback in een hybride tenant kan een gebruiker het risico niet zelf oplossen.",
+          "en": "With a password: the password change only reaches on-premises AD with password writeback. Without writeback in a hybrid tenant a user cannot remediate the risk themselves.",
+          "fr": "Avec mot de passe : le changement de mot de passe n'atteint l'AD local qu'avec la réécriture du mot de passe (password writeback). Sans writeback dans un tenant hybride, un utilisateur ne peut pas corriger le risque lui-même."
+        }
+      ]
     },
     "CA__2050__GRANT__MFA_for_All_Users": {
       "doel": {
@@ -440,6 +452,43 @@
             "nl": "Token protection werkt alleen in client-versies die gebonden tokens ondersteunen. Een Office-app of OneDrive-sync-client op een te oude versie wordt door deze policy geblokkeerd; deze Intune-policy houdt die clients bij.",
             "en": "Token protection only works in client versions that support bound tokens. An Office app or OneDrive sync client on too old a version is blocked by this policy; this Intune policy keeps those clients current.",
             "fr": "La token protection ne fonctionne que dans les versions de client qui prennent en charge les jetons liés. Une app Office ou un client de synchronisation OneDrive trop ancien est bloqué par cette stratégie ; cette stratégie Intune maintient ces clients à jour."
+          }
+        }
+      ]
+    },
+    "CA__2115__GRANT__Token_Protection_Apple": {
+      "doel": {
+        "nl": "Eist token protection voor Exchange Online en SharePoint Online in de Microsoft-apps op beheerde iPhones, iPads en Macs: het aanmeldtoken is aan de Secure Enclave van het toestel gebonden en werkt niet meer als het gestolen wordt. De Apple-tegenhanger van 2110.",
+        "en": "Requires token protection for Exchange Online and SharePoint Online in the Microsoft apps on managed iPhones, iPads and Macs: the sign-in token is bound to the device's Secure Enclave and stops working when it is stolen. The Apple counterpart of 2110.",
+        "fr": "Exige la token protection pour Exchange Online et SharePoint Online dans les applications Microsoft sur les iPhone, iPad et Mac gérés : le jeton de connexion est lié à la Secure Enclave de l'appareil et ne fonctionne plus s'il est volé. L'équivalent Apple de 2110."
+      },
+      "letOp": [
+        {
+          "nl": "Alleen MDM-beheerde toestellen worden ondersteund. Het apparaatfilter (device.isCompliant -eq True, include) houdt de policy daarom bij compliant toestellen; een persoonlijke iPhone met alleen App Protection is niet geregistreerd, valt niet onder het filter en wordt niet geblokkeerd. Haal dat filter niet weg.",
+          "en": "Only MDM-managed devices are supported. The device filter (device.isCompliant -eq True, include) therefore keeps the policy on compliant devices; a personal iPhone with only App Protection is not registered, does not match the filter and is not blocked. Do not remove that filter.",
+          "fr": "Seuls les appareils gérés par MDM sont pris en charge. Le filtre d'appareil (device.isCompliant -eq True, include) limite donc la stratégie aux appareils conformes ; un iPhone personnel avec seulement App Protection n'est pas enregistré, ne correspond pas au filtre et n'est pas bloqué. Ne retirez pas ce filtre."
+        },
+        {
+          "nl": "De ingebouwde Mail- en Agenda-apps van Apple ondersteunen geen token protection en worden geblokkeerd zodra de policy aan staat. Op een compliant toestel laat 2070 die apps nu wel toe; kondig de overstap naar Outlook aan vóór je aanzet.",
+          "en": "Apple's built-in Mail and Calendar apps do not support token protection and are blocked once the policy is on. On a compliant device 2070 currently allows those apps; announce the move to Outlook before enabling.",
+          "fr": "Les applications Mail et Calendrier intégrées d'Apple ne prennent pas en charge la token protection et sont bloquées dès que la stratégie est active. Sur un appareil conforme, 2070 autorise actuellement ces applications ; annoncez le passage à Outlook avant l'activation."
+        },
+        {
+          "nl": "Toestellen die al geregistreerd waren vóór de SSO-plug-in of Platform SSO er stond, krijgen één keer een aanmeldvraag en worden dan automatisch naar hardwaregebonden registratie overgezet (statuscode 1003/1004 in de sign-in-logs).",
+          "en": "Devices registered before the SSO plug-in or Platform SSO was in place get one sign-in prompt and are then automatically upgraded to hardware-backed registration (status code 1003/1004 in the sign-in logs).",
+          "fr": "Les appareils enregistrés avant la mise en place du plug-in SSO ou de Platform SSO reçoivent une seule invite de connexion, puis passent automatiquement à un enregistrement lié au matériel (code d'état 1003/1004 dans les journaux de connexion)."
+        }
+      ],
+      "intune": [
+        {
+          "targets": [
+            "IOS/SettingsCatalog/Baseline_IOS_D_Enterprise_SSO",
+            "MAC/SettingsCatalog/Baseline_MAC_D_Platform_SSO"
+          ],
+          "waarom": {
+            "nl": "Token protection op Apple vraagt hardwaregebonden apparaatregistratie, en die komt alleen via de Microsoft Enterprise SSO-plug-in (iOS) of Platform SSO (macOS). Zonder deze Intune-policy is het token niet gebonden en blokkeert deze CA-policy de Microsoft-apps.",
+            "en": "Token protection on Apple needs hardware-backed device registration, which only comes through the Microsoft Enterprise SSO plug-in (iOS) or Platform SSO (macOS). Without this Intune policy the token is not bound and this CA policy blocks the Microsoft apps.",
+            "fr": "La token protection sur Apple exige un enregistrement d'appareil lié au matériel, qui ne passe que par le plug-in Microsoft Enterprise SSO (iOS) ou Platform SSO (macOS). Sans cette stratégie Intune, le jeton n'est pas lié et cette stratégie CA bloque les applications Microsoft."
           }
         }
       ]
@@ -636,9 +685,9 @@
     },
     "CA__2160__GRANT__Agent_Users_Compliant_Device": {
       "doel": {
-        "nl": "Eist een compliant apparaat voor agent-users die vanaf een endpoint een sessie starten. Report-only; vraagt Microsoft Entra Agent ID.",
-        "en": "Requires a compliant device for agent users that start a session from an endpoint. Report-only; requires Microsoft Entra Agent ID.",
-        "fr": "Exige un appareil conforme pour les agent users qui ouvrent une session depuis un terminal. Report-only ; requiert Microsoft Entra Agent ID."
+        "nl": "Eist een compliant apparaat voor agent-users die vanaf een endpoint een sessie starten. Report-only; vraagt Microsoft 365 E7 of Microsoft Agent 365.",
+        "en": "Requires a compliant device for agent users that start a session from an endpoint. Report-only; requires Microsoft 365 E7 or Microsoft Agent 365.",
+        "fr": "Exige un appareil conforme pour les agent users qui ouvrent une session depuis un terminal. Report-only ; requiert Microsoft 365 E7 ou Microsoft Agent 365."
       },
       "intune": [
         {

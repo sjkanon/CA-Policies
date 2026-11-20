@@ -4,7 +4,7 @@
 
 # CA - 1170 - BLOCK - Risky Agent Users
 
-Blocks agent users with medium or high risk. Report-only; requires Microsoft Entra Agent ID.
+Blocks agent users with medium or high risk. Report-only; requires Microsoft 365 E7 or Microsoft Agent 365.
 
 | | |
 |---|---|
@@ -20,7 +20,7 @@ Blocks agent users with medium or high risk. Report-only; requires Microsoft Ent
 
 Groups, named locations and authentication strengths in the table must exist in the tenant: see [`prerequisites/`](../prerequisites/README.en.md). An exclusion group that does not exist excludes nobody.
 
-> **Optional** — vraagt Microsoft Entra Agent ID. Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.
+> **Optional** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P2 (of M365 E5), want hij gebruikt agentrisico (nog preview). Report-only omdat hij op medium risico al blokkeert — dezelfde afweging als bij 2010/2020, waar medium een extra eis krijgt en niet meteen een blokkade.
 
 ## Touches Intune
 

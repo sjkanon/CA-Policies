@@ -8,7 +8,7 @@ template: [ANALYSE.en.md](ANALYSE.en.md).
 
 ## In short
 
-- **One source:** `CATemplate/` — 46 Conditional Access policies in CIPP template format:
+- **One source:** `CATemplate/` — 47 Conditional Access policies in CIPP template format:
   18 BLOCK, 16 GRANT, 7 SESSION.
 - **One derivative:** `cipp/` — the templates as an import file and the layout in three stages for
   a CIPP baseline.
@@ -26,7 +26,7 @@ template: [ANALYSE.en.md](ANALYSE.en.md).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>46 templates · _manifest.json"]
+  T["<b>CATemplate/</b><br/>47 templates · _manifest.json"]
   P["prerequisites/<br/>ca-prerequisites.json"]
   A["authentication-methods/<br/>authentication-methods.json"]
   C["controls/<br/>ca-controls.json"]

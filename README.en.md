@@ -4,12 +4,12 @@
 
 `CATemplate/` is the source: the agreed Conditional Access policies in CIPP template format
 (a Table Storage row with a nested `JSON` string), numbered `CA__1xxx` BLOCK, `2xxx` GRANT
-and `3xxx` SESSION. 46 templates. The numbering and the layout come from Daniel Chronlund's CA design;
+and `3xxx` SESSION. 47 templates. The numbering and the layout come from Daniel Chronlund's CA design;
 why everything carries one prefix and there are no personas is explained in [`ANALYSE.en.md`](docs/ANALYSE.en.md#why-there-are-no-personas).
 
 ```mermaid
 flowchart LR
-  T["<b>CATemplate/</b><br/>46 templates<br/><i>the source</i>"]
+  T["<b>CATemplate/</b><br/>47 templates<br/><i>the source</i>"]
   P["prerequisites/<br/>groups · locations · strengths"]
   C["controls/<br/>ca-controls.json"]
   A["authentication-methods/"]
@@ -119,7 +119,7 @@ that does not exist excludes nobody**, so the policy becomes stricter than inten
 an alarm. Two cases are not "stricter" but "locked out":
 
 - `Excluded from Conditional Access` and `SG-U-CA-Exclude-Breakglass` both appear in 40 of
-  the 46 templates — one break-glass exclusion under two names, so that a tenant does not have
+  the 47 templates — one break-glass exclusion under two names, so that a tenant does not have
   to rename anything to follow the convention it already uses. The six without it target
   workload and agent identities (`includeUsers: "None"`), so they affect nothing there.
   Both empty = no break-glass; one of the two empty is more treacherous, because then the

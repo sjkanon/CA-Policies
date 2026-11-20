@@ -4,7 +4,7 @@
 
 # CA - 1180 - BLOCK - Agent Users Outside Compliant Network
 
-Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Report-only; vraagt Microsoft Entra Agent ID en Global Secure Access.
+Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Report-only; vraagt Microsoft 365 E7 of Microsoft Agent 365 en Global Secure Access.
 
 | | |
 |---|---|
@@ -20,7 +20,7 @@ Blokkeert agent-users buiten een compliant netwerk van Global Secure Access. Rep
 
 Groepen, named locations en authentication strengths in de tabel moeten in de tenant bestaan: zie [`prerequisites/`](../prerequisites/README.md). Een uitsluitingsgroep die niet bestaat sluit niemand uit.
 
-> **Optioneel** — vraagt Microsoft Entra Agent ID én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.
+> **Optioneel** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit, én Global Secure Access: de named location 'All Compliant Network locations' bestaat alleen in een tenant met GSA. Report-only tot beide er zijn.
 
 ## Raakt Intune
 

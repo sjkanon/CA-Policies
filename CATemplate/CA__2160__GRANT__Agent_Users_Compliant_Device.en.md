@@ -4,7 +4,7 @@
 
 # CA - 2160 - GRANT - Agent Users Compliant Device
 
-Requires a compliant device for agent users that start a session from an endpoint. Report-only; requires Microsoft Entra Agent ID.
+Requires a compliant device for agent users that start a session from an endpoint. Report-only; requires Microsoft 365 E7 or Microsoft Agent 365.
 
 | | |
 |---|---|
@@ -20,7 +20,7 @@ Requires a compliant device for agent users that start a session from an endpoin
 
 Groups, named locations and authentication strengths in the table must exist in the tenant: see [`prerequisites/`](../prerequisites/README.en.md). An exclusion group that does not exist excludes nobody.
 
-> **Optional** — vraagt Microsoft Entra Agent ID. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
+> **Optional** — vraagt een licentie voor agents: Microsoft 365 E7, of Microsoft Agent 365 met Entra ID P1 (of M365 E3), en minstens één geregistreerde agent-identiteit. Report-only: een agent-usersessie vanaf een endpoint dat (nog) niet compliant is valt hiermee stil, en welke endpoints agents gebruiken is in de meeste tenants nog niet in kaart.
 
 ## Touches Intune
 
